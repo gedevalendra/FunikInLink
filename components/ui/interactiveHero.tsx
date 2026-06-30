@@ -10,80 +10,88 @@ interface HeroProps {
 }
 
 export default function InteractiveHero({ session, userUsername }: HeroProps) {
-  // 1. Animasi Teks Berganti
+  // 1. Daftar kata ganti yang diketik di dalam Mockup Safari iOS
+  const iosKeywords = ["brand", "influencer", "youtuber", "streamer", "freelancer"];
+  const [iosIndex, setIosIndex] = useState(0);
+  const [iosTyped, setIosTyped] = useState("");
+  const [iosDeleting, setIosDeleting] = useState(false);
+
+  // 2. Daftar frasa untuk judul utama yang dianimasikan per huruf (Slide Up)
   const words = [
-    "Semua Kreativitasmu",
-    "Semua Portofoliomu",
-    "Bisnis Digitalmu",
-    "Media Sosialmu",
+    "Semua Kreativitas",
+    "Semua Portofolio",
+    "Bisnis Digital",
+    "Media Sosial",
     "FunikIn Link",
   ];
   const [wordIndex, setWordIndex] = useState(0);
-  const [fade, setFade] = useState(true);
-
-  // 2. Animasi Efek Mengetik Username
-  const targetText = "username_kamu";
-  const [typedText, setTypedText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
-
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
 
-    // Looping Teks Judul Utama
+    // Interval ganti frasa judul utama
     const wordInterval = setInterval(() => {
-      setFade(false);
-      setTimeout(() => {
-        setWordIndex((prev) => (prev + 1) % words.length);
-        setFade(true);
-      }, 400);
-    }, 3000);
+      setWordIndex((prev) => (prev + 1) % words.length);
+    }, 3500);
 
     return () => clearInterval(wordInterval);
   }, []);
 
-  // Logika Efek Mengetik Ketik-Hapus Looping
+  // 3. Efek Mengetik Otomatis untuk Mockup Search Bar iOS
   useEffect(() => {
     let timer: NodeJS.Timeout;
+    const currentWord = iosKeywords[iosIndex];
+
     const handleTyping = () => {
-      if (!isDeleting) {
-        setTypedText(targetText.substring(0, typedText.length + 1));
-        if (typedText === targetText) {
-          timer = setTimeout(() => setIsDeleting(true), 2000); // Jeda sebelum hapus
+      if (!iosDeleting) {
+        setIosTyped(currentWord.substring(0, iosTyped.length + 1));
+        if (iosTyped === currentWord) {
+          timer = setTimeout(() => setIosDeleting(true), 1500); // Jeda sebelum hapus
         } else {
-          timer = setTimeout(handleTyping, 100);
+          timer = setTimeout(handleTyping, 80); // Kecepatan ketik
         }
       } else {
-        setTypedText(targetText.substring(0, typedText.length - 1));
-        if (typedText === "") {
-          setIsDeleting(false);
-          timer = setTimeout(handleTyping, 500); // Jeda sebelum mulai ketik lagi
+        setIosTyped(currentWord.substring(0, iosTyped.length - 1));
+        if (iosTyped === "") {
+          setIosDeleting(false);
+          setIosIndex((prev) => (prev + 1) % iosKeywords.length);
+          timer = setTimeout(handleTyping, 400); // Jeda sebelum kata berikutnya
         } else {
-          timer = setTimeout(handleTyping, 60);
+          timer = setTimeout(handleTyping, 40); // Kecepatan hapus
         }
       }
     };
 
     timer = setTimeout(handleTyping, 100);
     return () => clearTimeout(timer);
-  }, [typedText, isDeleting]);
+  }, [iosTyped, iosDeleting, iosIndex]);
+
+  // Varian animasi per huruf muncul dari bawah ke atas (Slide up)
+  const containerVariants = {
+    initial: {},
+    animate: { transition: { staggerChildren: 0.03 } },
+    exit: { transition: { staggerChildren: 0.02, staggerDirection: -1 } }
+  } as const;
+
+  const letterVariants = {
+    initial: { opacity: 0, y: 15 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring" as const, damping: 12, stiffness: 200 }
+    },
+    exit: {
+      opacity: 0,
+      y: -15,
+      transition: { ease: "easeIn" as const, duration: 0.15 }
+    }
+  } as const;
 
   return (
-    <main className="relative flex-grow flex flex-col items-center justify-center text-center px-4 sm:px-6 w-full mx-auto overflow-hidden min-h-[90vh] z-0 bg-[#FAFAFA] pt-12 md:pt-20">
+    <main className="relative flex-grow flex flex-col items-center justify-center text-center px-4 sm:px-6 w-full mx-auto overflow-hidden min-h-[95vh] z-0 bg-[#FAFAFA] pt-12 md:pt-16">
       
-      {/* CSS CUSTOM UNTUK GRID BACKDROP & CAHAYA SCANNING */}
-      <style>{`
-        @keyframes sweepX {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100vw); }
-        }
-        .animate-sweep-x {
-          animation: sweepX 8s linear infinite;
-        }
-      `}</style>
-
-      {/* BACKGROUND GRID PATTERN & GRADIENT AURA */}
+      {/* Background Grid & Light Scanner Effect */}
       {isMounted && (
         <>
           <div
@@ -94,72 +102,87 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
             }}
           />
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-yellow-400/10 rounded-full blur-[120px] pointer-events-none z-0" />
-          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-0 bottom-0 left-0 w-[500px] bg-gradient-to-r from-transparent via-yellow-500/5 via-50% to-transparent animate-sweep-x" />
-          </div>
         </>
       )}
 
-      {/* KONTEN UTAMA */}
       <div className="relative z-10 w-full max-w-4xl space-y-6 sm:space-y-8 flex flex-col items-center">
         
-        {/* 1. ANIMASI FLIP 3D BOX ICON (Menggunakan Framer Motion) */}
+        {/* 1. ANIMASI FLIP 3D BOX ICON */}
         <motion.div
-          animate={{ 
-            rotateY: [0, 180, 180, 360, 360],
-            y: [0, -6, 0, -6, 0]
-          }}
-          transition={{ 
-            duration: 6, 
-            repeat: Infinity, 
-            ease: "easeInOut" 
-          }}
+          animate={{ rotateY: [0, 180, 180, 360, 360], y: [0, -6, 0, -6, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           style={{ transformStyle: "preserve-3d" }}
-          className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-900 rounded-2xl flex items-center justify-center shadow-xl cursor-pointer border border-slate-800"
+          className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-900 rounded-2xl flex items-center justify-center shadow-xl border border-slate-800"
         >
           <i className="bx bx-link text-3xl sm:text-4xl text-yellow-400"></i>
         </motion.div>
 
-        {/* 2. JUDUL UTAMA DENGAN FORMAT "FunikIn" */}
-        <h1 className="font-black tracking-tight text-slate-900 leading-tight min-h-[90px] min-[400px]:min-h-[100px] sm:min-h-[120px] md:min-h-[150px] text-3xl min-[400px]:text-4xl sm:text-5xl md:text-6xl max-w-2xl">
+        {/* 2. JUDUL UTAMA DENGAN ANIMASI PER HURUF (SLIDE UP) */}
+        <h1 className="font-black tracking-tight text-slate-900 leading-tight text-3xl min-[400px]:text-4xl sm:text-5xl md:text-6xl max-w-2xl min-h-[100px] sm:min-h-[130px] md:min-h-[160px]">
           Satu Tautan untuk <br />
-          <span
-            className={`inline-block transition-all duration-500 transform ${
-              fade ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-            }`}
-          >
-            {words[wordIndex] === "FunikIn Link" ? (
-              <span className="text-black">
-                Funik<span className="text-yellow-500">In</span> Link
-              </span>
-            ) : (
-              <span className="text-yellow-500">{words[wordIndex]}</span>
-            )}
+          <span className="inline-block relative">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={wordIndex}
+                variants={containerVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="inline-flex flex-wrap justify-center gap-x-[2px]"
+              >
+                {words[wordIndex] === "FunikIn Link" ? (
+                  <>
+                    {/* Render Manual untuk Funik(Hitam) In(Kuning) Link(Hitam) */}
+                    {"Funik".split("").map((char, i) => (
+                      <motion.span key={`f-${i}`} variants={letterVariants} className="text-black inline-block">{char}</motion.span>
+                    ))}
+                    {"In".split("").map((char, i) => (
+                      <motion.span key={`i-${i}`} variants={letterVariants} className="text-yellow-500 inline-block">{char}</motion.span>
+                    ))}
+                    <motion.span variants={letterVariants} className="text-black inline-block">&nbsp;</motion.span>
+                    {"Link".split("").map((char, i) => (
+                      <motion.span key={`l-${i}`} variants={letterVariants} className="text-black inline-block">{char}</motion.span>
+                    ))}
+                  </>
+                ) : (
+                  // Kata standar berwarna Kuning penuh
+                  words[wordIndex].split("").map((char, i) => (
+                    <motion.span
+                      key={`w-${i}`}
+                      variants={letterVariants}
+                      className="text-yellow-500 inline-block"
+                    >
+                      {char === " " ? "\u00A0" : char}
+                    </motion.span>
+                  ))
+                )}
+              </motion.span>
+            </AnimatePresence>
           </span>
         </h1>
 
-        {/* 3. MOCKUP SEARCH BAR / URL IPHONE DENGAN EFEK MENGETIK */}
-        <div className="w-full max-w-md bg-white border border-slate-200 shadow-sm rounded-full px-5 py-2.5 flex items-center gap-2.5 mx-auto font-sans">
+        {/* 3. MOCKUP URL DENGAN EFEK MENGETIK KATA TUGAS */}
+        <div className="w-full max-w-md bg-white border border-slate-200 shadow-sm rounded-full px-5 py-2.5 flex items-center gap-2.5 mx-auto">
           <div className="flex gap-1.5 shrink-0">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-400" />
             <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
           </div>
-          <div className="flex-1 text-left text-xs sm:text-sm text-slate-400 truncate select-none flex items-center font-mono">
+          <div className="flex-1 text-left text-xs sm:text-sm text-slate-400 truncate flex items-center font-mono">
             <i className="bx bx-lock-alt text-emerald-500 mr-1.5 text-sm shrink-0"></i>
             <span className="text-slate-600">https://funikin.it.com/</span>
-            <span className="text-yellow-600 font-semibold">{typedText}</span>
+            <span className="text-yellow-600 font-semibold">{iosTyped}</span>
             <span className="w-1 h-4 bg-yellow-500 ml-0.5 animate-pulse shrink-0" />
           </div>
           <i className="bx bx-refresh text-slate-400 text-lg shrink-0"></i>
         </div>
 
         {/* DESKRIPSI */}
-        <p className="text-sm sm:text-base md:text-lg text-slate-500 max-w-md md:max-w-xl mx-auto leading-relaxed font-normal px-4">
+        <p className="text-sm sm:text-base md:text-lg text-slate-500 max-w-md md:max-w-xl mx-auto leading-relaxed px-4">
           Kelola portofolio, media sosial, dan tautan pentingmu dalam satu halaman profil kustom yang indah, cepat, dan responsif.
         </p>
 
-        {/* TOMBOL BERANDA */}
+        {/* TOMBOL AKSI */}
         <div className="pt-2">
           {session ? (
             <Link
@@ -178,57 +201,117 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
           )}
         </div>
 
-        {/* 4. TAMPILAN PREMIUM: IOS APP VIEW PREVIEW (MOCKUP GAWAI MELAYANG) */}
-        <div className="w-full pt-10 pb-4 flex justify-center perspective-[1000px]">
-          <motion.div 
-            initial={{ y: 40, opacity: 0, rotateX: 10 }}
-            animate={{ y: 0, opacity: 1, rotateX: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-            className="w-[280px] h-[380px] sm:w-[320px] sm:h-[430px] bg-slate-950 rounded-[40px] p-3 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] border-4 border-slate-800 relative overflow-hidden flex flex-col"
+        {/* 4. PREMIUM IPHONE 14 PRO MAX MOCKUP (DENGAN REPLIKA UI RILL DASHBOARD MOBILE KAMU) */}
+        <div className="w-full pt-6 flex justify-center relative">
+          
+          {/* Efek Opacity Gradasi Masking Bawah ke Atas */}
+          <div 
+            className="w-[360px] h-[400px] relative overflow-hidden flex justify-center z-10"
+            style={{
+              maskImage: "linear-gradient(to top, transparent 0%, rgba(0,0,0,0.4) 20%, black 55%)",
+              WebkitMaskImage: "linear-gradient(to top, transparent 0%, rgba(0,0,0,0.4) 20%, black 55%)"
+            }}
           >
-            {/* Dynamic Island iPhone */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 w-24 h-4 bg-black rounded-full z-30 flex items-center justify-end px-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-900/40" />
-            </div>
-
-            {/* iOS App View Content */}
-            <div className="w-full h-full bg-white rounded-[32px] overflow-hidden flex flex-col p-4 relative text-left">
-              {/* Top Safari Mini Header */}
-              <div className="w-full bg-slate-50 border border-slate-100 py-1 px-3 rounded-full text-[9px] font-mono text-slate-400 mb-5 flex items-center justify-between mt-2">
-                <span className="truncate">funikin.it.com/{userUsername || "kamu"}</span>
-                <i className="bx bx-redo text-slate-300"></i>
+            {/* Rangka iPhone 14 Pro Max Dinamis */}
+            <motion.div 
+              initial={{ y: 60, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
+              className="w-[340px] h-[660px] bg-slate-950 rounded-[52px] p-3.5 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.25)] border-[5px] border-slate-800 flex flex-col shrink-0"
+            >
+              {/* iPhone Dynamic Island */}
+              <div className="absolute top-5 left-1/2 -translate-x-1/2 w-28 h-5 bg-black rounded-full z-40 flex items-center justify-end px-3">
+                <span className="w-2 h-2 rounded-full bg-slate-900 border border-slate-800/40" />
               </div>
 
-              {/* Simulasi Profil User Dalam Mockup */}
-              <div className="flex flex-col items-center text-center space-y-2 mb-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-yellow-400 to-amber-500 flex items-center justify-center font-bold text-white text-xs shadow-sm">
-                  FI
+              {/* Aplikasi Web Funikin di dalam iOS */}
+              <div className="w-full h-full bg-[#f8fafc] rounded-[38px] overflow-hidden flex flex-col relative text-left select-none font-sans">
+                
+                {/* Navbar Mini Atas Match UI Gambar Kamu */}
+                <div className="w-full bg-white border-b border-slate-100 px-6 pt-7 pb-3 flex items-center justify-between shrink-0">
+                  <span className="text-sm font-bold text-black font-sans">
+                    Funik<span className="text-yellow-500">In</span> <span className="bg-yellow-500 text-white text-[10px] px-1.5 py-0.5 rounded-md ml-0.5 font-medium">Link</span>
+                  </span>
+                  <i className="bx bx-menu text-xl text-slate-800"></i>
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-slate-800 flex items-center justify-center gap-0.5">
-                    Your Name <i className="bx bxs-badge-check text-blue-500 text-[10px]"></i>
-                  </h4>
-                  <p className="text-[9px] text-slate-400 font-mono">@ {userUsername || "username"}</p>
-                </div>
-              </div>
 
-              {/* Simulasi Tautan Link List */}
-              <div className="space-y-2 flex-1 overflow-hidden">
-                <div className="w-full py-2 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-medium text-slate-700 flex items-center gap-2 hover:bg-slate-100/50 transition-colors">
-                  <i className="bx bxl-instagram text-slate-600 text-xs"></i> Ikuti Instagram Saya
-                </div>
-                <div className="w-full py-2 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-medium text-slate-700 flex items-center gap-2 hover:bg-slate-100/50 transition-colors">
-                  <i className="bx bxl-linkedin text-slate-600 text-xs"></i> Hubungkan via LinkedIn
-                </div>
-                <div className="w-full py-2 px-3 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-medium text-slate-700 flex items-center gap-2 hover:bg-slate-100/50 transition-colors">
-                  <i className="bx bx-globe text-slate-600 text-xs"></i> Kunjungi Website Portofolio
-                </div>
-              </div>
+                {/* Konten Scrollable Profile */}
+                <div className="flex-1 overflow-y-auto p-5 space-y-5">
+                  
+                  {/* Bagian Foto & Username Header */}
+                  <div className="flex items-center gap-4 pt-2">
+                    <div className="w-14 h-14 rounded-full bg-slate-900 text-white font-semibold flex items-center justify-center text-sm tracking-wide uppercase border border-slate-200 shadow-xs">
+                      GV
+                    </div>
+                    <div className="space-y-0.5">
+                      <h3 className="text-base font-bold text-slate-900 flex items-center gap-1">
+                        Gede Valendra
+                        <i className="bx bxs-badge-check text-blue-500 text-base"></i>
+                      </h3>
+                      <p className="text-xs text-slate-400 font-mono">@{userUsername || "gedevalendra"}</p>
+                    </div>
+                  </div>
 
-              {/* Bottom iOS Indicator bar */}
-              <div className="w-20 h-1 bg-slate-200 rounded-full mx-auto mt-auto shrink-0" />
-            </div>
-          </motion.div>
+                  {/* Deskripsi Bio & Hashtags */}
+                  <div className="space-y-2">
+                    <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                      Halo, selamat datang di tautan resmi saya! Mari berkolaborasi, dan saling berbagi ilmu mengenai dunia tech!
+                    </p>
+                    <div className="flex gap-1.5 text-[11px] font-medium text-blue-600">
+                      <span>#Developer</span>
+                      <span>#FunikIn</span>
+                    </div>
+                  </div>
+
+                  {/* Title Section */}
+                  <div className="pt-2">
+                    <p className="text-[10px] font-bold tracking-wider uppercase text-slate-400 mb-2.5">Tautan Resmi</p>
+                    
+                    {/* Tombol Tambah Tautan */}
+                    <div className="w-full py-2.5 border border-dashed border-slate-300 rounded-xl text-center text-xs font-medium text-slate-500 bg-white/50 mb-3 flex items-center justify-center gap-1.5">
+                      <i className="bx bx-plus text-sm"></i> Tambah Tautan Baru
+                    </div>
+
+                    {/* Daftar List Card Sesuai Screenshoot Kamu */}
+                    <div className="space-y-3">
+                      {/* Card 1: Edu */}
+                      <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs flex items-start gap-3 relative">
+                        <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shrink-0 border border-amber-100">
+                          <i className="bx bx-globe"></i>
+                        </div>
+                        <div className="min-w-0 flex-1 pr-6">
+                          <h4 className="text-xs font-bold text-slate-800">FunikIn—Edu</h4>
+                          <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Bergabung, belajar, bermain, semua dalam satu platform—FunikIn</p>
+                          <p className="text-[10px] text-blue-500 font-mono mt-1 font-medium">www.funikin.com ↗</p>
+                        </div>
+                        <div className="absolute right-3.5 top-3.5 flex gap-1.5 text-slate-300 text-xs">
+                          <i className="bx bx-edit-alt"></i> <i className="bx bx-trash"></i>
+                        </div>
+                      </div>
+
+                      {/* Card 2: LinkedIn */}
+                      <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs flex items-start gap-3 relative">
+                        <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg shrink-0 border border-blue-100">
+                          <i className="bx bxl-linkedin"></i>
+                        </div>
+                        <div className="min-w-0 flex-1 pr-6">
+                          <h4 className="text-xs font-bold text-slate-800">LinkedIn</h4>
+                          <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Ayo buat koneksi bersama!</p>
+                          <p className="text-[10px] text-blue-500 font-mono mt-1 font-medium">www.linkedin.com/in/... ↗</p>
+                        </div>
+                        <div className="absolute right-3.5 top-3.5 flex gap-1.5 text-slate-300 text-xs">
+                          <i className="bx bx-edit-alt"></i> <i className="bx bx-trash"></i>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
+            </motion.div>
+          </div>
+
         </div>
 
       </div>
