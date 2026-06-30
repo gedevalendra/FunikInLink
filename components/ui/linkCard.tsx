@@ -68,7 +68,8 @@ export default function LinkCard({ link, isAdmin }: { link: any, isAdmin: boolea
                   deleteLink(link._id.toString());
                 }
               }}
-              className="p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-md transition-colors"
+              className="p-1.5 w-fit h-fit flex text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors"
+
             >
               <i className="bx bx-trash text-base"></i>
             </button>
