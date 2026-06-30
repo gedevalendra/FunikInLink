@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="w-full bg-gray-50 border-t border-gray-100 px-[5%] py-6 mt-auto">
+    <footer className="relative z-[100] w-full bg-white px-[5%] py-6 mt-auto shadow-[0_-4px_15px_rgba(255,255,255,0.5)]">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         
         {/* Sisi Kiri: Logo & Copyright */}

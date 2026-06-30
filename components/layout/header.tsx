@@ -15,8 +15,7 @@ export default function Header() {
         <h1 className="font-bold w-fit flex items-center">
           Funik
           <span className="text-yellow-500">In</span>
-          <span className="flex items-center justify-center gap-1 mx-2 bg-yellow-500 p-1 pr-2 text-xs rounded-full text-white">
-            <i className="bx bx-link bg-white text-yellow-500 text-sm rounded-full p-1"></i>
+          <span className="flex items-center justify-center gap-1 mx-2 bg-yellow-500 p-1 px-2 text-xs rounded-xs text-white">
             Link
           </span>
         </h1>

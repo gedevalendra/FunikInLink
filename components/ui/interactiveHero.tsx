@@ -30,7 +30,6 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
   useEffect(() => {
     setIsMounted(true);
 
-    // Jalankan loop ganti teks setiap 3 detik
     const wordInterval = setInterval(() => {
       setFade(false);
       setTimeout(() => {
@@ -39,12 +38,10 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
       }, 400);
     }, 3000);
 
-    // Jalankan efek ikon mengambang naik turun
     const floatInterval = setInterval(() => {
       setFloat((prev) => !prev);
     }, 2000);
 
-    // Tangkap pergerakan kursor mouse secara presisi
     const handleMouseMove = (e: MouseEvent) => {
       setMousePos({ x: e.clientX, y: e.clientY });
     };
@@ -58,36 +55,77 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
   }, []);
 
   return (
-    <main className="relative flex-grow flex flex-col items-center justify-center text-center px-4 sm:px-6 w-full mx-auto overflow-hidden min-h-[70vh] z-0 bg-white">
+    <main className="relative flex-grow flex flex-col items-center justify-center text-center px-4 sm:px-6 w-full mx-auto overflow-hidden min-h-[70vh] z-0 bg-[#FAFAFA]">
+      
       {/* ======================================================== */}
-      {/* BACKGROUND GRID (KOTAK-KOTAK) & CAHAYA MENGIKUTI KURSOR */}
+      {/* CSS CUSTOM UNTUK ANIMASI LIGHTNING / CAHAYA MENGALIR */}
+      {/* ======================================================== */}
+      <style>{`
+        @keyframes sweepX {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100vw); }
+        }
+        @keyframes sweepY {
+          0% { transform: translateY(-100%); }
+          100% { transform: translateY(100vh); }
+        }
+        .animate-sweep-x {
+          animation: sweepX 7s linear infinite;
+        }
+        .animate-sweep-y {
+          animation: sweepY 10s linear infinite;
+        }
+      `}</style>
+
+      {/* ======================================================== */}
+      {/* BACKGROUND LAYER & ANIMASI CAHAYA */}
       {/* ======================================================== */}
       {isMounted && (
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          {/* Pola Grid (Kotak-kotak) */}
+        <>
+          {/* LAYER 1: CAHAYA KURSOR KUNING */}
+          <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+            <div 
+              className="absolute w-[400px] h-[400px] bg-yellow-500/10 rounded-full blur-[100px] will-change-transform"
+              style={{ 
+                transform: `translate3d(${mousePos.x - 200}px, ${mousePos.y - 200}px, 0)`,
+                transition: "transform 0.2s ease-out"
+              }}
+            />
+          </div>
+
+          {/* LAYER 2: GARIS KOTAK-KOTAK DASAR (Tebal diubah jadi 1.5px agar lebih tegas) */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 z-0 pointer-events-none opacity-50"
             style={{
-              backgroundImage: `linear-gradient(to right, #f0f0f0 1px, transparent 1px), linear-gradient(to bottom, #f0f0f0 1px, transparent 1px)`,
-              backgroundSize: "40px 40px", // Ukuran kotak-kotak
+              backgroundImage: `linear-gradient(to right, #e5e7eb 1.5px, transparent 1.5px), linear-gradient(to bottom, #e5e7eb 1.5px, transparent 1.5px)`,
+              backgroundSize: "40px 40px",
             }}
           />
 
-          {/* Masking Cahaya (Light) yang Mengikuti Mouse */}
+          {/* LAYER 3: MASKING LIGHTNING PUTIH (Lebih Tebal & Terang) */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 z-0 pointer-events-none"
             style={{
-              background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(250, 204, 21, 0.15), transparent 40%)`,
-              willChange: "background",
+              WebkitMaskImage: `linear-gradient(to right, black 1.5px, transparent 1.5px), linear-gradient(to bottom, black 1.5px, transparent 1.5px)`,
+              WebkitMaskSize: "40px 40px",
+              maskImage: `linear-gradient(to right, black 1.5px, transparent 1.5px), linear-gradient(to bottom, black 1.5px, transparent 1.5px)`,
+              maskSize: "40px 40px",
             }}
-          />
-        </div>
+          >
+            {/* Cahaya Putih Berjalan Vertikal (Lebar jadi 400px, warna putih dipadatkan) */}
+            <div className="absolute top-0 bottom-0 left-0 w-[400px] bg-gradient-to-r from-transparent via-yellow-500/20 via-50% to-transparent opacity-100 animate-sweep-x" />
+            
+            {/* Cahaya Putih Berjalan Horizontal */}
+            <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-b from-transparent via-white via-50% to-transparent opacity-100 animate-sweep-y delay-300" />
+          </div>
+        </>
       )}
 
       {/* ======================================================== */}
       {/* KONTEN UTAMA */}
       {/* ======================================================== */}
       <div className="relative z-10 w-full max-w-3xl space-y-6 sm:space-y-8 flex flex-col items-center py-12 md:py-16">
+        
         {/* IKON DENGAN ANIMASI MENGAMBANG */}
         <div
           className={`w-16 h-16 sm:w-20 sm:h-20 bg-gray-900 rounded-2xl flex items-center justify-center shadow-lg transform transition-transform duration-1000 ease-in-out ${
@@ -98,10 +136,10 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
         </div>
 
         {/* JUDUL UTAMA DENGAN FONT RESPONSIVE */}
-        <h1 className="font-black tracking-tight text-gray-900 leading-tight min-h-[100px] sm:min-h-[120px] md:min-h-[150px] text-[clamp(2rem,6vw,4rem)]">
+        <h1 className="font-black tracking-tight text-gray-900 leading-tight min-h-[100px] sm:min-h-[120px] md:min-h-[150px] text-[clamp(2.5rem,5vw,4rem)]">
           Satu Tautan untuk <br />
           <span
-            className={`text-yellow-600 inline-block transition-all duration-500 transform ${
+            className={`text-yellow-500 inline-block transition-all duration-500 transform ${
               fade ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
             }`}
           >
@@ -122,7 +160,7 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
               href={`/${userUsername}`}
               className="bg-yellow-500 text-white font-medium py-3 px-6 sm:py-4 sm:px-8 rounded-xl hover:bg-yellow-600 transition-all shadow-md hover:shadow-lg inline-block active:scale-95 text-sm sm:text-base"
             >
-              Halo, {userUsername}! Ke Profil Saya
+              Halo, {session.user?.name}! Ke Profil Saya
             </Link>
           ) : (
             <Link
