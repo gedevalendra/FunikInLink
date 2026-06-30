@@ -9,8 +9,10 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  // Ambil data session untuk mengecek apakah user sudah login atau belum
   const { data: session } = useSession();
+
+  // Ambil username dengan aman jika ada
+  const userUsername = (session?.user as any)?.username || "";
 
   return (
     <>
@@ -60,11 +62,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             Privacy
           </Link>
 
-          {/* LOGIKA LOGIN: Jika sudah login, tampilkan Profile. Jika belum, Get Started */}
+          {/* JIKA LOGGED IN, ARAHKAN KE /[USERNAME] */}
           {session ? (
             <>
               <Link
-                href="/profile"
+                href={`/${userUsername}`}
                 onClick={onClose}
                 className={`text-lg font-medium text-gray-700 hover:text-yellow-500 transition-all transform duration-500 ${
                   isOpen ? "translate-y-0 opacity-100 delay-[300ms]" : "-translate-y-4 opacity-0"
@@ -73,7 +75,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 Profile Saya
               </Link>
 
-              {/* KHUSUS ADMIN: Menu ini hanya muncul jika role-nya admin */}
+              {/* KHUSUS ADMIN */}
               {(session.user as any)?.role === "admin" && (
                 <Link
                   href="/admin"

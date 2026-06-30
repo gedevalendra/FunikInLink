@@ -2,12 +2,13 @@ import Link from "next/link";
 import Header from "../components/layout/header";
 import Footer from "../components/layout/footer";
 import { getServerSession } from "next-auth";
-// SESUAIKAN PATH INI DENGAN FOLDER KAMU:
-import { authOptions } from "../lib/auth"; 
+import { authOptions } from "../lib/auth";
 
 export default async function LandingPage() {
-  // Cek apakah user sudah login di sisi server
   const session = await getServerSession(authOptions);
+  
+  // Ambil username dengan aman jika ada
+  const userUsername = (session?.user as any)?.username || "";
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900 font-sans">
@@ -24,10 +25,10 @@ export default async function LandingPage() {
         </p>
         <div className="pt-4">
           
-          {/* LOGIKA TOMBOL BERANDA */}
+          {/* LOGIKA TOMBOL BERANDA SEKARANG MENANGKAP URL USERNAME */}
           {session ? (
             <Link 
-              href="/profile" 
+              href={`/${userUsername}`} 
               className="bg-yellow-500 text-white font-medium py-3.5 px-8 rounded-xl hover:bg-yellow-600 transition-all shadow-md hover:shadow-lg inline-block active:scale-95"
             >
               Halo, {session.user?.name}! Ke Profil Saya 
