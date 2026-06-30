@@ -41,6 +41,33 @@ export async function deleteLink(id: string) {
   }
 }
 
+// ==========================================
+// ACTION BARU: UNTUK EDIT/UPDATE LINK
+// ==========================================
+export async function updateLink(formData: FormData) {
+  await connectDB();
+  
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) throw new Error("Unauthorized");
+
+  const currentUser = await User.findOne({ email: session.user.email });
+  if (!currentUser) throw new Error("User tidak ditemukan!");
+
+  const id = formData.get("id") as string;
+  
+  await SharedLink.findOneAndUpdate(
+    { _id: id, username: currentUser.username }, // Memastikan hanya pemilik yang bisa edit
+    {
+      title: formData.get("title"),
+      url: formData.get("url"),
+      description: formData.get("description"),
+      icon: formData.get("icon") || "bx-link",
+    }
+  );
+  
+  revalidatePath(`/${currentUser.username}`);
+}
+
 export async function updateProfile(formData: FormData) {
   await connectDB();
   
@@ -74,7 +101,7 @@ export async function updateProfile(formData: FormData) {
     name,
     bio,
     hashtags,
-    isNewUser: false, // <-- SET SETELAH BERHASIL MENYIMPAN USERNAME DAN SETUP PROFILE
+    isNewUser: false, 
   }, { new: true });
 
   if (updatedUser) {
