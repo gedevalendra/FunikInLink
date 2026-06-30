@@ -22,7 +22,7 @@ export default function DeleteUserButton({ userId, userName, deleteAction }: Del
         type="submit" 
         className="text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 px-2.5 py-1.5 rounded-lg transition-all"
       >
-        <i className="bx bx-trash-alt"></i> Hapus
+        <i className="bx bx-trash-alt"></i>
       </button>
     </form>
   );
