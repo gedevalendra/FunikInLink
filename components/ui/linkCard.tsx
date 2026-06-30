@@ -29,7 +29,7 @@ export default function LinkCard({ link, isAdmin }: { link: any, isAdmin: boolea
 
   return (
     <>
-      <div className="relative flex items-start gap-4 p-3 -mx-3 rounded-xl hover:bg-gray-50 transition-colors shadow-sm border border-gray-100">
+      <div className="relative flex items-start gap-4 p-3 -mx-3 rounded-xl transition-colors shadow-sm border border-gray-100">
         <div className="text-yellow-600 transition-colors pt-0.5 text-2xl">
           <i className={`bx ${link.icon}`}></i>
         </div>
@@ -52,7 +52,7 @@ export default function LinkCard({ link, isAdmin }: { link: any, isAdmin: boolea
 
         {/* TOMBOL SELALU MUNCUL KARENA KITA MENGHAPUS opacity-0 */}
         {isAdmin && (
-          <div className="absolute top-3 right-3 flex gap-1 bg-white p-1 rounded-lg shadow-sm border border-gray-100">
+          <div className="absolute top-3 right-3 flex gap-1">
             <button 
               onClick={() => {
                 setSelectedIcon(link.icon || "bx-link");
