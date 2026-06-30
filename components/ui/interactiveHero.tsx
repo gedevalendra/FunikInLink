@@ -82,7 +82,7 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
       {/* ======================================================== */}
       {isMounted && (
         <>
-          {/* LAYER 1: CAHAYA KURSOR KUNING */}
+          {/* LAYER 1: CAHAYA KURSOR KUNING (Masih di-comment sesuai permintaan Anda) */}
           {/* <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
             <div 
               className="absolute w-[400px] h-[400px] bg-yellow-500/10 rounded-full blur-[100px] will-change-transform"
@@ -93,7 +93,7 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
             />
           </div> */}
 
-          {/* LAYER 2: GARIS KOTAK-KOTAK DASAR (Tebal diubah jadi 1.5px agar lebih tegas) */}
+          {/* LAYER 2: GARIS KOTAK-KOTAK DASAR */}
           <div
             className="absolute inset-0 z-0 pointer-events-none opacity-50"
             style={{
@@ -102,7 +102,7 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
             }}
           />
 
-          {/* LAYER 3: MASKING LIGHTNING PUTIH (Lebih Tebal & Terang) */}
+          {/* LAYER 3: MASKING LIGHTNING PUTIH */}
           <div
             className="absolute inset-0 z-0 pointer-events-none"
             style={{
@@ -112,7 +112,7 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
               maskSize: "40px 40px",
             }}
           >
-            {/* Cahaya Putih Berjalan Vertikal (Lebar jadi 400px, warna putih dipadatkan) */}
+            {/* Cahaya Putih Berjalan Vertikal */}
             <div className="absolute top-0 bottom-0 left-0 w-[400px] bg-gradient-to-r from-transparent via-yellow-500/20 via-50% to-transparent opacity-100 animate-sweep-x" />
             
             {/* Cahaya Putih Berjalan Horizontal */}
@@ -135,8 +135,8 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
           <i className="bx bx-link text-3xl sm:text-4xl text-white"></i>
         </div>
 
-        {/* JUDUL UTAMA DENGAN FONT RESPONSIVE - BAGIAN INI YANG DIPERBAIKI */}
-        <h1 className="font-black tracking-tight text-gray-900 leading-tight min-h-[100px] sm:min-h-[120px] md:min-h-[150px] text-4xl sm:text-5xl md:text-6xl">
+        {/* JUDUL UTAMA DENGAN FONT RESPONSIVE YANG LEBIH MULUS DI MOBILE */}
+        <h1 className="font-black tracking-tight text-gray-900 leading-tight min-h-[90px] min-[400px]:min-h-[100px] sm:min-h-[120px] md:min-h-[150px] text-3xl min-[400px]:text-4xl sm:text-5xl md:text-6xl">
           Satu Tautan untuk <br />
           <span
             className={`text-yellow-500 inline-block transition-all duration-500 transform ${
