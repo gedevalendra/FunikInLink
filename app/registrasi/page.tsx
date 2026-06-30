@@ -1,6 +1,7 @@
-import Link from "next/link";
+"use client"; // <-- Wajib ditambahkan di baris paling atas!
 
-import { signIn } from "next-auth/react"; // Import fungsi login dari NextAuth
+import Link from "next/link";
+import { signIn } from "next-auth/react";
 
 export default function RegistrasiPage() {
   return (
