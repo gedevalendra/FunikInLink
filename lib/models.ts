@@ -14,7 +14,7 @@ const LinkSchema = new mongoose.Schema({
 export const SharedLink = mongoose.models.SharedLink || mongoose.model("SharedLink", LinkSchema);
 
 // 2. Model untuk Profil Pengguna (User)
-const AdminSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
@@ -22,10 +22,10 @@ const AdminSchema = new mongoose.Schema({
   hashtags: { type: [String], default: [] },
   isNewUser: { type: Boolean, default: true }, 
 }, { 
-  collection: "Admin" 
+  collection: "User" 
 });
 
-export const Admin = mongoose.models.Admin || mongoose.model("Admin", AdminSchema);
+export const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
 // 3. Model untuk Hak Akses Admin Panel (PASTIKAN BAGIAN INI ADA)
 const AdminListSchema = new mongoose.Schema({

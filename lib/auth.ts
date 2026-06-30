@@ -1,7 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { connectDB } from "./db";
-import { Admin, AdminList } from "./models";
+import { User, AdminList } from "./models";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -15,13 +15,13 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === "google") {
         await connectDB();
         try {
-          const existingUser = await Admin.findOne({ email: user.email });
+          const existingUser = await User.findOne({ email: user.email });
           
           if (!existingUser) {
             const baseUsername = user.email?.split("@")[0] || "user";
             const randomNum = Math.floor(Math.random() * 1000);
             
-            await Admin.create({
+            await User.create({
               name: user.name,
               email: user.email,
               username: `${baseUsername}_${randomNum}`,

@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../lib/auth"; 
 import { connectDB } from "../../lib/db"; 
-import { Admin, SharedLink, AdminList } from "../../lib/models"; 
+import { User, SharedLink, AdminList } from "../../lib/models"; 
 import Header from "../../components/layout/header"; 
 import Footer from "../../components/layout/footer"; 
 import { revalidatePath } from "next/cache";
@@ -21,10 +21,10 @@ async function deleteUserAction(formData: FormData) {
 
   const userId = formData.get("userId") as string;
   
-  const userDoc = await Admin.findById(userId);
+  const userDoc = await User.findById(userId);
   if (userDoc) {
     await SharedLink.deleteMany({ username: userDoc.username });
-    await Admin.findByIdAndDelete(userId);
+    await User.findByIdAndDelete(userId);
   }
 
   revalidatePath("/admin");
@@ -44,7 +44,7 @@ async function toggleVerifyUserAction(formData: FormData) {
   const userId = formData.get("userId") as string;
   const currentStatus = formData.get("currentStatus") === "true";
 
-  await Admin.findByIdAndUpdate(userId, { isNewUser: !currentStatus });
+  await User.findByIdAndUpdate(userId, { isNewUser: !currentStatus });
 
   revalidatePath("/admin");
 }
@@ -75,7 +75,7 @@ export default async function admin() {
     );
   }
 
-  const rawUsers = await Admin.find({}).lean();
+  const rawUsers = await User.find({}).lean();
 
   const processedUsers = await Promise.all(
     rawUsers.map(async (u: any) => {
