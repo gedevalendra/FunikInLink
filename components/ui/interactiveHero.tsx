@@ -83,7 +83,7 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
       {isMounted && (
         <>
           {/* LAYER 1: CAHAYA KURSOR KUNING */}
-          <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+          {/* <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
             <div 
               className="absolute w-[400px] h-[400px] bg-yellow-500/10 rounded-full blur-[100px] will-change-transform"
               style={{ 
@@ -91,7 +91,7 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
                 transition: "transform 0.2s ease-out"
               }}
             />
-          </div>
+          </div> */}
 
           {/* LAYER 2: GARIS KOTAK-KOTAK DASAR (Tebal diubah jadi 1px agar lebih tegas) */}
           <div
