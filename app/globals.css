@@ -30,3 +30,18 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Animasi geser bolak-balik pelan di area terbatas */
+@keyframes marquee-simple-wkwk {
+  0% { transform: translateX(5%); }
+  50% { transform: translateX(-5%); }
+  100% { transform: translateX(5%); }
+}
+
+.animate-simple-marquee {
+  animation: marquee-simple-wkwk 10s ease-in-out infinite;
+}
+
+/* Berhenti jalan sejenak saat kursor diarahkan ke logo */
+.animate-simple-marquee:hover {
+  animation-play-state: paused;
+}
