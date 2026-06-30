@@ -1,33 +1,53 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../lib/auth";
-import { connectDB } from "../../lib/db";
-import { Admin, SharedLink, AdminList } from "../../lib/models";
-import Header from "../../components/layout/header";
-import Footer from "../../components/layout/footer";
+import { authOptions } from "../../lib/auth"; // Sesuaikan path jika berbeda
+import { connectDB } from "../../lib/db"; // Sesuaikan path jika berbeda
+import { Admin, SharedLink, AdminList } from "../../lib/models"; // Sesuaikan path jika berbeda
+import Header from "../../components/layout/header"; // Sesuaikan path jika berbeda
+import Footer from "../../components/layout/footer"; // Sesuaikan path jika berbeda
 import { revalidatePath } from "next/cache";
 
-// Server Action untuk menghapus user dan link-linknya
+// Server Action untuk menghapus pengguna
 async function deleteUserAction(formData: FormData) {
   "use server";
   await connectDB();
   
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) throw new Error("Unauthorized");
+  if (!session?.user?.email) throw new Error("Akses tidak sah!");
   
-  // Keamanan ganda: pastikan yang mengeksekusi beneran admin
+  // Validasi lapis kedua: pastikan email pengeksusi terdaftar di AdminList
   const checkAdmin = await AdminList.findOne({ email: session.user.email });
-  if (!checkAdmin) throw new Error("Forbidden");
+  if (!checkAdmin) throw new Error("Akses ditolak!");
 
   const userId = formData.get("userId") as string;
   
-  // Ambil data user terlebih dahulu untuk tahu username-nya sebelum dihapus
+  // Ambil data user untuk mengetahui username sebelum dihapus
   const userDoc = await Admin.findById(userId);
   if (userDoc) {
-    // 1. Hapus semua link yang dimiliki user ini
+    // 1. Hapus semua tautan milik user ini
     await SharedLink.deleteMany({ username: userDoc.username });
-    // 2. Hapus user dari collection Admin
+    // 2. Hapus dokumen profil pengguna
     await Admin.findByIdAndDelete(userId);
   }
+
+  revalidatePath("/admin");
+}
+
+// Server Action untuk memverifikasi atau mengubah status manual user baru jika diperlukan
+async function toggleVerifyUserAction(formData: FormData) {
+  "use server";
+  await connectDB();
+
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) throw new Error("Akses tidak sah!");
+
+  const checkAdmin = await AdminList.findOne({ email: session.user.email });
+  if (!checkAdmin) throw new Error("Akses ditolak!");
+
+  const userId = formData.get("userId") as string;
+  const currentStatus = formData.get("currentStatus") === "true";
+
+  // Balikkan status isNewUser (jika true jadi false, jika false jadi true)
+  await Admin.findByIdAndUpdate(userId, { isNewUser: !currentStatus });
 
   revalidatePath("/admin");
 }
@@ -35,35 +55,45 @@ async function deleteUserAction(formData: FormData) {
 export default async function AdminDashboardPage() {
   await connectDB();
 
-  // 1. Validasi Akses Admin
+  // 1. Ambil sesi pengguna yang sedang aktif login saat ini
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
-    return <div className="min-h-screen flex items-center justify-center font-mono">Silakan login terlebih dahulu.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center font-sans bg-gray-50 text-gray-500 text-sm">
+        Silakan login terlebih dahulu untuk mengakses halaman ini.
+      </div>
+    );
   }
 
+  // 2. Cocokkan email dari sesi login aktif dengan daftar email di collection AdminList
   const checkAdmin = await AdminList.findOne({ email: session.user.email });
   if (!checkAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-center p-4">
-        <div>
-          <h1 className="text-2xl font-bold text-red-600">Akses Ditolak!</h1>
-          <p className="text-sm text-gray-500 mt-1">Halaman ini hanya ditujukan khusus untuk Administrator.</p>
+      <div className="min-h-screen flex items-center justify-center text-center p-6 bg-gray-50 font-sans">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-black text-red-600">Akses Ditolak!</h1>
+          <p className="text-sm text-gray-500 max-w-sm">
+            Email <span className="font-mono text-gray-800 font-semibold">{session.user.email}</span> tidak terdaftar sebagai Administrator pada sistem FunikIn.
+          </p>
         </div>
       </div>
     );
   }
 
-  // 2. Ambil seluruh data user dari database
-  const allUsers = await Admin.find({}).lean();
+  // 3. Ambil seluruh data user. Gunakan transformasi objek agar _id dikonversi menjadi string aman
+  const rawUsers = await Admin.find({}).lean();
+  
+  const allUsers = rawUsers.map((u: any) => ({
+    ...u,
+    _id: u._id.toString(), // Mengubah format ObjectId agar tidak menyebabkan crash rendering di Next.js
+  }));
 
-  // 3. Ambil statistik jumlah link per user untuk indikator keaktifan dasar
-  // (Di sini kita hitung apakah user punya link aktif atau profilnya kosong/tidak diurus)
+  // 4. Kalkulasi statistik dan hitung jumlah tautan aktif per pengguna
   const usersWithLinkCount = await Promise.all(
     allUsers.map(async (user: any) => {
       const linkCount = await SharedLink.countDocuments({ username: user.username });
       return {
         ...user,
-        _id: user._id.toString(),
         linkCount,
       };
     })
@@ -74,22 +104,26 @@ export default async function AdminDashboardPage() {
       <Header />
 
       <main className="flex-grow max-w-5xl w-full mx-auto px-6 py-10">
-        <div className="mb-6">
-          <h1 className="text-2xl font-black tracking-tight text-gray-900 flex items-center gap-2">
-            <i className="bx bx-shield-quarter text-blue-600"></i> Admin Panel
-          </h1>
-          <p className="text-xs text-gray-500">Kelola kredensial pengguna, verifikasi status, dan moderasi tautan aplikasi FunikIn.</p>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-black tracking-tight text-gray-900 flex items-center gap-2">
+              <i className="bx bx-shield-quarter text-blue-600"></i> Admin Panel
+            </h1>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Masuk sebagai Admin: <span className="font-semibold text-gray-700">{checkAdmin.nama}</span> ({checkAdmin.email})
+            </p>
+          </div>
         </div>
 
-        {/* Kartu Ringkasan Statistik */}
+        {/* Panel Ringkasan Metrik Singkat */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
             <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xl">
               <i className="bx bx-user"></i>
             </div>
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase">Total Pengguna</p>
-              <p className="text-xl font-black">{allUsers.length}</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Pengguna</p>
+              <p className="text-xl font-black">{usersWithLinkCount.length}</p>
             </div>
           </div>
           <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
@@ -97,7 +131,7 @@ export default async function AdminDashboardPage() {
               <i className="bx bx-link-external"></i>
             </div>
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase">Total Tautan Dibuat</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Tautan Aktif</p>
               <p className="text-xl font-black">
                 {usersWithLinkCount.reduce((acc, curr) => acc + curr.linkCount, 0)}
               </p>
@@ -105,15 +139,15 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Tabel Utama Daftar User */}
+        {/* Tabel Administrasi Pengguna */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                  <th className="p-4">Pengguna / Profile</th>
+                  <th className="p-4">Pengguna / Profil</th>
                   <th className="p-4">Username</th>
-                  <th className="p-4">Status Akun</th>
+                  <th className="p-4">Verifikasi Akun</th>
                   <th className="p-4">Indikator Tautan</th>
                   <th className="p-4 text-center">Aksi Administrasi</th>
                 </tr>
@@ -128,11 +162,11 @@ export default async function AdminDashboardPage() {
                 ) : (
                   usersWithLinkCount.map((user) => (
                     <tr key={user._id} className="hover:bg-gray-50/50 transition-colors">
-                      {/* Kolom Nama & Email */}
+                      {/* Kolom Pengguna */}
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gray-900 text-white font-bold flex items-center justify-center text-xs uppercase">
-                            {user.name.substring(0, 2)}
+                          <div className="w-9 h-9 rounded-full bg-gray-900 text-white font-bold flex items-center justify-center text-xs uppercase flex-shrink-0">
+                            {user.name ? user.name.substring(0, 2) : "US"}
                           </div>
                           <div>
                             <p className="font-semibold text-gray-800 leading-tight">{user.name}</p>
@@ -141,20 +175,20 @@ export default async function AdminDashboardPage() {
                         </div>
                       </td>
 
-                      {/* Kolom Username kustom */}
+                      {/* Kolom Username */}
                       <td className="p-4 font-mono text-xs text-gray-600">
                         @{user.username}
                       </td>
 
-                      {/* Kolom Status Akun (isNewUser) */}
+                      {/* Kolom Verifikasi Status Onboarding */}
                       <td className="p-4">
                         {user.isNewUser ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                             Belum Setup
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-green-50 text-green-700 px-2 py-0.5 rounded-full border border-green-200">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-green-50 text-green-700 px-2.5 py-1 rounded-full border border-green-200">
                             <i className="bx bx-check-circle text-xs"></i>
                             Terverifikasi
                           </span>
@@ -171,26 +205,48 @@ export default async function AdminDashboardPage() {
                         ) : (
                           <div className="flex items-center gap-1.5 text-xs text-gray-400">
                             <span className="w-2 h-2 rounded-full bg-gray-300"></span>
-                            <span className="italic">Kosong</span>
+                            <span className="italic">Tidak Aktif</span>
                           </div>
                         )}
                       </td>
 
-                      {/* Kolom Tombol Hapus Aksi */}
+                      {/* Kolom Tombol Aksi Kontrol */}
                       <td className="p-4 text-center">
-                        <form action={deleteUserAction} onSubmit={(e) => {
-                          if(!confirm(`Apakah kamu yakin ingin menghapus user ${user.name}? Semua tautan miliknya juga akan hilang permanen!`)) {
-                            e.preventDefault();
-                          }
-                        }}>
-                          <input type="hidden" name="userId" value={user._id} />
-                          <button 
-                            type="submit" 
-                            className="text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 hover:text-red-700 px-3 py-1.5 rounded-lg transition-all active:scale-95"
+                        <div className="flex items-center justify-center gap-2">
+                          {/* Form Verifikasi / Ubah Status Manual */}
+                          <form action={toggleVerifyUserAction}>
+                            <input type="hidden" name="userId" value={user._id} />
+                            <input type="hidden" name="currentStatus" value={String(user.isNewUser)} />
+                            <button 
+                              type="submit"
+                              className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all active:scale-95 border ${
+                                user.isNewUser 
+                                  ? "bg-white text-gray-700 border-gray-200 hover:bg-gray-50" 
+                                  : "bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100"
+                              }`}
+                            >
+                              {user.isNewUser ? "Verifikasi" : "Unverify"}
+                            </button>
+                          </form>
+
+                          {/* Form Hapus User */}
+                          <form 
+                            action={deleteUserAction} 
+                            onSubmit={(e) => {
+                              if(!confirm(`Apakah kamu yakin ingin menghapus user ${user.name}? Semua tautan miliknya juga akan terhapus secara permanen!`)) {
+                                e.preventDefault();
+                              }
+                            }}
                           >
-                            <i className="bx bx-trash-alt mr-1"></i> Hapus
-                          </button>
-                        </form>
+                            <input type="hidden" name="userId" value={user._id} />
+                            <button 
+                              type="submit" 
+                              className="text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 px-2.5 py-1.5 rounded-lg transition-all active:scale-95"
+                            >
+                              <i className="bx bx-trash-alt"></i> Hapus
+                            </button>
+                          </form>
+                        </div>
                       </td>
                     </tr>
                   ))
