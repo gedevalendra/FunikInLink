@@ -7,4 +7,4 @@ const LinkSchema = new mongoose.Schema({
   url: { type: String, required: true },
 });
 
-export const SharedLink = mongoose.models.SharedLink || mongoose.model("SharedLink", LinkSchema);a
+export const SharedLink = mongoose.models.SharedLink || mongoose.model("SharedLink", LinkSchema);

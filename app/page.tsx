@@ -1,8 +1,8 @@
-import Header from "../components/layout/Header"; // Sesuaikan nama file dengan kapital/kecil yang kamu buat
-import Footer from "../components/layout/Footer"; 
-import ProfileSettings from "../components/ui/ProfileSettings";
-import AddLinkModal from "../components/ui/AddLinkModal";
-import LinkCard from "../components/ui/LinkCard";
+import Header from "../components/layout/header"; // Sesuaikan nama file dengan kapital/kecil yang kamu buat
+import Footer from "../components/layout/footer"; 
+import ProfileSettings from "../components/ui/profileSettings";
+import AddLinkModal from "../components/ui/addLinkModal";
+import LinkCard from "../components/ui/linkCard";
 import { connectDB } from "../lib/db";
 import { SharedLink } from "../lib/models"; 
 
