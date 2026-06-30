@@ -5,8 +5,8 @@ import { signIn } from "next-auth/react";
 
 export default function RegistrasiPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6 font-sans">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center space-y-8 border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center px-6 font-sans">
+      <div className="max-w-md w-full text-center space-y-8">
         
         {/* Header Teks */}
         <div className="space-y-3">
@@ -14,7 +14,8 @@ export default function RegistrasiPage() {
             <i className="bx bx-link text-3xl text-white"></i>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-            Selamat Datang di FunikIn
+            Selamat Datang di Funik
+            <span className="text-yellow-500">In</span>
           </h1>
           <p className="text-sm text-gray-500 leading-relaxed px-4">
             Masuk atau daftar secara otomatis menggunakan akun Google untuk mulai mengelola tautanmu.

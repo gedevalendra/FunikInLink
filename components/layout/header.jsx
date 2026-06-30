@@ -8,7 +8,9 @@ export default function Header() {
 
   return (
     <>
-      <div className="w-full sticky top-0 flex items-center justify-between bg-white shadow-sm px-[5%] py-3 z-30">
+      {/* PERBAIKAN DI SINI: bg-white/80 dan backdrop-blur-md */}
+      <div className="w-full sticky top-0 flex items-center justify-between bg-white/80 backdrop-blur-md shadow-sm px-[5%] py-3 z-30">
+        
         {/* Logo */}
         <h1 className="font-bold w-fit flex items-center">
           Funik

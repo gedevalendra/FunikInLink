@@ -19,7 +19,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Backdrop */}
       <div
         className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          isOpen ? "opacity-100 backdrop-blur-xs pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
       />
@@ -43,7 +43,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Daftar Menu */}
         <nav className="flex flex-col gap-4">
           <Link
-            href="#about"
+            href="/"
+            onClick={onClose}
+            className={`text-lg font-medium text-gray-700 hover:text-yellow-500 transition-all transform duration-500 ${
+              isOpen ? "translate-y-0 opacity-100 delay-[100ms]" : "-translate-y-4 opacity-0"
+            }`}
+          >
+            Home
+          </Link>
+          
+          <Link
+            href="/About"
             onClick={onClose}
             className={`text-lg font-medium text-gray-700 hover:text-yellow-500 transition-all transform duration-500 ${
               isOpen ? "translate-y-0 opacity-100 delay-[100ms]" : "-translate-y-4 opacity-0"
@@ -53,7 +63,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </Link>
           
           <Link
-            href="#privacy"
+            href="/Privacy"
             onClick={onClose}
             className={`text-lg font-medium text-gray-700 hover:text-yellow-500 transition-all transform duration-500 ${
               isOpen ? "translate-y-0 opacity-100 delay-[200ms]" : "-translate-y-4 opacity-0"
@@ -104,7 +114,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <Link
               href="/registrasi"
               onClick={onClose}
-              className={`text-lg font-medium bg-yellow-500 text-white text-center p-3 rounded-xl shadow-md hover:bg-yellow-600 transition-all transform duration-500 ${
+              className={`text-lg font-medium bg-yellow-500 text-white text-center p-3 rounded-lg hover:opacity-80 transition-all transform duration-400 ${
                 isOpen ? "translate-y-0 opacity-100 delay-[300ms]" : "-translate-y-4 opacity-0"
               }`}
             >
