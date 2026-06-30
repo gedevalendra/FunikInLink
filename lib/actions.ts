@@ -9,11 +9,9 @@ import { authOptions } from "./auth";
 export async function addLink(formData: FormData) {
   await connectDB();
   
-  // Ambil sesi user yang sedang login saat ini
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) throw new Error("Kamu harus login terlebih dahulu!");
 
-  // Cari data username berdasarkan email yang sedang login
   const currentUser = await Admin.findOne({ email: session.user.email });
   if (!currentUser) throw new Error("User tidak ditemukan!");
 
@@ -50,18 +48,44 @@ export async function updateProfile(formData: FormData) {
   const name = formData.get("name");
   const bio = formData.get("bio");
   const hashtagString = formData.get("hashtags") as string;
+  
+  const usernameInput = formData.get("username") as string;
+
+  const cleanUsername = usernameInput ? usernameInput.toLowerCase().trim().replace(/\s+/g, "-") : "";
+
+  if (cleanUsername) {
+    const existingUsername = await Admin.findOne({ 
+      username: cleanUsername, 
+      _id: { $ne: userId } 
+    });
+
+    if (existingUsername) {
+      throw new Error("Username sudah digunakan oleh orang lain! Silakan pilih yang lain.");
+    }
+  }
 
   const hashtags = hashtagString
     ? hashtagString.split(" ").filter((tag) => tag.startsWith("#"))
     : [];
 
+  const oldUser = await Admin.findById(userId);
+
   const updatedUser = await Admin.findByIdAndUpdate(userId, {
+    username: cleanUsername || oldUser?.username, // jika input kosong, gunakan yang lama
     name,
     bio,
     hashtags,
   }, { new: true });
 
   if (updatedUser) {
+    if (oldUser && oldUser.username !== updatedUser.username) {
+      await SharedLink.updateMany(
+        { username: oldUser.username },
+        { $set: { username: updatedUser.username } }
+      );
+      revalidatePath(`/${oldUser.username}`);
+    }
+
     revalidatePath(`/${updatedUser.username}`);
   }
 }

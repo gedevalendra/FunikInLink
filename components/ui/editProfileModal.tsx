@@ -20,6 +20,28 @@ export default function EditProfileModal({ user, onClose }: Props) {
           {/* Hidden ID agar tahu user mana yang diupdate */}
           <input type="hidden" name="userId" value={user._id.toString()} />
 
+          {/* INPUT USERNAME (TAMBAHAN BARU) */}
+          <div>
+            <label className="text-xs font-bold text-gray-400 uppercase">Username (Tautan Link)</label>
+            <div className="flex items-center mt-1 border border-gray-200 rounded-lg focus-within:border-yellow-500 overflow-hidden px-2.5 bg-white">
+              <span className="text-sm text-gray-400 select-none">funikin.it.com/</span>
+              <input 
+                name="username" 
+                defaultValue={user.username} 
+                required 
+                placeholder="username_kamu"
+                pattern="^[a-zA- Main0-9_-]+$"
+                title="Username hanya boleh berisi huruf, angka, garis bawah (_), dan tanda hubung (-), tanpa spasi."
+                className="w-full p-2.5 text-sm outline-none pl-0.5" 
+                onChange={(e) => {
+                  // Otomatis mengubah spasi dan huruf kapital menjadi lowercase/tanpa spasi saat diketik
+                  e.target.value = e.target.value.toLowerCase().replace(/\s+/g, "-");
+                }}
+              />
+            </div>
+            <p className="text-[10px] text-gray-400 mt-1">Hanya huruf kecil, angka, tanda hubung (-), dan underscore (_).</p>
+          </div>
+
           <div>
             <label className="text-xs font-bold text-gray-400 uppercase">Nama Lengkap</label>
             <input name="name" defaultValue={user.name} required className="w-full mt-1 p-2.5 border border-gray-200 rounded-lg text-sm focus:border-yellow-500 outline-none" />
