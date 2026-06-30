@@ -385,43 +385,48 @@ export default async function admin() {
                     </div>
                   </div>
 
-                  {/* Tombol Aksi HP */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-2 pt-1">
-                    <div className="grid grid-cols-2 gap-2 w-full">
-                      {/* Tombol Centang Biru Mobile */}
-                      <form action={toggleBadgeVerificationAction}>
-                        <input type="hidden" name="userId" value={user._id} />
-                        <input type="hidden" name="currentVerifiedStatus" value={String(user.isVerified)} />
-                        <button 
-                          type="submit" 
-                          className={`w-full text-center text-xs font-medium px-3 py-1.5 rounded-md border transition-all ${
-                            user.isVerified ? 'bg-rose-50 text-rose-600 border-rose-200':'bg-blue-50 text-blue-600 border-blue-200'
-                          }`}
-                        >
-                          {user.isVerified ? "Hapus Centang" : "Beri Centang"}
-                        </button>
-                      </form>
+                  {/* =================================================== */}
+                  {/* TOMBOL AKSI HP (DIPERBAIKI MENJADI 3 KOLOM SEJAJAR) */}
+                  {/* =================================================== */}
+                  <div className="grid grid-cols-3 gap-2 w-full pt-1">
+                    
+                    {/* 1. Tombol Centang Biru Mobile */}
+                    <form action={toggleBadgeVerificationAction} className="w-full">
+                      <input type="hidden" name="userId" value={user._id} />
+                      <input type="hidden" name="currentVerifiedStatus" value={String(user.isVerified)} />
+                      <button 
+                        type="submit" 
+                        className={`w-full text-center text-[10px] sm:text-xs font-medium px-1 py-1.5 rounded-md border transition-all ${
+                          user.isVerified ? 'bg-rose-50 text-rose-600 border-rose-200':'bg-blue-50 text-blue-600 border-blue-200'
+                        }`}
+                      >
+                        {user.isVerified ? "Hapus" : "Centang"}
+                      </button>
+                    </form>
 
-                      {/* Tombol Reset Setup Mobile */}
-                      <form action={toggleVerifyUserAction}>
-                        <input type="hidden" name="userId" value={user._id} />
-                        <input type="hidden" name="currentStatus" value={String(user.isNewUser)} />
-                        <button 
-                          type="submit"
-                          className="w-full text-center text-xs font-medium px-3 py-1.5 rounded-md bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all"
-                        >
-                          {user.isNewUser ? "Aktifkan" : "Reset Setup"}
-                        </button>
-                      </form>
+                    {/* 2. Tombol Reset Setup Mobile */}
+                    <form action={toggleVerifyUserAction} className="w-full">
+                      <input type="hidden" name="userId" value={user._id} />
+                      <input type="hidden" name="currentStatus" value={String(user.isNewUser)} />
+                      <button 
+                        type="submit"
+                        className="w-full text-center text-[10px] sm:text-xs font-medium px-1 py-1.5 rounded-md bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all"
+                      >
+                        {user.isNewUser ? "Aktifkan" : "Reset"}
+                      </button>
+                    </form>
+
+                    {/* 3. Tombol Hapus Profil */}
+                    {/* Menggunakan custom class [&>button] untuk memaksa tombol dari komponen DeleteUserButton menyesuaikan lebar parent-nya */}
+                    <div className="w-full [&>button]:w-full [&>button]:text-[10px] sm:[&>button]:text-xs [&>button]:py-1.5 [&>button]:px-1 [&>button]:rounded-md">
+                      <DeleteUserButton 
+                        userId={user._id} 
+                        userName={user.name} 
+                        deleteAction={deleteUserAction} 
+                      />
                     </div>
 
-                    <DeleteUserButton 
-                      userId={user._id} 
-                      userName={user.name} 
-                      deleteAction={deleteUserAction} 
-                    />
                   </div>
-
                 </div>
               ))
             )}
