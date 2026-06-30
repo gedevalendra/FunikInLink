@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
+import { Suspense } from "react"; // 1. Import Suspense dari React
 import AuthProvider from "../components/AuthProvider";
 import ButtonLoaderInterceptor from "../components/ui/buttonLoaderInterceptor";
 
@@ -66,16 +67,25 @@ export default function RootLayout({
       lang="id" // Ubah jadi 'id' untuk SEO Indonesia
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        {/* Memindahkan CSS Boxicons ke dalam head agar valid secara struktur HTML */}
+        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet' />
+      </head>
       <body className="min-h-full flex flex-col">
-        <ButtonLoaderInterceptor />
+        {/* 2. Membungkus Interceptor dengan Suspense agar lolos build prerender Vercel */}
+        <Suspense fallback={null}>
+          <ButtonLoaderInterceptor />
+        </Suspense>
+
         <AuthProvider>
           {children}
         </AuthProvider>
+
         <Script 
           src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js" 
           strategy="afterInteractive" 
         />
-        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet' />
+        
         <Script
           src="https://app.sandbox.midtrans.com/snap/snap.js"
           data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
