@@ -3,9 +3,12 @@
 import { useState } from "react";
 import EditProfileModal from "./editProfileModal";
 
-export default function ProfileSettings({ user }: { user: any }) {
+export default function ProfileSettings({ user, isAdmin }: { user: any, isAdmin: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+
+  // LOGIKA PENGUNJUNG: Jika bukan admin, JANGAN tampilkan tombol setting sama sekali
+  if (!isAdmin) return null;
 
   return (
     <div className="relative">
@@ -19,7 +22,6 @@ export default function ProfileSettings({ user }: { user: any }) {
       {isOpen && (
         <div className="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-md py-1 z-10 text-sm">
           <button 
-            // Ubah alert menjadi trigger untuk memunculkan modal
             onClick={() => { setShowEditModal(true); setIsOpen(false); }}
             className="w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 flex items-center gap-2"
           >
@@ -34,7 +36,6 @@ export default function ProfileSettings({ user }: { user: any }) {
         </div>
       )}
 
-      {/* Komponen Modal yang akan muncul jika state showEditModal true */}
       {showEditModal && (
         <EditProfileModal user={user} onClose={() => setShowEditModal(false)} />
       )}
