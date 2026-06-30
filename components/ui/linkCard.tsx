@@ -4,7 +4,7 @@ import { deleteLink } from "../../lib/actions";
 
 export default function LinkCard({ link, isAdmin }: { link: any, isAdmin: boolean }) {
   return (
-    <div className="group relative flex items-start gap-4 p-3 -mx-3 rounded-xl hover:bg-gray-50 transition-colors">
+    <div className="group relative flex items-start gap-4 p-3 -mx-3 rounded-xl hover:bg-gray-50 transition-colors shadow-md">
       <div className="text-gray-400 group-hover:text-yellow-600 transition-colors pt-0.5 text-xl">
         <i className={`bx ${link.icon}`}></i>
       </div>
