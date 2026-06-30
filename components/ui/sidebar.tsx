@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -10,7 +12,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     <>
       {/* Backdrop (Latar belakang gelap transparan saat sidebar buka) */}
       <div
-        className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-100 ${
+        className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${
           isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -18,7 +20,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       {/* Kontainer Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-[75%] max-w-[350px] bg-white shadow-xl z-50 p-6 flex flex-col justify-start transition-transform duration-00 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-[75%] max-w-[350px] bg-white shadow-xl z-50 p-6 flex flex-col justify-start transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -34,30 +36,36 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Daftar Menu dengan Animasi Muncul dari Atas ke Bawah */}
         <nav className="flex flex-col gap-4">
-          <a
+          <Link
             href="#about"
+            onClick={onClose}
             className={`text-lg font-medium text-gray-700 hover:text-yellow-500 transition-all transform duration-500 ${
               isOpen ? "translate-y-0 opacity-100 delay-[100ms]" : "-translate-y-4 opacity-0"
             }`}
           >
             About
-          </a>
-          <a
+          </Link>
+          
+          <Link
             href="#privacy"
+            onClick={onClose}
             className={`text-lg font-medium text-gray-700 hover:text-yellow-500 transition-all transform duration-500 ${
               isOpen ? "translate-y-0 opacity-100 delay-[200ms]" : "-translate-y-4 opacity-0"
             }`}
           >
             Privacy
-          </a>
-          <a
-            href="#get-started"
+          </Link>
+          
+          {/* Tombol Get Started yang mengarah ke /registrasi */}
+          <Link
+            href="/registrasi"
+            onClick={onClose} // Menutup sidebar otomatis setelah diklik
             className={`text-lg font-medium bg-yellow-500 text-white text-center p-3 rounded-xl shadow-md hover:bg-yellow-600 transition-all transform duration-500 ${
               isOpen ? "translate-y-0 opacity-100 delay-[300ms]" : "-translate-y-4 opacity-0"
             }`}
           >
             Get Started
-          </a>
+          </Link>
         </nav>
       </div>
     </>
