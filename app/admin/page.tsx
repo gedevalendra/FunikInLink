@@ -281,7 +281,7 @@ export default async function admin() {
         <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
           
           <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-            <h3 className="text-xs font-medium uppercase tracking-wider text-slate-400">Daftar Manajemen Pengguna</h3>
+            <h3 className="text-xs font-medium uppercase tracking-wider text-slate-400">Daftar Pengguna</h3>
           </div>
 
           {/* RESPONSIVE LAYOUT 1: Tampilan Desktop */}
@@ -338,11 +338,11 @@ export default async function admin() {
                       <td className="p-4">
                         {user.isNewUser ? (
                           <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md border border-amber-200/60">
-                            Belum Setup
+                            ✖
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md border border-emerald-200/60">
-                            Sudah Setup
+                            ✔
                           </span>
                         )}
                       </td>
@@ -359,7 +359,7 @@ export default async function admin() {
 
                       <td className="p-4">
                         <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded font-medium">
-                          {user.linkCount} Tautan
+                          {user.linkCount}
                         </span>
                       </td>
 
