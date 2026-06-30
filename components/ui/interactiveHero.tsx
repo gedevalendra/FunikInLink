@@ -89,7 +89,7 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
   } as const;
 
   return (
-    <main className="relative flex-grow flex flex-col items-center justify-center text-center px-4 sm:px-6 w-full mx-auto overflow-hidden min-h-[95vh] z-0 bg-[#FAFAFA] pt-12 md:pt-16">
+    <main className="relative pt-[10rem] md:pt-[10rem] flex-grow flex flex-col items-center justify-center text-center px-4 sm:px-6 w-full mx-auto overflow-hidden min-h-[95vh] z-0 bg-[#FAFAFA] pt-12 md:pt-16">
       
       {/* Background Grid & Light Scanner Effect */}
       {isMounted && (

@@ -2,8 +2,6 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../lib/auth"; 
 import { connectDB } from "../../lib/db"; 
 import { User, SharedLink, AdminList } from "../../lib/models"; 
-import Header from "../../components/layout/header"; 
-import Footer from "../../components/layout/footer"; 
 import { revalidatePath } from "next/cache";
 import DeleteUserButton from "../../components/ui/DeleteUserButton"; 
 
@@ -188,7 +186,6 @@ export default async function admin() {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
-      <Header />
 
       <main className="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-6">
         
@@ -540,7 +537,6 @@ export default async function admin() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

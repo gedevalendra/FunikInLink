@@ -4,7 +4,6 @@
   display: none;
 }
 
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -44,4 +43,54 @@ body {
 /* Berhenti jalan sejenak saat kursor diarahkan ke logo */
 .animate-simple-marquee:hover {
   animation-play-state: paused;
+}
+
+/* --- CONTAINER STRUKTUR PARALLAX 3D --- */
+.parallax-wrapper {
+  perspective: 1px;
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+/* Bagian Hero berada di lapisan belakang (bergerak lambat saat di-scroll) */
+.parallax-bg {
+  transform: translateZ(-1px) scale(2);
+  transform-origin: center center;
+  z-index: 1;
+}
+
+/* Bagian Konten Bawah berada di lapisan depan (menutup Hero) */
+.parallax-fg {
+  transform: translateZ(0);
+  z-index: 2;
+  position: relative;
+}
+
+/* --- ANIMASI REFRESH BROWSER (Fade Up) --- */
+@keyframes refreshFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-on-refresh-1 { animation: refreshFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+.animate-on-refresh-2 { animation: refreshFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards; opacity: 0; }
+.animate-on-refresh-3 { animation: refreshFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards; opacity: 0; }
+.animate-on-refresh-4 { animation: refreshFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards; opacity: 0; }
+
+/* --- ANIMASI MARQUEE PARTNER BOLAK-BALIK --- */
+@keyframes marquee-simple-wkwk {
+  0% { transform: translateX(3%); }
+  50% { transform: translateX(-3%); }
+  100% { transform: translateX(3%); }
+}
+.animate-simple-marquee {
+  animation: marquee-simple-wkwk 8s ease-in-out infinite;
 }

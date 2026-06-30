@@ -4,7 +4,6 @@ import Footer from "../../components/layout/footer";
 export default function PrivacyPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-700 font-sans">
-      <Header />
       
       <main className="flex-grow max-w-2xl w-full mx-auto px-6 py-16 space-y-10">
         <h1 className="text-3xl tracking-tight font-normal text-gray-700">
@@ -39,7 +38,6 @@ export default function PrivacyPage() {
         </div>
       </main>
       
-      <Footer />
     </div>
   );
 }

@@ -101,8 +101,6 @@ export default async function DynamicProfilePage({ params }: Props) {
       {/* JIKA MEMENUHI SYARAT ONBOARDING, TAMPILKAN POP-UP SECARA OTOMATIS */}
       {showOnboarding && <OnboardingModal user={user} />}
 
-      <Header />
-      
       <main className="flex-grow max-w-xl w-full mx-auto px-6 py-12">
         
         <div className="flex items-start justify-between gap-4">
@@ -157,7 +155,6 @@ export default async function DynamicProfilePage({ params }: Props) {
         </div>
       </main>
       
-      <Footer />
     </div>
   );
 }

@@ -5,6 +5,9 @@ import Script from "next/script";
 import { Suspense } from "react"; // 1. Import Suspense dari React
 import AuthProvider from "../components/AuthProvider";
 import ButtonLoaderInterceptor from "../components/ui/buttonLoaderInterceptor";
+import Header from "../components/layout/header";
+import Footer from "../components/layout/footer";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -76,11 +79,11 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <ButtonLoaderInterceptor />
         </Suspense>
-
         <AuthProvider>
+        <Header />
           {children}
+        <Footer/>
         </AuthProvider>
-
         <Script 
           src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js" 
           strategy="afterInteractive" 
