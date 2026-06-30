@@ -7,8 +7,9 @@ export default function ButtonLoaderInterceptor() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
-  // Menyimpan referensi tombol yang terakhir kali diklik oleh user
+  // Menyimpan referensi tombol dan timer pemaksa mati (timeout)
   const lastClickedButtonRef = useRef<HTMLElement | null>(null);
+  const maxTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Helper untuk mematikan status loading pada tombol
   const removeLoading = (el: Element) => {
@@ -16,25 +17,27 @@ export default function ButtonLoaderInterceptor() {
     el.classList.remove("pointer-events-none", "opacity-90");
   };
 
-  // 1. Reset loading jika terjadi perpindahan halaman/rute URL
+  // Bersihkan semua loader & timer jika berpindah halaman
   useEffect(() => {
     const activeLoaders = document.querySelectorAll('[data-loading="true"]');
     activeLoaders.forEach(removeLoading);
+    if (maxTimeoutRef.current) clearTimeout(maxTimeoutRef.current);
     lastClickedButtonRef.current = null;
   }, [pathname, searchParams]);
 
-  // 2. Intercept Network Requests (Fetch & XHR) secara Global
+  // Intercept Jaringan (Fetch & XHR) secara Global
   useEffect(() => {
     let activeRequests = 0;
 
     const checkAndResetLoader = () => {
-      // Jika semua request jaringan sudah beres (0), matikan loading tombol terakhir
+      // Jika semua request jaringan selesai, matikan loading
       if (activeRequests <= 0) {
         activeRequests = 0;
         if (lastClickedButtonRef.current) {
           removeLoading(lastClickedButtonRef.current);
           lastClickedButtonRef.current = null;
         }
+        if (maxTimeoutRef.current) clearTimeout(maxTimeoutRef.current);
       }
     };
 
@@ -43,34 +46,30 @@ export default function ButtonLoaderInterceptor() {
     window.fetch = async (...args) => {
       activeRequests++;
       try {
-        const response = await originalFetch(...args);
-        return response;
+        return await originalFetch(...args);
       } finally {
         activeRequests--;
-        // Beri sedikit jeda mikro (100ms) agar UI tidak berkedip terlalu cepat jika server super kilat
-        setTimeout(checkAndResetLoader, 100);
+        setTimeout(checkAndResetLoader, 50); // Jeda mikro 50ms biar transisi smooth
       }
     };
 
-    // --- INTERCEPT XMLHTTPREQUEST (XHR / Axios biasanya pakai ini) ---
-    // cast originals to any to avoid strict TS overload mismatch when wrapping
-    const originalOpen = XMLHttpRequest.prototype.open as any;
-    const originalSend = XMLHttpRequest.prototype.send as any;
+    // --- INTERCEPT XMLHTTPREQUEST (XHR / Axios) ---
+    const originalOpen = XMLHttpRequest.prototype.open;
+    const originalSend = XMLHttpRequest.prototype.send;
 
-    XMLHttpRequest.prototype.open = function (this: XMLHttpRequest, ...args: any[]) {
+    XMLHttpRequest.prototype.open = function (method: string, url: string | URL, async: boolean = true, username?: string | null, password?: string | null) {
       this.addEventListener("loadend", () => {
         activeRequests--;
-        setTimeout(checkAndResetLoader, 100);
+        setTimeout(checkAndResetLoader, 50);
       });
-      return originalOpen.apply(this, args);
-    } as any;
+      return originalOpen.call(this, method, url, async, username, password);
+    };
 
-    XMLHttpRequest.prototype.send = function (this: XMLHttpRequest, ...args: any[]) {
+    XMLHttpRequest.prototype.send = function (body?: Document | XMLHttpRequestBodyInit | null) {
       activeRequests++;
-      return originalSend.apply(this, args);
-    } as any;
+      return originalSend.call(this, body);
+    };
 
-    // Cleanup saat komponen unmount (kembalikan fungsi asli browser)
     return () => {
       window.fetch = originalFetch;
       XMLHttpRequest.prototype.open = originalOpen;
@@ -78,12 +77,12 @@ export default function ButtonLoaderInterceptor() {
     };
   }, []);
 
-  // 3. Handle Event Klik Global
+  // Handle Event Klik Global
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
 
-      // Abaikan jika mengklik elemen input/checkbox/radio/label
+      // Abaikan jika mengklik input centang / radio secara langsung
       if (
         target.tagName === "INPUT" || 
         target.getAttribute("type") === "checkbox" ||
@@ -101,23 +100,30 @@ export default function ButtonLoaderInterceptor() {
           return;
         }
 
-        // Simpan element tombol ke ref dan nyalakan loading
+        // --- INSTAN LOADING DI SINI ---
+        // Bersihkan timer lama jika ada klik beruntun sebelum proses selesai
+        if (maxTimeoutRef.current) clearTimeout(maxTimeoutRef.current);
+
         lastClickedButtonRef.current = clickableEl;
         clickableEl.setAttribute("data-loading", "true");
         clickableEl.classList.add("pointer-events-none", "opacity-90");
 
-        // Failsafe Jaga-jaga: Jika tombol diklik tapi tidak ada request jaringan sama sekali 
-        // (misal cuma buka modal lokal), matikan loading dalam 400ms biar ga stuck.
-        setTimeout(() => {
-          if (clickableEl.getAttribute("data-loading") === "true" && !lastClickedButtonRef.current) {
+        // --- PENGAMAN MAKSIMAL 3 DETIK ---
+        // Jika dalam 3 detik server/database ngadat atau lambat, paksa matikan loading-nya
+        maxTimeoutRef.current = setTimeout(() => {
+          if (clickableEl.getAttribute("data-loading") === "true") {
             removeLoading(clickableEl);
+            if (lastClickedButtonRef.current === clickableEl) {
+              lastClickedButtonRef.current = null;
+            }
           }
-        }, 400);
+        }, 3000); // 3000ms = 3 detik pas
       }
     };
 
-    document.body.addEventListener("click", handleGlobalClick);
-    return () => document.body.removeEventListener("click", handleGlobalClick);
+    // Gunakan capture phase (true) agar event klik ditangkap paling pertama sebelum fungsi bawaan tombol berjalan
+    document.body.addEventListener("click", handleGlobalClick, true);
+    return () => document.body.removeEventListener("click", handleGlobalClick, true);
   }, []);
 
   return (
