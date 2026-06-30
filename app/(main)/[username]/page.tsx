@@ -1,14 +1,14 @@
-import Header from "../../components/layout/header"; 
-import Footer from "../../components/layout/footer"; 
-import ProfileSettings from "../../components/ui/profileSettings";
-import AddLinkModal from "../../components/ui/addLinkModal";
-import LinkCard from "../../components/ui/linkCard";
-import OnboardingModal from "../../components/ui/onboardingModal"; // <-- IMPORT MODAL BARU
-import { connectDB } from "../../lib/db";
-import { SharedLink, Admin } from "../../lib/models"; 
+import Header from "../../../components/layout/header"; 
+import Footer from "../../../components/layout/footer"; 
+import ProfileSettings from "../../../components/ui/profileSettings";
+import AddLinkModal from "../../../components/ui/addLinkModal";
+import LinkCard from "../../../components/ui/linkCard";
+import OnboardingModal from "../../../components/ui/onboardingModal"; // <-- IMPORT MODAL BARU
+import { connectDB } from "../../../lib/db";
+import { SharedLink, Admin } from "../../../lib/models"; 
 
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../lib/auth";
+import { authOptions } from "../../../lib/auth";
 
 interface Props {
   params: Promise<{ username: string }> | { username: string };
