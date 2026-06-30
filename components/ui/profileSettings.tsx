@@ -1,4 +1,3 @@
-// components/ui/ProfileSettings.tsx
 "use client";
 
 import { useState } from "react";
@@ -18,7 +17,7 @@ export default function ProfileSettings() {
       {isOpen && (
         <div className="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-md py-1 z-10 text-sm">
           <button 
-            onClick={() => alert("Fitur Edit")}
+            onClick={() => alert("Fitur Edit Profile segera hadir")}
             className="w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 flex items-center gap-2"
           >
             <i className="bx bx-edit"></i> Edit Profile
