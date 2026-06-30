@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 import AuthProvider from "../components/AuthProvider";
+import ButtonLoaderInterceptor from "../components/ui/buttonLoaderInterceptor";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -66,6 +67,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <ButtonLoaderInterceptor />
         <AuthProvider>
           {children}
         </AuthProvider>
