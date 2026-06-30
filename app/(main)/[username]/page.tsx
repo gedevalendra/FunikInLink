@@ -1,3 +1,4 @@
+import { Metadata } from "next"; // <-- PERBAIKAN: Import Metadata dari Next.js
 import Header from "../../../components/layout/header"; 
 import Footer from "../../../components/layout/footer"; 
 import ProfileSettings from "../../../components/ui/profileSettings";
@@ -5,7 +6,7 @@ import AddLinkModal from "../../../components/ui/addLinkModal";
 import LinkCard from "../../../components/ui/linkCard";
 import OnboardingModal from "../../../components/ui/onboardingModal"; 
 import { connectDB } from "../../../lib/db";
-import { SharedLink, User } from "../../../lib/models"; // <-- PERBAIKAN: Menggunakan Admin, bukan User sesuai dengan models.ts
+import { SharedLink, User } from "../../../lib/models";
 
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../lib/auth";
@@ -14,6 +15,52 @@ interface Props {
   params: Promise<{ username: string }> | { username: string };
 }
 
+// ==========================================
+// 1. FUNGSI SEO DINAMIS (generateMetadata)
+// ==========================================
+// Fungsi ini otomatis dipanggil oleh Next.js sebelum merender halaman 
+// untuk menyusun tag <head> dan Meta Open Graph (untuk preview WhatsApp)
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  await connectDB();
+  const resolvedParams = await params;
+  const username = resolvedParams.username;
+
+  // Ambil data profil berdasarkan username
+  const user = await User.findOne({ username: username }).lean();
+
+  // Jika tidak ditemukan, kembalikan SEO error 404
+  if (!user) {
+    return {
+      title: "Profil Tidak Ditemukan | FunikIn Link",
+      description: "Halaman profil yang Anda cari tidak tersedia.",
+    };
+  }
+
+  // Susun SEO berdasarkan data asli user
+  const pageTitle = `${user.name} (@${user.username}) | FunikIn Link`;
+  const pageDescription = user.bio || `Lihat semua tautan, media sosial, dan portofolio milik ${user.name} di FunikIn Link.`;
+
+  return {
+    title: pageTitle,
+    description: pageDescription,
+    openGraph: {
+      title: pageTitle,
+      description: pageDescription,
+      type: "profile",
+      // (Opsional) Jika Anda menyimpan URL foto profil di database, Anda bisa mengganti "/og-image.jpg" dengan URL foto profil mereka.
+      // images: [user.profilePictureUrl || "/og-image.jpg"], 
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      description: pageDescription,
+    }
+  };
+}
+
+// ==========================================
+// 2. KOMPONEN HALAMAN PROFIL (DynamicProfilePage)
+// ==========================================
 export default async function DynamicProfilePage({ params }: Props) {
   await connectDB();
   
@@ -21,7 +68,7 @@ export default async function DynamicProfilePage({ params }: Props) {
   const resolvedParams = await params;
   const username = resolvedParams.username;
 
-  // 1. Ambil data profil berdasarkan username dari model Admin
+  // 1. Ambil data profil berdasarkan username
   const user = await User.findOne({ username: username }).lean();
 
   // Jika username tidak ada di database, tampilkan pesan error 404
@@ -66,7 +113,7 @@ export default async function DynamicProfilePage({ params }: Props) {
             <div>
               <div className="flex items-center gap-1.5">
                 <h2 className="text-lg font-bold tracking-tight">{user.name}</h2>
-                {/* PERBAIKAN: Centang biru hanya akan muncul jika properti isVerified bernilai true di DB */}
+                {/* Centang biru hanya akan muncul jika properti isVerified bernilai true di DB */}
                 {user.isVerified && (
                   <i className="bx bxs-badge-check text-blue-500 text-lg" title="Verified Account"></i>
                 )}
