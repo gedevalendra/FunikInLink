@@ -13,9 +13,10 @@ export const SharedLink = mongoose.models.SharedLink || mongoose.model("SharedLi
 
 
 const UserSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
   name: { type: String, required: true },
-  email: { type: String, required: true },
+  username: { type: String, required: true, unique: true },
+  bio: { type: String, default: "" },
+  hashtags: { type: [String], default: [] }, // Disimpan sebagai Array
 }, { 
   collection: "User" 
 });

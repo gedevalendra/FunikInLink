@@ -1,13 +1,28 @@
-import Header from "../components/layout/header"; // Sesuaikan nama file dengan kapital/kecil yang kamu buat
+import Header from "../components/layout/header"; 
 import Footer from "../components/layout/footer"; 
 import ProfileSettings from "../components/ui/profileSettings";
 import AddLinkModal from "../components/ui/addLinkModal";
 import LinkCard from "../components/ui/linkCard";
 import { connectDB } from "../lib/db";
-import { SharedLink } from "../lib/models"; 
+import { SharedLink, User } from "../lib/models"; 
 
 export default async function Home() {
   await connectDB();
+  
+  // 1. Ambil data User dari database
+  let user = await User.findOne({}).lean();
+
+  // Jika database masih kosong, buat 1 user default otomatis
+  if (!user) {
+    user = await User.create({
+      name: "Gede Valendra",
+      username: "gedevalendra",
+      bio: "Full-Stack Developer membangun solusi praktis berbasis web modern. Fokus pada performa, keamanan, dan pengalaman pengguna.",
+      hashtags: ["#Developer", "#NextJS", "#FullStack"]
+    });
+  }
+
+  // 2. Ambil data Link
   const sharedLinks = await SharedLink.find({}).sort({ _id: -1 }).lean();
 
   return (
@@ -19,28 +34,32 @@ export default async function Home() {
         {/* ================= SECTION 1: PROFILE ================= */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-gray-900 text-white font-medium flex items-center justify-center text-lg flex-shrink-0">
-              GV
+            <div className="w-14 h-14 rounded-full bg-gray-900 text-white font-medium flex items-center justify-center text-lg flex-shrink-0 uppercase">
+              {/* Ambil 2 huruf pertama dari nama user */}
+              {user.name.substring(0, 2)}
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h2 className="text-lg font-bold tracking-tight">Gede Valendra</h2>
+                <h2 className="text-lg font-bold tracking-tight">{user.name}</h2>
                 <i className="bx bxs-badge-check text-blue-500 text-lg"></i>
               </div>
-              <p className="text-xs text-gray-500 font-mono">@gedevalendra</p>
+              <p className="text-xs text-gray-500 font-mono">@{user.username}</p>
             </div>
           </div>
-          <ProfileSettings />
+          
+          {/* Kirim data user ke komponen dropdown agar bisa diedit di modal */}
+          <ProfileSettings user={user} />
         </div>
 
         <div className="mt-4 space-y-3">
           <p className="text-sm text-gray-600 leading-relaxed max-w-md">
-            Full-Stack Developer membangun solusi praktis berbasis web modern. Fokus pada performa, keamanan, dan pengalaman pengguna.
+            {user.bio}
           </p>
           <div className="flex gap-2 text-xs font-mono text-gray-400">
-            <span>#Developer</span>
-            <span>#NextJS</span>
-            <span>#FullStack</span>
+            {/* Looping hashtags dari database */}
+            {user.hashtags?.map((tag: string, index: number) => (
+              <span key={index}>{tag}</span>
+            ))}
           </div>
         </div>
 
