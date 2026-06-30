@@ -6,7 +6,7 @@ import Header from "../../components/layout/header"; // Sesuaikan path jika berb
 import Footer from "../../components/layout/footer"; // Sesuaikan path jika berbeda
 import { revalidatePath } from "next/cache";
 
-// Server Action untuk menghapus pengguna
+// Server Action untuk menghapus pengguna beserta tautannya
 async function deleteUserAction(formData: FormData) {
   "use server";
   await connectDB();
@@ -14,25 +14,23 @@ async function deleteUserAction(formData: FormData) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) throw new Error("Akses tidak sah!");
   
-  // Validasi lapis kedua: pastikan email pengeksusi terdaftar di AdminList
   const checkAdmin = await AdminList.findOne({ email: session.user.email });
   if (!checkAdmin) throw new Error("Akses ditolak!");
 
   const userId = formData.get("userId") as string;
   
-  // Ambil data user untuk mengetahui username sebelum dihapus
   const userDoc = await Admin.findById(userId);
   if (userDoc) {
-    // 1. Hapus semua tautan milik user ini
+    // 1. Hapus semua link milik user ini
     await SharedLink.deleteMany({ username: userDoc.username });
-    // 2. Hapus dokumen profil pengguna
+    // 2. Hapus data profil user
     await Admin.findByIdAndDelete(userId);
   }
 
   revalidatePath("/admin");
 }
 
-// Server Action untuk memverifikasi atau mengubah status manual user baru jika diperlukan
+// Server Action untuk verifikasi manual status pengguna baru
 async function toggleVerifyUserAction(formData: FormData) {
   "use server";
   await connectDB();
@@ -46,7 +44,6 @@ async function toggleVerifyUserAction(formData: FormData) {
   const userId = formData.get("userId") as string;
   const currentStatus = formData.get("currentStatus") === "true";
 
-  // Balikkan status isNewUser (jika true jadi false, jika false jadi true)
   await Admin.findByIdAndUpdate(userId, { isNewUser: !currentStatus });
 
   revalidatePath("/admin");
@@ -55,7 +52,7 @@ async function toggleVerifyUserAction(formData: FormData) {
 export default async function AdminDashboardPage() {
   await connectDB();
 
-  // 1. Ambil sesi pengguna yang sedang aktif login saat ini
+  // 1. Ambil sesi user aktif
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return (
@@ -65,57 +62,63 @@ export default async function AdminDashboardPage() {
     );
   }
 
-  // 2. Cocokkan email dari sesi login aktif dengan daftar email di collection AdminList
-  const checkAdmin = await AdminList.findOne({ email: session.user.email });
+  // 2. Validasi kecocokan email dengan AdminList di database
+  const checkAdmin = await AdminList.findOne({ email: session.user.email }).lean();
   if (!checkAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center text-center p-6 bg-gray-50 font-sans">
         <div className="space-y-2">
           <h1 className="text-2xl font-black text-red-600">Akses Ditolak!</h1>
           <p className="text-sm text-gray-500 max-w-sm">
-            Email <span className="font-mono text-gray-800 font-semibold">{session.user.email}</span> tidak terdaftar sebagai Administrator pada sistem FunikIn.
+            Email <span className="font-mono text-gray-800 font-semibold">{session.user.email}</span> tidak terdaftar sebagai Administrator.
           </p>
         </div>
       </div>
     );
   }
 
-  // 3. Ambil seluruh data user. Gunakan transformasi objek agar _id dikonversi menjadi string aman
+  // 3. Ambil data semua user dari MongoDB
   const rawUsers = await Admin.find({}).lean();
-  
-  const allUsers = rawUsers.map((u: any) => ({
-    ...u,
-    _id: u._id.toString(), // Mengubah format ObjectId agar tidak menyebabkan crash rendering di Next.js
-  }));
 
-  // 4. Kalkulasi statistik dan hitung jumlah tautan aktif per pengguna
-  const usersWithLinkCount = await Promise.all(
-    allUsers.map(async (user: any) => {
-      const linkCount = await SharedLink.countDocuments({ username: user.username });
+  // 4. Lakukan pembersihan data yang sangat ketat untuk mencegah Server Component Render Error
+  const processedUsers = await Promise.all(
+    rawUsers.map(async (u: any) => {
+      // Hitung jumlah tautan aktif milik user ini
+      const linkCount = await SharedLink.countDocuments({ username: u.username });
+      
       return {
-        ...user,
-        linkCount,
+        // Konversi paksa ID objek MongoDB menjadi string primitif
+        _id: String(u._id), 
+        name: String(u.name || "User"),
+        email: String(u.email || ""),
+        username: String(u.username || "user"),
+        bio: String(u.bio || ""),
+        isNewUser: Boolean(u.isNewUser),
+        // Konversi setiap array item jika ada
+        hashtags: Array.isArray(u.hashtags) ? u.hashtags.map((tag: any) => String(tag)) : [],
+        linkCount: Number(linkCount)
       };
     })
   );
+
+  // Kalkulasi total tautan global secara aman
+  const totalActiveLinks = processedUsers.reduce((acc, curr) => acc + curr.linkCount, 0);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900 font-sans">
       <Header />
 
       <main className="flex-grow max-w-5xl w-full mx-auto px-6 py-10">
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-black tracking-tight text-gray-900 flex items-center gap-2">
-              <i className="bx bx-shield-quarter text-blue-600"></i> Admin Panel
-            </h1>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Masuk sebagai Admin: <span className="font-semibold text-gray-700">{checkAdmin.nama}</span> ({checkAdmin.email})
-            </p>
-          </div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-black tracking-tight text-gray-900 flex items-center gap-2">
+            <i className="bx bx-shield-quarter text-blue-600"></i> Admin Panel
+          </h1>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Administrator Aktif: <span className="font-semibold text-gray-700">{String(checkAdmin.nama)}</span>
+          </p>
         </div>
 
-        {/* Panel Ringkasan Metrik Singkat */}
+        {/* Metrik Indikator Ringkas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
             <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xl">
@@ -123,7 +126,7 @@ export default async function AdminDashboardPage() {
             </div>
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Pengguna</p>
-              <p className="text-xl font-black">{usersWithLinkCount.length}</p>
+              <p className="text-xl font-black">{processedUsers.length}</p>
             </div>
           </div>
           <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
@@ -132,14 +135,12 @@ export default async function AdminDashboardPage() {
             </div>
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Tautan Aktif</p>
-              <p className="text-xl font-black">
-                {usersWithLinkCount.reduce((acc, curr) => acc + curr.linkCount, 0)}
-              </p>
+              <p className="text-xl font-black">{totalActiveLinks}</p>
             </div>
           </div>
         </div>
 
-        {/* Tabel Administrasi Pengguna */}
+        {/* Tabel Data */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -153,20 +154,20 @@ export default async function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-sm">
-                {usersWithLinkCount.length === 0 ? (
+                {processedUsers.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="p-8 text-center text-xs text-gray-400 font-mono italic">
-                      Belum ada pendaftar user di database...
+                      Belum ada data pendaftar di database...
                     </td>
                   </tr>
                 ) : (
-                  usersWithLinkCount.map((user) => (
+                  processedUsers.map((user) => (
                     <tr key={user._id} className="hover:bg-gray-50/50 transition-colors">
                       {/* Kolom Pengguna */}
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-gray-900 text-white font-bold flex items-center justify-center text-xs uppercase flex-shrink-0">
-                            {user.name ? user.name.substring(0, 2) : "US"}
+                            {user.name.substring(0, 2)}
                           </div>
                           <div>
                             <p className="font-semibold text-gray-800 leading-tight">{user.name}</p>
@@ -180,7 +181,7 @@ export default async function AdminDashboardPage() {
                         @{user.username}
                       </td>
 
-                      {/* Kolom Verifikasi Status Onboarding */}
+                      {/* Kolom Verifikasi */}
                       <td className="p-4">
                         {user.isNewUser ? (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200">
@@ -195,7 +196,7 @@ export default async function AdminDashboardPage() {
                         )}
                       </td>
 
-                      {/* Kolom Indikator Keaktifan Link */}
+                      {/* Kolom Indikator Link */}
                       <td className="p-4">
                         {user.linkCount > 0 ? (
                           <div className="flex items-center gap-1.5 text-xs text-gray-700 font-medium">
@@ -210,16 +211,15 @@ export default async function AdminDashboardPage() {
                         )}
                       </td>
 
-                      {/* Kolom Tombol Aksi Kontrol */}
+                      {/* Kolom Aksi */}
                       <td className="p-4 text-center">
                         <div className="flex items-center justify-center gap-2">
-                          {/* Form Verifikasi / Ubah Status Manual */}
                           <form action={toggleVerifyUserAction}>
                             <input type="hidden" name="userId" value={user._id} />
                             <input type="hidden" name="currentStatus" value={String(user.isNewUser)} />
                             <button 
                               type="submit"
-                              className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all active:scale-95 border ${
+                              className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all border ${
                                 user.isNewUser 
                                   ? "bg-white text-gray-700 border-gray-200 hover:bg-gray-50" 
                                   : "bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100"
@@ -229,11 +229,10 @@ export default async function AdminDashboardPage() {
                             </button>
                           </form>
 
-                          {/* Form Hapus User */}
                           <form 
                             action={deleteUserAction} 
                             onSubmit={(e) => {
-                              if(!confirm(`Apakah kamu yakin ingin menghapus user ${user.name}? Semua tautan miliknya juga akan terhapus secara permanen!`)) {
+                              if(!confirm(`Hapus pengguna ${user.name}? Semua link-nya akan dihapus permanen.`)) {
                                 e.preventDefault();
                               }
                             }}
@@ -241,7 +240,7 @@ export default async function AdminDashboardPage() {
                             <input type="hidden" name="userId" value={user._id} />
                             <button 
                               type="submit" 
-                              className="text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 px-2.5 py-1.5 rounded-lg transition-all active:scale-95"
+                              className="text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 px-2.5 py-1.5 rounded-lg transition-all"
                             >
                               <i className="bx bx-trash-alt"></i> Hapus
                             </button>
