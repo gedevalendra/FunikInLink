@@ -135,8 +135,8 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
           <i className="bx bx-link text-3xl sm:text-4xl text-white"></i>
         </div>
 
-        {/* JUDUL UTAMA DENGAN FONT RESPONSIVE */}
-        <h1 className="font-black tracking-tight text-gray-900 leading-tight min-h-[100px] sm:min-h-[120px] md:min-h-[150px] text-[clamp(2.5rem,5vw,4rem)]">
+        {/* JUDUL UTAMA DENGAN FONT RESPONSIVE - BAGIAN INI YANG DIPERBAIKI */}
+        <h1 className="font-black tracking-tight text-gray-900 leading-tight min-h-[100px] sm:min-h-[120px] md:min-h-[150px] text-4xl sm:text-5xl md:text-6xl">
           Satu Tautan untuk <br />
           <span
             className={`text-yellow-500 inline-block transition-all duration-500 transform ${
@@ -160,7 +160,7 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
               href={`/${userUsername}`}
               className="bg-yellow-500 text-white font-medium py-3 px-6 sm:py-4 sm:px-8 rounded-xl hover:bg-yellow-600 transition-all shadow-md hover:shadow-lg inline-block active:scale-95 text-sm sm:text-base"
             >
-              Halo, {session.user?.name}! Ke Profil Saya
+              Halo, {userUsername}! Ke Profil Saya
             </Link>
           ) : (
             <Link
