@@ -189,7 +189,7 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
               href={`/${userUsername}`}
               className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 sm:py-3.5 sm:px-8 rounded-xl transition-all shadow-md hover:shadow-lg inline-block active:scale-95 text-sm sm:text-base border border-yellow-600/20"
             >
-              Halo, {userUsername}! Ke Profil Saya
+              Halo {userUsername}! Ke Profil Saya
             </Link>
           ) : (
             <Link

@@ -19,8 +19,8 @@ export default function ParallaxWrapper({ children }: { children: React.ReactNod
 
   return (
     <div
-      // HAPUS flex, flex-col, dan justify-center. Biarkan normal.
-      className="fixed top-0 left-0 w-full h-screen -z-10 bg-slate-50 will-change-transform"
+      // PERBAIKAN: Mengubah -z-10 menjadi z-0 agar elemen di dalamnya bisa diklik
+      className="fixed top-0 left-0 w-full h-screen z-0 bg-slate-50 will-change-transform"
       style={{
         transform: `translateY(-${offset * 0.4}px)`,
       }}
