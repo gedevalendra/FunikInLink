@@ -93,11 +93,11 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
             />
           </div>
 
-          {/* LAYER 2: GARIS KOTAK-KOTAK DASAR (Tebal diubah jadi 1.5px agar lebih tegas) */}
+          {/* LAYER 2: GARIS KOTAK-KOTAK DASAR (Tebal diubah jadi 1px agar lebih tegas) */}
           <div
             className="absolute inset-0 z-0 pointer-events-none opacity-50"
             style={{
-              backgroundImage: `linear-gradient(to right, #e5e7eb 1.5px, transparent 1.5px), linear-gradient(to bottom, #e5e7eb 1.5px, transparent 1.5px)`,
+              backgroundImage: `linear-gradient(to right, #e5e7eb 1px, transparent 1px), linear-gradient(to bottom, #e5e7eb 1px, transparent 1px)`,
               backgroundSize: "40px 40px",
             }}
           />
@@ -106,9 +106,9 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
           <div
             className="absolute inset-0 z-0 pointer-events-none"
             style={{
-              WebkitMaskImage: `linear-gradient(to right, black 1.5px, transparent 1.5px), linear-gradient(to bottom, black 1.5px, transparent 1.5px)`,
+              WebkitMaskImage: `linear-gradient(to right, black 1px, transparent 1px), linear-gradient(to bottom, black 1px, transparent 1px)`,
               WebkitMaskSize: "40px 40px",
-              maskImage: `linear-gradient(to right, black 1.5px, transparent 1.5px), linear-gradient(to bottom, black 1.5px, transparent 1.5px)`,
+              maskImage: `linear-gradient(to right, black 1px, transparent 1px), linear-gradient(to bottom, black 1px, transparent 1px)`,
               maskSize: "40px 40px",
             }}
           >
