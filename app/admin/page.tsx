@@ -5,6 +5,8 @@ import { Admin, SharedLink, AdminList } from "../../lib/models";
 import Header from "../../components/layout/header"; 
 import Footer from "../../components/layout/footer"; 
 import { revalidatePath } from "next/cache";
+// 1. IMPORT TOMBOL HAPUS BARU YANG SUDAH BERBASIS CLIENT
+import DeleteUserButton from "../../components/ui/DeleteUserButton"; 
 
 // Server Action untuk menghapus pengguna beserta tautannya
 async function deleteUserAction(formData: FormData) {
@@ -21,9 +23,7 @@ async function deleteUserAction(formData: FormData) {
   
   const userDoc = await Admin.findById(userId);
   if (userDoc) {
-    // 1. Hapus semua link milik user ini
     await SharedLink.deleteMany({ username: userDoc.username });
-    // 2. Hapus data profil user
     await Admin.findByIdAndDelete(userId);
   }
 
@@ -52,7 +52,6 @@ async function toggleVerifyUserAction(formData: FormData) {
 export default async function admin() {
   await connectDB();
 
-  // 1. Ambil sesi user aktif
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return (
@@ -62,7 +61,6 @@ export default async function admin() {
     );
   }
 
-  // 2. Validasi kecocokan email dengan AdminList di database
   const checkAdmin = await AdminList.findOne({ email: session.user.email }).lean();
   if (!checkAdmin) {
     return (
@@ -77,31 +75,25 @@ export default async function admin() {
     );
   }
 
-  // 3. Ambil data semua user dari MongoDB
   const rawUsers = await Admin.find({}).lean();
 
-  // 4. Lakukan pembersihan data yang sangat ketat untuk mencegah Server Component Render Error
   const processedUsers = await Promise.all(
     rawUsers.map(async (u: any) => {
-      // Hitung jumlah tautan aktif milik user ini
       const linkCount = await SharedLink.countDocuments({ username: u.username });
       
       return {
-        // Konversi paksa ID objek MongoDB menjadi string primitif
         _id: String(u._id), 
         name: String(u.name || "User"),
         email: String(u.email || ""),
         username: String(u.username || "user"),
         bio: String(u.bio || ""),
         isNewUser: Boolean(u.isNewUser),
-        // Konversi setiap array item jika ada
         hashtags: Array.isArray(u.hashtags) ? u.hashtags.map((tag: any) => String(tag)) : [],
         linkCount: Number(linkCount)
       };
     })
   );
 
-  // Kalkulasi total tautan global secara aman
   const totalActiveLinks = processedUsers.reduce((acc, curr) => acc + curr.linkCount, 0);
 
   return (
@@ -118,7 +110,6 @@ export default async function admin() {
           </p>
         </div>
 
-        {/* Metrik Indikator Ringkas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
             <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xl">
@@ -140,7 +131,6 @@ export default async function admin() {
           </div>
         </div>
 
-        {/* Tabel Data */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -163,7 +153,6 @@ export default async function admin() {
                 ) : (
                   processedUsers.map((user) => (
                     <tr key={user._id} className="hover:bg-gray-50/50 transition-colors">
-                      {/* Kolom Pengguna */}
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-gray-900 text-white font-bold flex items-center justify-center text-xs uppercase flex-shrink-0">
@@ -176,12 +165,10 @@ export default async function admin() {
                         </div>
                       </td>
 
-                      {/* Kolom Username */}
                       <td className="p-4 font-mono text-xs text-gray-600">
                         @{user.username}
                       </td>
 
-                      {/* Kolom Verifikasi */}
                       <td className="p-4">
                         {user.isNewUser ? (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200">
@@ -196,7 +183,6 @@ export default async function admin() {
                         )}
                       </td>
 
-                      {/* Kolom Indikator Link */}
                       <td className="p-4">
                         {user.linkCount > 0 ? (
                           <div className="flex items-center gap-1.5 text-xs text-gray-700 font-medium">
@@ -211,7 +197,6 @@ export default async function admin() {
                         )}
                       </td>
 
-                      {/* Kolom Aksi */}
                       <td className="p-4 text-center">
                         <div className="flex items-center justify-center gap-2">
                           <form action={toggleVerifyUserAction}>
@@ -229,22 +214,12 @@ export default async function admin() {
                             </button>
                           </form>
 
-                          <form 
-                            action={deleteUserAction} 
-                            onSubmit={(e) => {
-                              if(!confirm(`Hapus pengguna ${user.name}? Semua link-nya akan dihapus permanen.`)) {
-                                e.preventDefault();
-                              }
-                            }}
-                          >
-                            <input type="hidden" name="userId" value={user._id} />
-                            <button 
-                              type="submit" 
-                              className="text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 px-2.5 py-1.5 rounded-lg transition-all"
-                            >
-                              <i className="bx bx-trash-alt"></i> Hapus
-                            </button>
-                          </form>
+                          {/* 2. GUNAKAN COMPONENT BARU DI SINI */}
+                          <DeleteUserButton 
+                            userId={user._id} 
+                            userName={user.name} 
+                            deleteAction={deleteUserAction} 
+                          />
                         </div>
                       </td>
                     </tr>
