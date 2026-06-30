@@ -3,6 +3,7 @@ import Footer from "../../components/layout/footer";
 import ProfileSettings from "../../components/ui/profileSettings";
 import AddLinkModal from "../../components/ui/addLinkModal";
 import LinkCard from "../../components/ui/linkCard";
+import OnboardingModal from "../../components/ui/onboardingModal"; // <-- IMPORT MODAL BARU
 import { connectDB } from "../../lib/db";
 import { SharedLink, Admin } from "../../lib/models"; 
 
@@ -41,11 +42,18 @@ export default async function DynamicProfilePage({ params }: Props) {
   // Logika Utama: Pengunjung dianggap ADMIN jika email yang login COCOK dengan email pemilik profil ini
   const isAdmin = session?.user?.email === user.email;
 
+  // LOGIKA POP-UP ONBOARDING SETUP PROFILE
+  // Muncul hanya jika dia pemilik halaman profil ini dan status session-nya masih merupakan user baru (isNewUser)
+  const showOnboarding = isAdmin && (session?.user as any)?.isNewUser;
+
   // 3. Ambil data Link yang HANYA dimiliki oleh username ini saja
   const sharedLinks = await SharedLink.find({ username: user.username }).sort({ _id: -1 }).lean();
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900 font-sans">
+      {/* JIKA MEMENUHI SYARAT ONBOARDING, TAMPILKAN POP-UP SECARA OTOMATIS */}
+      {showOnboarding && <OnboardingModal user={user} />}
+
       <Header />
       
       <main className="flex-grow max-w-xl w-full mx-auto px-6 py-12">

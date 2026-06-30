@@ -16,7 +16,7 @@ export async function addLink(formData: FormData) {
   if (!currentUser) throw new Error("User tidak ditemukan!");
 
   await SharedLink.create({
-    username: currentUser.username, // <-- Simpan sesuai username pemiliknya
+    username: currentUser.username, 
     title: formData.get("title"),
     url: formData.get("url"),
     description: formData.get("description"),
@@ -48,7 +48,6 @@ export async function updateProfile(formData: FormData) {
   const name = formData.get("name");
   const bio = formData.get("bio");
   const hashtagString = formData.get("hashtags") as string;
-  
   const usernameInput = formData.get("username") as string;
 
   const cleanUsername = usernameInput ? usernameInput.toLowerCase().trim().replace(/\s+/g, "-") : "";
@@ -71,10 +70,11 @@ export async function updateProfile(formData: FormData) {
   const oldUser = await Admin.findById(userId);
 
   const updatedUser = await Admin.findByIdAndUpdate(userId, {
-    username: cleanUsername || oldUser?.username, // jika input kosong, gunakan yang lama
+    username: cleanUsername || oldUser?.username, 
     name,
     bio,
     hashtags,
+    isNewUser: false, // <-- SET SETELAH BERHASIL MENYIMPAN USERNAME DAN SETUP PROFILE
   }, { new: true });
 
   if (updatedUser) {

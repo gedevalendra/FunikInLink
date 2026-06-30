@@ -26,6 +26,7 @@ export const authOptions: NextAuthOptions = {
               email: user.email,
               username: `${baseUsername}_${randomNum}`,
               bio: "Halo, selamat datang di tautan resmi saya!",
+              isNewUser: true, // Dipastikan bernilai true saat buat baru
             });
           }
           return true;
@@ -40,11 +41,12 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       await connectDB();
 
-      // AMBIL USERNAME DARI DATABASE BERDASARKAN EMAIL USER YANG AKTIF
+      // AMBIL DATA DARI DATABASE BERDASARKAN EMAIL USER YANG AKTIF
       if (token.email) {
         const userDoc = await Admin.findOne({ email: token.email }).lean();
         if (userDoc) {
-          token.username = userDoc.username; // Masukkan username ke token
+          token.username = userDoc.username; 
+          token.isNewUser = userDoc.isNewUser; // <-- MASUKKAN STATUS USER BARU KE TOKEN
         }
       }
 
@@ -62,7 +64,8 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session?.user) {
         (session.user as any).role = token.role;
-        (session.user as any).username = token.username; // KIRIM USERNAME KE FRONTEND
+        (session.user as any).username = token.username; 
+        (session.user as any).isNewUser = token.isNewUser; // <-- KIRIM STATUS USER BARU KE FRONTEND
       }
       return session;
     }
