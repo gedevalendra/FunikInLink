@@ -34,7 +34,6 @@ export const User = mongoose.models.User || mongoose.model("User", UserSchema);
 const AdminListSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   nama: { type: String, required: true },
-  iduser: { type: String },
 }, { 
   collection: "AdminList", // Pastikan nama collection sesuai di MongoDB Compass Anda
   timestamps: true 

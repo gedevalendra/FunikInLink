@@ -7,7 +7,11 @@ import Footer from "../../components/layout/footer";
 import { revalidatePath } from "next/cache";
 import DeleteUserButton from "../../components/ui/DeleteUserButton"; 
 
-// Server Action untuk menghapus pengguna beserta tautannya
+// =========================================================================
+// SERVER ACTIONS
+// =========================================================================
+
+// 1. Server Action untuk menghapus pengguna beserta tautannya & AdminList (jika dia admin)
 async function deleteUserAction(formData: FormData) {
   "use server";
   await connectDB();
@@ -22,6 +26,9 @@ async function deleteUserAction(formData: FormData) {
   
   const userDoc = await User.findById(userId);
   if (userDoc) {
+    // Jika user yang dihapus merupakan admin, hapus juga dari koleksi AdminList
+    await AdminList.deleteOne({ email: userDoc.email });
+    // Hapus tautan dan data user
     await SharedLink.deleteMany({ username: userDoc.username });
     await User.findByIdAndDelete(userId);
   }
@@ -29,7 +36,7 @@ async function deleteUserAction(formData: FormData) {
   revalidatePath("/admin");
 }
 
-// Server Action untuk verifikasi manual status pengguna baru (Onboarding/Setup Status)
+// 2. Server Action untuk verifikasi manual status pengguna baru (Onboarding/Setup Status)
 async function toggleVerifyUserAction(formData: FormData) {
   "use server";
   await connectDB();
@@ -48,9 +55,7 @@ async function toggleVerifyUserAction(formData: FormData) {
   revalidatePath("/admin");
 }
 
-// =========================================================================
-// SERVER ACTION BARU: Untuk Mengaktifkan / Menonaktifkan Centang Biru (Badge)
-// =========================================================================
+// 3. Server Action untuk Mengaktifkan / Menonaktifkan Centang Biru (Badge)
 async function toggleBadgeVerificationAction(formData: FormData) {
   "use server";
   await connectDB();
@@ -64,12 +69,51 @@ async function toggleBadgeVerificationAction(formData: FormData) {
   const userId = formData.get("userId") as string;
   const currentVerifiedStatus = formData.get("currentVerifiedStatus") === "true";
 
-  // Membalikkan status verified (true -> false / false -> true)
   await User.findByIdAndUpdate(userId, { isVerified: !currentVerifiedStatus });
 
   revalidatePath("/admin");
 }
 
+// 4. SERVER ACTION BARU: Mengangkat Jabatan User Menjadi Admin / Menurunkannya
+async function toggleAdminRoleAction(formData: FormData) {
+  "use server";
+  await connectDB();
+
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) throw new Error("Akses tidak sah!");
+
+  const checkAdmin = await AdminList.findOne({ email: session.user.email });
+  if (!checkAdmin) throw new Error("Akses ditolak!");
+
+  const userEmail = formData.get("userEmail") as string;
+  const userName = formData.get("userName") as string;
+  const isCurrentlyAdmin = formData.get("isCurrentlyAdmin") === "true";
+
+  if (isCurrentlyAdmin) {
+    // Antisipasi: Jangan sampai Admin utama tidak sengaja menurunkan jabatannya sendiri jika tidak ada admin lain
+    if (userEmail === session.user.email) {
+      const totalAdminCount = await AdminList.countDocuments({});
+      if (totalAdminCount <= 1) {
+        throw new Error("Anda tidak bisa menurunkan jabatan Anda sendiri karena Anda adalah satu-satunya admin tersisa!");
+      }
+    }
+    // Jika dia admin, turunkan jabatan dengan menghapus dari AdminList
+    await AdminList.deleteOne({ email: userEmail });
+  } else {
+    // Jika bukan admin, daftarkan email dan nama rill ke AdminList
+    await AdminList.create({
+      nama: userName,
+      email: userEmail
+    });
+  }
+
+  revalidatePath("/admin");
+}
+
+
+// =========================================================================
+// HALAMAN UTAMA PANEL ADMIN
+// =========================================================================
 export default async function admin() {
   await connectDB();
 
@@ -82,7 +126,6 @@ export default async function admin() {
     );
   }
 
-  // Mengambil data Admin yang sedang membuka halaman ini
   const checkAdmin = await AdminList.findOne({ email: session.user.email }).lean();
   if (!checkAdmin) {
     return (
@@ -98,15 +141,33 @@ export default async function admin() {
     );
   }
 
-  // Ambil semua daftar Administrator resmi dari database untuk widget Online
-  const totalAdmins = await AdminList.find({}).lean();
-  
-  // Ambil data User dari database koleksi Admin
+  // Ambil data User rill dari DB
   const rawUsers = await User.find({}).lean();
+  
+  // Ambil semua daftar Administrator resmi untuk pembanding status role
+  const rawAdmins = await AdminList.find({}).lean();
+  const adminEmails = new Set(rawAdmins.map((adm: any) => String(adm.email)));
+
+  // SINKRONISASI OTOMATIS: Update nama admin di AdminList jika nama di akun User berubah
+  await Promise.all(
+    rawUsers.map(async (u: any) => {
+      if (adminEmails.has(String(u.email))) {
+        const matchingAdmin = rawAdmins.find((adm: any) => String(adm.email) === String(u.email));
+        if (matchingAdmin && matchingAdmin.nama !== u.name) {
+          await AdminList.updateOne({ email: u.email }, { nama: u.name });
+        }
+      }
+    })
+  );
+
+  // Ambil data ulang setelah proses sinkronisasi nama selesai agar datanya up-to-date
+  const totalAdmins = await AdminList.find({}).lean();
+  const updatedAdminEmails = new Set(totalAdmins.map((adm: any) => String(adm.email)));
 
   const processedUsers = await Promise.all(
     rawUsers.map(async (u: any) => {
       const linkCount = await SharedLink.countDocuments({ username: u.username });
+      const isUserAdmin = updatedAdminEmails.has(String(u.email));
       
       return {
         _id: String(u._id), 
@@ -115,7 +176,8 @@ export default async function admin() {
         username: String(u.username || "user"),
         bio: String(u.bio || ""),
         isNewUser: u.isNewUser !== undefined ? Boolean(u.isNewUser) : false,
-        isVerified: u.isVerified !== undefined ? Boolean(u.isVerified) : false, // Ambil data rill centang biru
+        isVerified: u.isVerified !== undefined ? Boolean(u.isVerified) : false,
+        isAdmin: isUserAdmin, // Flag status penentu role admin
         hashtags: Array.isArray(u.hashtags) ? u.hashtags.map((tag: any) => String(tag)) : [],
         linkCount: Number(linkCount)
       };
@@ -142,13 +204,13 @@ export default async function admin() {
           </div>
         </div>
 
-        {/* Tengah: Sistem Pemantau Online (Data Rill dari DB) */}
+        {/* Tengah: Sistem Pemantau Online */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           
           {/* Card Status Admin Online */}
           <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-sm md:col-span-1">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium tracking-wider uppercase text-slate-400">Admin Aktif Sistem</span>
+              <span className="text-xs font-medium tracking-wider uppercase text-slate-400">Admin Aktif Sistem ({totalAdmins.length})</span>
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -160,7 +222,7 @@ export default async function admin() {
                   <div className="w-5 h-5 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-medium uppercase text-[10px]">
                     {String(adminItem.nama).substring(0,2)}
                   </div>
-                  <div className="truncate">
+                  <div className="truncate w-full">
                     <p className="text-slate-700 font-medium truncate">{String(adminItem.nama)}</p>
                     <p className="text-[10px] text-slate-400 font-mono truncate">{String(adminItem.email)}</p>
                   </div>
@@ -188,6 +250,7 @@ export default async function admin() {
                       <p className="text-slate-700 font-medium truncate min-w-0 flex items-center gap-1">
                         {userItem.name}
                         {userItem.isVerified && <i className="bx bxs-badge-check text-blue-500 text-xs"></i>}
+                        {userItem.isAdmin && <span className="text-[9px] bg-red-50 text-red-600 border border-red-200/50 px-1 rounded">Admin</span>}
                       </p>
                     </div>
                     <span className="text-[10px] font-mono text-slate-400 shrink-0">@{userItem.username}</span>
@@ -221,13 +284,13 @@ export default async function admin() {
             <h3 className="text-xs font-medium uppercase tracking-wider text-slate-400">Daftar Manajemen Pengguna</h3>
           </div>
 
-          {/* RESPONSIVE LAYOUT 1: Tampilan khusus Laptop/Desktop (Bentuk Tabel Bersih) */}
+          {/* RESPONSIVE LAYOUT 1: Tampilan Desktop */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 text-[11px] font-medium uppercase tracking-wider text-slate-400 bg-slate-50/30">
                   <th className="p-4 pl-6">Profil Pengguna</th>
-                  <th className="p-4">Username</th>
+                  <th className="p-4">Role Jabatan</th>
                   <th className="p-4">Setup Profil</th>
                   <th className="p-4">Centang Biru</th>
                   <th className="p-4">Tautan Aktif</th>
@@ -259,8 +322,17 @@ export default async function admin() {
                         </div>
                       </td>
 
-                      <td className="p-4 font-mono text-xs text-slate-500">
-                        @{user.username}
+                      {/* KOLOM ROLE JABATAN ADMIN / USER */}
+                      <td className="p-4">
+                        {user.isAdmin ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-red-50 text-red-700 px-2 py-0.5 rounded-md border border-red-200">
+                            ADMINISTRATOR
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                            STANDARD USER
+                          </span>
+                        )}
                       </td>
 
                       <td className="p-4">
@@ -275,7 +347,6 @@ export default async function admin() {
                         )}
                       </td>
 
-                      {/* KOLOM INDIKATOR VERIFIKASI CENTANG BIRU */}
                       <td className="p-4">
                         {user.isVerified ? (
                           <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-200/60 shadow-sm">
@@ -294,7 +365,24 @@ export default async function admin() {
 
                       <td className="p-4 pr-6">
                         <div className="flex items-center justify-end gap-2">
-                          {/* FORM BERGANTI STATUS CENTANG BIRU */}
+                          
+                          {/* FORM BARU: UTK MENGATUR ROLE ADMIN / BUKAN */}
+                          <form action={toggleAdminRoleAction}>
+                            <input type="hidden" name="userEmail" value={user.email} />
+                            <input type="hidden" name="userName" value={user.name} />
+                            <input type="hidden" name="isCurrentlyAdmin" value={String(user.isAdmin)} />
+                            <button 
+                              type="submit"
+                              className={`text-xs font-medium px-2.5 py-1 rounded-md border transition-all ${
+                                user.isAdmin 
+                                  ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" 
+                                  : "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100"
+                              }`}
+                            >
+                              {user.isAdmin ? "Turunkan Admin" : "Jadikan Admin"}
+                            </button>
+                          </form>
+
                           <form action={toggleBadgeVerificationAction}>
                             <input type="hidden" name="userId" value={user._id} />
                             <input type="hidden" name="currentVerifiedStatus" value={String(user.isVerified)} />
@@ -315,7 +403,7 @@ export default async function admin() {
                             <input type="hidden" name="currentStatus" value={String(user.isNewUser)} />
                             <button 
                               type="submit"
-                              className="text-xs font-medium px-2.5 py-1 rounded-md bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-800 transition-all"
+                              className="text-xs font-medium px-2.5 py-1 rounded-md bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all"
                             >
                               {user.isNewUser ? "Aktifkan" : "Reset Status"}
                             </button>
@@ -335,7 +423,7 @@ export default async function admin() {
             </table>
           </div>
 
-          {/* RESPONSIVE LAYOUT 2: Tampilan khusus Layar HP / Mobile (Bentuk List Kartu) */}
+          {/* RESPONSIVE LAYOUT 2: Tampilan Mobile */}
           <div className="block md:hidden divide-y divide-slate-100">
             {processedUsers.length === 0 ? (
               <div className="p-8 text-center text-xs text-slate-400 italic">
@@ -360,16 +448,21 @@ export default async function admin() {
                       </div>
                     </div>
                     
-                    {/* Badge Status Setup */}
-                    <div className="shrink-0 flex gap-1.5">
-                      {user.isVerified && (
-                        <span className="text-[9px] font-medium bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200">Badge</span>
+                    {/* Status Flags */}
+                    <div className="shrink-0 flex flex-col gap-1 items-end">
+                      {user.isAdmin && (
+                        <span className="text-[9px] font-bold bg-red-50 text-red-700 px-1.5 py-0.5 rounded border border-red-200">Admin</span>
                       )}
-                      {user.isNewUser ? (
-                        <span className="text-[9px] font-medium bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-200/50">New</span>
-                      ) : (
-                        <span className="text-[9px] font-medium bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-200/50">Active</span>
-                      )}
+                      <div className="flex gap-1">
+                        {user.isVerified && (
+                          <span className="text-[9px] font-medium bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200">Badge</span>
+                        )}
+                        {user.isNewUser ? (
+                          <span className="text-[9px] font-medium bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-200/50">New</span>
+                        ) : (
+                          <span className="text-[9px] font-medium bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-200/50">Active</span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -385,12 +478,25 @@ export default async function admin() {
                     </div>
                   </div>
 
-                  {/* =================================================== */}
-                  {/* TOMBOL AKSI HP (DIPERBAIKI MENJADI 3 KOLOM SEJAJAR) */}
-                  {/* =================================================== */}
-                  <div className="grid grid-cols-3 gap-2 w-full pt-1">
+                  {/* TOMBOL AKSI HP */}
+                  <div className="grid grid-cols-2 gap-2 w-full pt-1">
                     
-                    {/* 1. Tombol Centang Biru Mobile */}
+                    {/* Toggle Admin */}
+                    <form action={toggleAdminRoleAction} className="w-full">
+                      <input type="hidden" name="userEmail" value={user.email} />
+                      <input type="hidden" name="userName" value={user.name} />
+                      <input type="hidden" name="isCurrentlyAdmin" value={String(user.isAdmin)} />
+                      <button 
+                        type="submit"
+                        className={`w-full text-center text-[10px] sm:text-xs font-medium px-1 py-1.5 rounded-md border transition-all ${
+                          user.isAdmin ? 'bg-amber-50 text-amber-700 border-amber-200':'bg-purple-50 text-purple-700 border-purple-200'
+                        }`}
+                      >
+                        {user.isAdmin ? "Turunkan Admin" : "Jadikan Admin"}
+                      </button>
+                    </form>
+                    
+                    {/* Toggle Verified */}
                     <form action={toggleBadgeVerificationAction} className="w-full">
                       <input type="hidden" name="userId" value={user._id} />
                       <input type="hidden" name="currentVerifiedStatus" value={String(user.isVerified)} />
@@ -400,11 +506,11 @@ export default async function admin() {
                           user.isVerified ? 'bg-rose-50 text-rose-600 border-rose-200':'bg-blue-50 text-blue-600 border-blue-200'
                         }`}
                       >
-                        {user.isVerified ? "Hapus" : "Centang"}
+                        {user.isVerified ? "Hapus Centang" : "Beri Centang"}
                       </button>
                     </form>
 
-                    {/* 2. Tombol Reset Setup Mobile */}
+                    {/* Reset Setup */}
                     <form action={toggleVerifyUserAction} className="w-full">
                       <input type="hidden" name="userId" value={user._id} />
                       <input type="hidden" name="currentStatus" value={String(user.isNewUser)} />
@@ -416,8 +522,7 @@ export default async function admin() {
                       </button>
                     </form>
 
-                    {/* 3. Tombol Hapus Profil */}
-                    {/* Menggunakan custom class [&>button] untuk memaksa tombol dari komponen DeleteUserButton menyesuaikan lebar parent-nya */}
+                    {/* Hapus Profil */}
                     <div className="w-full [&>button]:w-full [&>button]:text-[10px] sm:[&>button]:text-xs [&>button]:py-1.5 [&>button]:px-1 [&>button]:rounded-md">
                       <DeleteUserButton 
                         userId={user._id} 
