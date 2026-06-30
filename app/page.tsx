@@ -61,7 +61,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ==========================================
-          3. SECTION STRUKTUR PROGRAM / FITUR UTAMA
+          3. SECTION STRUKTUR PROGRAM / FITUR UTAM
           ========================================== */}
       <section className="w-full py-20 bg-white">
         <div className="max-w-5xl mx-auto px-6">
