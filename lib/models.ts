@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const LinkSchema = new mongoose.Schema({
+  username: { type: String, required: true }, // <-- TAMBAHKAN INI agar link tidak bercampur
   icon: { type: String, default: "bx-link" },
   title: { type: String, required: true },
   description: { type: String, default: "" },
@@ -11,15 +12,14 @@ const LinkSchema = new mongoose.Schema({
 
 export const SharedLink = mongoose.models.SharedLink || mongoose.model("SharedLink", LinkSchema);
 
-// Skema diganti menjadi Admin sesuai permintaanmu
 const AdminSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true }, // Wajib ada untuk login Google
+  email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
   bio: { type: String, default: "" },
   hashtags: { type: [String], default: [] },
 }, { 
-  collection: "Admin" // <-- Menyimpan data ke collection Admin
+  collection: "Admin" 
 });
 
 export const Admin = mongoose.models.Admin || mongoose.model("Admin", AdminSchema);
