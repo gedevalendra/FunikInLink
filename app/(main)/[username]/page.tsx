@@ -3,9 +3,9 @@ import Footer from "../../../components/layout/footer";
 import ProfileSettings from "../../../components/ui/profileSettings";
 import AddLinkModal from "../../../components/ui/addLinkModal";
 import LinkCard from "../../../components/ui/linkCard";
-import OnboardingModal from "../../../components/ui/onboardingModal"; // <-- IMPORT MODAL BARU
+import OnboardingModal from "../../../components/ui/onboardingModal"; 
 import { connectDB } from "../../../lib/db";
-import { SharedLink, User } from "../../../lib/models"; 
+import { SharedLink, User } from "../../../lib/models"; // <-- PERBAIKAN: Menggunakan Admin, bukan User sesuai dengan models.ts
 
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../lib/auth";
@@ -17,11 +17,11 @@ interface Props {
 export default async function DynamicProfilePage({ params }: Props) {
   await connectDB();
   
-  // Resolving params untuk mendukung Next.js versi terbaru (14/15)
+  // Resolving params untuk mendukung Next.js versi terbaru (Next 14/15)
   const resolvedParams = await params;
   const username = resolvedParams.username;
 
-  // 1. Ambil data profil berdasarkan username yang ada di URL direktori
+  // 1. Ambil data profil berdasarkan username dari model Admin
   const user = await User.findOne({ username: username }).lean();
 
   // Jika username tidak ada di database, tampilkan pesan error 404
@@ -36,7 +36,7 @@ export default async function DynamicProfilePage({ params }: Props) {
     );
   }
 
-  // 2. Cek siapa yang sedang login saat ini via Google
+  // 2. Cek siapa yang sedang login saat ini via Google Auth
   const session = await getServerSession(authOptions);
   
   // Logika Utama: Pengunjung dianggap ADMIN jika email yang login COCOK dengan email pemilik profil ini
@@ -61,12 +61,15 @@ export default async function DynamicProfilePage({ params }: Props) {
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-gray-900 text-white font-medium flex items-center justify-center text-lg flex-shrink-0 uppercase">
-              {user.name.substring(0, 2)}
+              {String(user.name || "U").substring(0, 2)}
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <h2 className="text-lg font-bold tracking-tight">{user.name}</h2>
-                <i className="bx bxs-badge-check text-blue-500 text-lg"></i>
+                {/* PERBAIKAN: Centang biru hanya akan muncul jika properti isVerified bernilai true di DB */}
+                {user.isVerified && (
+                  <i className="bx bxs-badge-check text-blue-500 text-lg" title="Verified Account"></i>
+                )}
               </div>
               <p className="text-xs text-gray-500 font-mono">@{user.username}</p>
             </div>
@@ -78,9 +81,9 @@ export default async function DynamicProfilePage({ params }: Props) {
 
         <div className="mt-4 space-y-3">
           <p className="text-sm text-gray-600 leading-relaxed max-w-md">
-            {user.bio}
+            {user.bio || "Belum ada bio."}
           </p>
-          <div className="flex gap-2 text-xs font-mono text-gray-400">
+          <div className="flex flex-wrap gap-2 text-xs font-mono text-blue-600">
             {user.hashtags?.map((tag: string, index: number) => (
               <span key={index}>{tag}</span>
             ))}
@@ -98,7 +101,7 @@ export default async function DynamicProfilePage({ params }: Props) {
           {isAdmin && <AddLinkModal />}
           
           {sharedLinks.length === 0 ? (
-            <p className="text-xs text-gray-400 font-mono italic">Belum ada tautan di profil ini...</p>
+            <p className="text-xs text-gray-400 font-mono italic pt-2">Belum ada tautan di profil ini...</p>
           ) : (
             sharedLinks.map((link: any) => (
               <LinkCard key={link._id.toString()} link={link} isAdmin={isAdmin} />

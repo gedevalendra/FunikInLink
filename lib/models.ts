@@ -14,15 +14,18 @@ const LinkSchema = new mongoose.Schema({
 export const SharedLink = mongoose.models.SharedLink || mongoose.model("SharedLink", LinkSchema);
 
 // 2. Model untuk Profil Pengguna (User)
+// Di dalam UserSchema Anda, tambahkan:
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
   bio: { type: String, default: "" },
   hashtags: { type: [String], default: [] },
-  isNewUser: { type: Boolean, default: true }, 
+  isNewUser: { type: Boolean, default: true },
+  // TAMBAHKAN FIELD BARU INI:
+  isVerified: { type: Boolean, default: false }, 
 }, { 
-  collection: "User" 
+  collection: "User" // atau "User" tergantung setup koleksi Anda
 });
 
 export const User = mongoose.models.User || mongoose.model("User", UserSchema);

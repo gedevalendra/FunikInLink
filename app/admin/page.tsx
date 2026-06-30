@@ -29,7 +29,7 @@ async function deleteUserAction(formData: FormData) {
   revalidatePath("/admin");
 }
 
-// Server Action untuk verifikasi manual status pengguna baru
+// Server Action untuk verifikasi manual status pengguna baru (Onboarding/Setup Status)
 async function toggleVerifyUserAction(formData: FormData) {
   "use server";
   await connectDB();
@@ -44,6 +44,28 @@ async function toggleVerifyUserAction(formData: FormData) {
   const currentStatus = formData.get("currentStatus") === "true";
 
   await User.findByIdAndUpdate(userId, { isNewUser: !currentStatus });
+
+  revalidatePath("/admin");
+}
+
+// =========================================================================
+// SERVER ACTION BARU: Untuk Mengaktifkan / Menonaktifkan Centang Biru (Badge)
+// =========================================================================
+async function toggleBadgeVerificationAction(formData: FormData) {
+  "use server";
+  await connectDB();
+
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) throw new Error("Akses tidak sah!");
+
+  const checkAdmin = await AdminList.findOne({ email: session.user.email });
+  if (!checkAdmin) throw new Error("Akses ditolak!");
+
+  const userId = formData.get("userId") as string;
+  const currentVerifiedStatus = formData.get("currentVerifiedStatus") === "true";
+
+  // Membalikkan status verified (true -> false / false -> true)
+  await User.findByIdAndUpdate(userId, { isVerified: !currentVerifiedStatus });
 
   revalidatePath("/admin");
 }
@@ -79,7 +101,7 @@ export default async function admin() {
   // Ambil semua daftar Administrator resmi dari database untuk widget Online
   const totalAdmins = await AdminList.find({}).lean();
   
-  // Ambil data User dari database
+  // Ambil data User dari database koleksi Admin
   const rawUsers = await User.find({}).lean();
 
   const processedUsers = await Promise.all(
@@ -93,6 +115,7 @@ export default async function admin() {
         username: String(u.username || "user"),
         bio: String(u.bio || ""),
         isNewUser: u.isNewUser !== undefined ? Boolean(u.isNewUser) : false,
+        isVerified: u.isVerified !== undefined ? Boolean(u.isVerified) : false, // Ambil data rill centang biru
         hashtags: Array.isArray(u.hashtags) ? u.hashtags.map((tag: any) => String(tag)) : [],
         linkCount: Number(linkCount)
       };
@@ -162,7 +185,10 @@ export default async function admin() {
                       <div className="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-medium uppercase text-[10px]">
                         {userItem.name.substring(0,2)}
                       </div>
-                      <p className="text-slate-700 font-medium truncate min-w-0">{userItem.name}</p>
+                      <p className="text-slate-700 font-medium truncate min-w-0 flex items-center gap-1">
+                        {userItem.name}
+                        {userItem.isVerified && <i className="bx bxs-badge-check text-blue-500 text-xs"></i>}
+                      </p>
                     </div>
                     <span className="text-[10px] font-mono text-slate-400 shrink-0">@{userItem.username}</span>
                   </div>
@@ -202,7 +228,8 @@ export default async function admin() {
                 <tr className="border-b border-slate-200 text-[11px] font-medium uppercase tracking-wider text-slate-400 bg-slate-50/30">
                   <th className="p-4 pl-6">Profil Pengguna</th>
                   <th className="p-4">Username</th>
-                  <th className="p-4">Status Awal</th>
+                  <th className="p-4">Setup Profil</th>
+                  <th className="p-4">Centang Biru</th>
                   <th className="p-4">Tautan Aktif</th>
                   <th className="p-4 pr-6 text-right">Aksi Manajemen</th>
                 </tr>
@@ -210,7 +237,7 @@ export default async function admin() {
               <tbody className="divide-y divide-slate-100 text-sm text-slate-600">
                 {processedUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-12 text-center text-xs text-slate-400 italic">
+                    <td colSpan={6} className="p-12 text-center text-xs text-slate-400 italic">
                       Belum ada data pendaftar sistem di database...
                     </td>
                   </tr>
@@ -223,7 +250,10 @@ export default async function admin() {
                             {user.name.substring(0, 2)}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-medium text-slate-700 truncate">{user.name}</p>
+                            <p className="font-medium text-slate-700 truncate flex items-center gap-1">
+                              {user.name}
+                              {user.isVerified && <i className="bx bxs-badge-check text-blue-500 text-sm" title="Verified Profile"></i>}
+                            </p>
                             <p className="text-xs text-slate-400 font-mono truncate mt-0.5">{user.email}</p>
                           </div>
                         </div>
@@ -245,6 +275,17 @@ export default async function admin() {
                         )}
                       </td>
 
+                      {/* KOLOM INDIKATOR VERIFIKASI CENTANG BIRU */}
+                      <td className="p-4">
+                        {user.isVerified ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-200/60 shadow-sm">
+                            Verified
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-400 italic">Standar</span>
+                        )}
+                      </td>
+
                       <td className="p-4">
                         <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded font-medium">
                           {user.linkCount} Tautan
@@ -253,6 +294,22 @@ export default async function admin() {
 
                       <td className="p-4 pr-6">
                         <div className="flex items-center justify-end gap-2">
+                          {/* FORM BERGANTI STATUS CENTANG BIRU */}
+                          <form action={toggleBadgeVerificationAction}>
+                            <input type="hidden" name="userId" value={user._id} />
+                            <input type="hidden" name="currentVerifiedStatus" value={String(user.isVerified)} />
+                            <button 
+                              type="submit"
+                              className={`text-xs font-medium px-2.5 py-1 rounded-md border transition-all ${
+                                user.isVerified 
+                                  ? "bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100" 
+                                  : "bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
+                              }`}
+                            >
+                              {user.isVerified ? "Hapus Centang" : "Beri Centang"}
+                            </button>
+                          </form>
+
                           <form action={toggleVerifyUserAction}>
                             <input type="hidden" name="userId" value={user._id} />
                             <input type="hidden" name="currentStatus" value={String(user.isNewUser)} />
@@ -278,7 +335,7 @@ export default async function admin() {
             </table>
           </div>
 
-          {/* RESPONSIVE LAYOUT 2: Tampilan khusus Layar HP / Mobile (Bentuk List Kartu/Card Ringkas) */}
+          {/* RESPONSIVE LAYOUT 2: Tampilan khusus Layar HP / Mobile (Bentuk List Kartu) */}
           <div className="block md:hidden divide-y divide-slate-100">
             {processedUsers.length === 0 ? (
               <div className="p-8 text-center text-xs text-slate-400 italic">
@@ -295,13 +352,19 @@ export default async function admin() {
                         {user.name.substring(0, 2)}
                       </div>
                       <div className="min-w-0">
-                        <h4 className="font-medium text-slate-700 truncate text-sm">{user.name}</h4>
+                        <h4 className="font-medium text-slate-700 truncate text-sm flex items-center gap-1">
+                          {user.name}
+                          {user.isVerified && <i className="bx bxs-badge-check text-blue-500 text-xs"></i>}
+                        </h4>
                         <p className="text-xs text-slate-400 font-mono truncate">{user.email}</p>
                       </div>
                     </div>
                     
-                    {/* Badge Status */}
-                    <div className="shrink-0">
+                    {/* Badge Status Setup */}
+                    <div className="shrink-0 flex gap-1.5">
+                      {user.isVerified && (
+                        <span className="text-[9px] font-medium bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200">Badge</span>
+                      )}
                       {user.isNewUser ? (
                         <span className="text-[9px] font-medium bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-200/50">New</span>
                       ) : (
@@ -322,18 +385,35 @@ export default async function admin() {
                     </div>
                   </div>
 
-                  {/* Tombol Aksi di bagian bawah kartu */}
-                  <div className="flex items-center justify-end gap-2 pt-1">
-                    <form action={toggleVerifyUserAction} className="w-full sm:w-auto">
-                      <input type="hidden" name="userId" value={user._id} />
-                      <input type="hidden" name="currentStatus" value={String(user.isNewUser)} />
-                      <button 
-                        type="submit"
-                        className="w-full text-center text-xs font-medium px-3 py-1.5 rounded-md bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all"
-                      >
-                        {user.isNewUser ? "Ubah Status" : "Reset Setup"}
-                      </button>
-                    </form>
+                  {/* Tombol Aksi HP */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-2 pt-1">
+                    <div className="grid grid-cols-2 gap-2 w-full">
+                      {/* Tombol Centang Biru Mobile */}
+                      <form action={toggleBadgeVerificationAction}>
+                        <input type="hidden" name="userId" value={user._id} />
+                        <input type="hidden" name="currentVerifiedStatus" value={String(user.isVerified)} />
+                        <button 
+                          type="submit" 
+                          className={`w-full text-center text-xs font-medium px-3 py-1.5 rounded-md border transition-all ${
+                            user.isVerified ? 'bg-rose-50 text-rose-600 border-rose-200':'bg-blue-50 text-blue-600 border-blue-200'
+                          }`}
+                        >
+                          {user.isVerified ? "Hapus Centang" : "Beri Centang"}
+                        </button>
+                      </form>
+
+                      {/* Tombol Reset Setup Mobile */}
+                      <form action={toggleVerifyUserAction}>
+                        <input type="hidden" name="userId" value={user._id} />
+                        <input type="hidden" name="currentStatus" value={String(user.isNewUser)} />
+                        <button 
+                          type="submit"
+                          className="w-full text-center text-xs font-medium px-3 py-1.5 rounded-md bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all"
+                        >
+                          {user.isNewUser ? "Aktifkan" : "Reset Setup"}
+                        </button>
+                      </form>
+                    </div>
 
                     <DeleteUserButton 
                       userId={user._id} 
