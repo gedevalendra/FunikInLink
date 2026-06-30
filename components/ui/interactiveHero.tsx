@@ -136,7 +136,7 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
         </div>
 
         {/* JUDUL UTAMA DENGAN FONT RESPONSIVE */}
-        <h1 className="font-black tracking-tight text-gray-900 leading-tight min-h-[100px] sm:min-h-[120px] md:min-h-[150px] text-[clamp(2.5rem,5vw,4rem)]">
+        <h1 className="font-bold tracking-tight text-gray-900 leading-tight min-h-[100px] sm:min-h-[120px] md:min-h-[150px] text-[clamp(2.5rem,5vw,4rem)]">
           Satu Tautan untuk <br />
           <span
             className={`text-yellow-500 inline-block transition-all duration-500 transform ${
