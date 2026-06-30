@@ -7,7 +7,6 @@ export default function Footer() {
         <div className="flex flex-col items-center sm:items-start gap-1">
           <h2 className="font-bold text-base flex items-center">
             Funik<span className="text-yellow-500">In</span>
-            <span className="ml-1 text-xs font-normal text-gray-500">Link</span>
           </h2>
           <p className="text-xs text-gray-400">
             © {new Date().getFullYear()} FunikIn Dev. All rights reserved.

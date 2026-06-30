@@ -15,10 +15,10 @@ export default async function Home() {
   // Jika database masih kosong, buat 1 user default otomatis
   if (!user) {
     user = await User.create({
-      name: "Gede Valendra",
-      username: "gedevalendra",
-      bio: "Full-Stack Developer membangun solusi praktis berbasis web modern. Fokus pada performa, keamanan, dan pengalaman pengguna.",
-      hashtags: ["#Developer", "#NextJS", "#FullStack"]
+      name: "Anonymous",
+      username: "anonymous",
+      bio: "Silahkan mendaftar terlebih dahulu untuk bisa mendapatkan FunikIn Link",
+      hashtags: ["#FunikInLink #Best"]
     });
   }
 
@@ -74,7 +74,7 @@ export default async function Home() {
           <AddLinkModal />
           
           {sharedLinks.length === 0 ? (
-            <p className="text-xs text-gray-400 font-mono italic">Belum ada tautan di database...</p>
+            <p className="text-xs text-gray-400 font-mono">Belum ada tautan di database...</p>
           ) : (
             sharedLinks.map((link: any) => (
               <LinkCard key={link._id.toString()} link={link} />
