@@ -29,7 +29,7 @@ export default function LinkCard({ link, isAdmin }: { link: any, isAdmin: boolea
 
   return (
     <>
-      <div className="relative flex items-start gap-4 p-3 -mx-3 rounded-xl transition-colors shadow-sm border border-gray-100">
+      <div className="relative flex items-start gap-4 p-3 -mx-3 rounded-xl transition-colors shadow-xs border border-gray-100/30">
         <div className="text-yellow-600 transition-colors pt-0.5 text-2xl">
           <i className={`bx ${link.icon}`}></i>
         </div>
@@ -58,7 +58,7 @@ export default function LinkCard({ link, isAdmin }: { link: any, isAdmin: boolea
                 setSelectedIcon(link.icon || "bx-link");
                 setIsEditing(true);
               }}
-              className="p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors"
+              className="p-1.5 w-fit h-fit flex text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors"
             >
               <i className="bx bx-edit text-base"></i>
             </button>
