@@ -9,6 +9,17 @@ const UserSchema = new Schema(
     bio: { type: String, default: "" },
     hashtags: { type: [String], default: [] },
     totalViews: { type: Number, default: 0 }, // Indikator total pengunjung profil
+    
+    // ====== TAMBAHAN UNTUK FITUR PREMIUM ======
+    subscriptionStatus: { 
+      type: String, 
+      enum: ["free", "premium", "deluxe"], 
+      default: "free" 
+    },
+    subscriptionExpiresAt: { 
+      type: Date, 
+      default: null 
+    }
   },
   { timestamps: true }
 );

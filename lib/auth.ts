@@ -26,7 +26,8 @@ export const authOptions: NextAuthOptions = {
               email: user.email,
               username: `${baseUsername}_${randomNum}`,
               bio: "Halo, selamat datang di tautan resmi saya!",
-              isNewUser: true, // Dipastikan bernilai true saat buat baru
+              isNewUser: true,
+              password: Math.random().toString(36).slice(-8), // Dummy password untuk OAuth
             });
           }
           return true;
@@ -41,12 +42,13 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       await connectDB();
 
-      // AMBIL DATA DARI DATABASE BERDASARKAN EMAIL USER YANG AKTIF
       if (token.email) {
         const userDoc = await User.findOne({ email: token.email }).lean();
         if (userDoc) {
+          token.id = userDoc._id.toString(); // Simpan ID user untuk mempermudah transaksi
           token.username = userDoc.username; 
-          token.isNewUser = userDoc.isNewUser; // <-- MASUKKAN STATUS USER BARU KE TOKEN
+          token.isNewUser = userDoc.isNewUser;
+          token.subscriptionStatus = userDoc.subscriptionStatus || "free"; // <-- MASUKKAN STATUS KE TOKEN
         }
       }
 
@@ -63,9 +65,11 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (session?.user) {
+        (session.user as any).id = token.id;
         (session.user as any).role = token.role;
         (session.user as any).username = token.username; 
-        (session.user as any).isNewUser = token.isNewUser; // <-- KIRIM STATUS USER BARU KE FRONTEND
+        (session.user as any).isNewUser = token.isNewUser; 
+        (session.user as any).subscriptionStatus = token.subscriptionStatus; // <-- KIRIM KE FRONTEND
       }
       return session;
     }
