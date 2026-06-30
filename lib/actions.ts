@@ -1,7 +1,7 @@
 "use server";
 
 import { connectDB } from "./db";
-import { SharedLink, Admin } from "./models";
+import { SharedLink, User } from "./models";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth";
@@ -12,7 +12,7 @@ export async function addLink(formData: FormData) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) throw new Error("Kamu harus login terlebih dahulu!");
 
-  const currentUser = await Admin.findOne({ email: session.user.email });
+  const currentUser = await User.findOne({ email: session.user.email });
   if (!currentUser) throw new Error("User tidak ditemukan!");
 
   await SharedLink.create({
@@ -32,7 +32,7 @@ export async function deleteLink(id: string) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) throw new Error("Unauthorized");
 
-  const currentUser = await Admin.findOne({ email: session.user.email });
+  const currentUser = await User.findOne({ email: session.user.email });
   
   await SharedLink.findByIdAndDelete(id);
   
@@ -53,7 +53,7 @@ export async function updateProfile(formData: FormData) {
   const cleanUsername = usernameInput ? usernameInput.toLowerCase().trim().replace(/\s+/g, "-") : "";
 
   if (cleanUsername) {
-    const existingUsername = await Admin.findOne({ 
+    const existingUsername = await User.findOne({ 
       username: cleanUsername, 
       _id: { $ne: userId } 
     });
@@ -67,9 +67,9 @@ export async function updateProfile(formData: FormData) {
     ? hashtagString.split(" ").filter((tag) => tag.startsWith("#"))
     : [];
 
-  const oldUser = await Admin.findById(userId);
+  const oldUser = await User.findById(userId);
 
-  const updatedUser = await Admin.findByIdAndUpdate(userId, {
+  const updatedUser = await User.findByIdAndUpdate(userId, {
     username: cleanUsername || oldUser?.username, 
     name,
     bio,

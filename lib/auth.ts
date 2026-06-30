@@ -43,7 +43,7 @@ export const authOptions: NextAuthOptions = {
 
       // AMBIL DATA DARI DATABASE BERDASARKAN EMAIL USER YANG AKTIF
       if (token.email) {
-        const userDoc = await Admin.findOne({ email: token.email }).lean();
+        const userDoc = await User.findOne({ email: token.email }).lean();
         if (userDoc) {
           token.username = userDoc.username; 
           token.isNewUser = userDoc.isNewUser; // <-- MASUKKAN STATUS USER BARU KE TOKEN
