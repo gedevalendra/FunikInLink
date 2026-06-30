@@ -1,7 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { connectDB } from "./db";
-import { Admin } from "./models"; // Kita akan buat model Admin setelah ini
+import { Admin, AdminList } from "./models"; // Pastikan model AdminList ditambahkan di import sini
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -11,15 +11,16 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    // 1. FUNGSI SIGN-IN: Untuk menyimpan data siapa saja yang login (User Biasa)
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         await connectDB();
         try {
-          // Cek di collection Admin apakah ada email ini
-          const existingAdmin = await Admin.findOne({ email: user.email });
+          // Cek apakah profil user ini sudah ada di database
+          const existingUser = await Admin.findOne({ email: user.email });
           
-          if (!existingAdmin) {
-            const baseUsername = user.email?.split("@")[0] || "admin";
+          if (!existingUser) {
+            const baseUsername = user.email?.split("@")[0] || "user";
             const randomNum = Math.floor(Math.random() * 1000);
             
             // Jika belum ada, buat sebagai profil baru
@@ -32,12 +33,37 @@ export const authOptions: NextAuthOptions = {
           }
           return true;
         } catch (error) {
-          console.log("Error saat menyimpan admin:", error);
+          console.log("Error saat menyimpan profil user:", error);
           return false;
         }
       }
       return false;
     },
+
+    // 2. FUNGSI JWT: Untuk mengecek apakah email yang login adalah ADMIN TERDAFTAR
+    async jwt({ token, user }) {
+      if (user) {
+        await connectDB();
+        
+        // Cek secara spesifik ke collection AdminList (yang isinya cuma gmail pilihan)
+        const isAdmin = await AdminList.findOne({ email: user.email }).lean();
+        
+        if (isAdmin) {
+          token.role = "admin"; // Jika emailnya terdaftar di AdminList, beri akses admin
+        } else {
+          token.role = "user";  // Jika tidak terdaftar, dia cuma user biasa
+        }
+      }
+      return token;
+    },
+
+    // 3. FUNGSI SESSION: Meneruskan role dari JWT ke Frontend (untuk merubah UI Beranda/Sidebar)
+    async session({ session, token }) {
+      if (session?.user) {
+        (session.user as any).role = token.role;
+      }
+      return session;
+    }
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

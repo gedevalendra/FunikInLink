@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -8,9 +9,12 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+  // Ambil data session untuk mengecek apakah user sudah login atau belum
+  const { data: session } = useSession();
+
   return (
     <>
-      {/* Backdrop (Latar belakang gelap transparan saat sidebar buka) */}
+      {/* Backdrop */}
       <div
         className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${
           isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
@@ -34,7 +38,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </button>
         </div>
 
-        {/* Daftar Menu dengan Animasi Muncul dari Atas ke Bawah */}
+        {/* Daftar Menu */}
         <nav className="flex flex-col gap-4">
           <Link
             href="#about"
@@ -55,17 +59,56 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           >
             Privacy
           </Link>
-          
-          {/* Tombol Get Started yang mengarah ke /registrasi */}
-          <Link
-            href="/registrasi"
-            onClick={onClose} // Menutup sidebar otomatis setelah diklik
-            className={`text-lg font-medium bg-yellow-500 text-white text-center p-3 rounded-xl shadow-md hover:bg-yellow-600 transition-all transform duration-500 ${
-              isOpen ? "translate-y-0 opacity-100 delay-[300ms]" : "-translate-y-4 opacity-0"
-            }`}
-          >
-            Get Started
-          </Link>
+
+          {/* LOGIKA LOGIN: Jika sudah login, tampilkan Profile. Jika belum, Get Started */}
+          {session ? (
+            <>
+              <Link
+                href="/profile"
+                onClick={onClose}
+                className={`text-lg font-medium text-gray-700 hover:text-yellow-500 transition-all transform duration-500 ${
+                  isOpen ? "translate-y-0 opacity-100 delay-[300ms]" : "-translate-y-4 opacity-0"
+                }`}
+              >
+                Profile Saya
+              </Link>
+
+              {/* KHUSUS ADMIN: Menu ini hanya muncul jika role-nya admin */}
+              {(session.user as any)?.role === "admin" && (
+                <Link
+                  href="/admin"
+                  onClick={onClose}
+                  className={`text-lg font-medium text-blue-600 hover:text-blue-800 transition-all transform duration-500 ${
+                    isOpen ? "translate-y-0 opacity-100 delay-[400ms]" : "-translate-y-4 opacity-0"
+                  }`}
+                >
+                  Admin Panel
+                </Link>
+              )}
+
+              <button
+                onClick={() => {
+                  signOut();
+                  onClose();
+                }}
+                className={`text-lg font-medium bg-red-500 text-white text-center p-3 rounded-xl shadow-md hover:bg-red-600 transition-all transform duration-500 mt-4 ${
+                  isOpen ? "translate-y-0 opacity-100 delay-[500ms]" : "-translate-y-4 opacity-0"
+                }`}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/registrasi"
+              onClick={onClose}
+              className={`text-lg font-medium bg-yellow-500 text-white text-center p-3 rounded-xl shadow-md hover:bg-yellow-600 transition-all transform duration-500 ${
+                isOpen ? "translate-y-0 opacity-100 delay-[300ms]" : "-translate-y-4 opacity-0"
+              }`}
+            >
+              Get Started
+            </Link>
+          )}
         </nav>
       </div>
     </>

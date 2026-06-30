@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+// 1. Model untuk Link
 const LinkSchema = new mongoose.Schema({
   username: { type: String, required: true }, // <-- TAMBAHKAN INI agar link tidak bercampur
   icon: { type: String, default: "bx-link" },
@@ -12,6 +13,7 @@ const LinkSchema = new mongoose.Schema({
 
 export const SharedLink = mongoose.models.SharedLink || mongoose.model("SharedLink", LinkSchema);
 
+// 2. Model untuk Profil Pengguna (User)
 const AdminSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -23,3 +25,14 @@ const AdminSchema = new mongoose.Schema({
 });
 
 export const Admin = mongoose.models.Admin || mongoose.model("Admin", AdminSchema);
+
+// 3. Model untuk Hak Akses Admin Panel (TAMBAHAN BARU)
+const AdminListSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  nama: { type: String, required: true },
+  iduser: { type: String },
+}, { 
+  collection: "AdminList" 
+});
+
+export const AdminList = mongoose.models.AdminList || mongoose.model("AdminList", AdminListSchema);
