@@ -5,7 +5,7 @@ import AddLinkModal from "../../../components/ui/addLinkModal";
 import LinkCard from "../../../components/ui/linkCard";
 import OnboardingModal from "../../../components/ui/onboardingModal"; // <-- IMPORT MODAL BARU
 import { connectDB } from "../../../lib/db";
-import { SharedLink, Admin } from "../../../lib/models"; 
+import { SharedLink, User } from "../../../lib/models"; 
 
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../lib/auth";
@@ -22,7 +22,7 @@ export default async function DynamicProfilePage({ params }: Props) {
   const username = resolvedParams.username;
 
   // 1. Ambil data profil berdasarkan username yang ada di URL direktori
-  const user = await Admin.findOne({ username: username }).lean();
+  const user = await User.findOne({ username: username }).lean();
 
   // Jika username tidak ada di database, tampilkan pesan error 404
   if (!user) {
