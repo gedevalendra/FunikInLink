@@ -160,7 +160,7 @@ export default async function LandingPage() {
         </section>
 
         {/* SECTION LIVE PREVIEW: USER DATABASE (Max Rounded: md) */}
-        <section className="w-full py-16 bg-slate-50 border-b border-slate-100 overflow-hidden">
+        <section className="w-full py-14 bg-white overflow-hidden">
           <div className="max-w-5xl mx-auto px-4 mb-10 text-center">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-slate-200/60 px-2.5 py-1 rounded-md">
               Komunitas Kreator
