@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { deleteLink, updateLink } from "../../lib/actions";
 
-// Daftar 100 Ikon (Sama seperti Modal Add Link)
+// Daftar 100 Ikon
 const BOXICONS = [
   "bx-link", "bx-globe", "bxl-instagram", "bxl-tiktok", "bxl-youtube", "bxl-facebook", "bxl-twitter",
   "bxl-whatsapp", "bxl-telegram", "bxl-discord", "bxl-github", "bxl-linkedin", "bxl-spotify",
@@ -22,26 +22,39 @@ const BOXICONS = [
   "bx-cookie", "bx-game", "bx-ghost", "bx-bot", "bx-joystick", "bx-party"
 ];
 
-export default function LinkCard({ link, isAdmin }: { link: any, isAdmin: boolean }) {
+// Menambahkan parameter opsional isDummy untuk data preview
+interface LinkCardProps {
+  link: any;
+  isAdmin: boolean;
+  isDummy?: boolean;
+}
+
+export default function LinkCard({ link, isAdmin, isDummy = false }: LinkCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState(link.icon || "bx-link");
   const [showPicker, setShowPicker] = useState(false);
 
   return (
     <>
-      <div className="relative flex items-start gap-4 p-3 -mx-3 rounded-xl transition-colors shadow-xs border border-gray-100/30">
+      <div 
+        className={`relative flex items-start gap-4 p-3 -mx-3 rounded-xl transition-colors shadow-xs border border-gray-100/30 ${
+          isDummy ? "opacity-60 bg-gray-50/50 pointer-events-none select-none" : ""
+        }`}
+      >
         <div className="text-yellow-600 transition-colors pt-0.5 text-2xl">
           <i className={`bx ${link.icon}`}></i>
         </div>
 
-        <div className="space-y-0.5 flex-1 min-w-0 pr-16"> {/* pr-16 memberi ruang agar teks tidak tertutup tombol */}
-          <h4 className="text-sm font-semibold text-gray-900">{link.title}</h4>
+        <div className="space-y-0.5 flex-1 min-w-0 pr-16">
+          <h4 className="text-sm font-semibold text-gray-900">
+            {link.title} {isDummy && <span className="text-[10px] font-normal px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-sm ml-1.5">Contoh</span>}
+          </h4>
           {link.description && (
             <p className="text-xs text-gray-500 leading-relaxed">{link.description}</p>
           )}
           <a 
-            href={link.url}
-            target="_blank"
+            href={isDummy ? "#" : link.url}
+            target={isDummy ? "_self" : "_blank"}
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 font-medium pt-1"
           >
@@ -50,8 +63,8 @@ export default function LinkCard({ link, isAdmin }: { link: any, isAdmin: boolea
           </a>
         </div>
 
-        {/* TOMBOL SELALU MUNCUL KARENA KITA MENGHAPUS opacity-0 */}
-        {isAdmin && (
+        {/* Tombol aksi sembunyi total jika ini adalah link preview/dummy */}
+        {isAdmin && !isDummy && (
           <div className="absolute top-3 right-3 flex gap-1">
             <button 
               onClick={() => {
@@ -69,7 +82,6 @@ export default function LinkCard({ link, isAdmin }: { link: any, isAdmin: boolea
                 }
               }}
               className="p-1.5 w-fit h-fit flex text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors"
-
             >
               <i className="bx bx-trash text-base"></i>
             </button>
@@ -78,13 +90,12 @@ export default function LinkCard({ link, isAdmin }: { link: any, isAdmin: boolea
       </div>
 
       {/* MODAL EDIT TAUTAN */}
-      {isEditing && (
+      {isEditing && !isDummy && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
             <h3 className="font-bold text-lg mb-4 text-gray-800">Edit Tautan</h3>
             
             <form action={(formData) => { updateLink(formData); setIsEditing(false); }} className="space-y-4">
-              
               <input type="hidden" name="id" value={link._id.toString()} />
               <input type="hidden" name="icon" value={selectedIcon} />
 
