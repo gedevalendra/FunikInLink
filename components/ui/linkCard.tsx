@@ -22,14 +22,25 @@ const BOXICONS = [
   "bx-cookie", "bx-game", "bx-ghost", "bx-bot", "bx-joystick", "bx-party"
 ];
 
-// Menambahkan parameter opsional isDummy untuk data preview
 interface LinkCardProps {
   link: any;
   isAdmin: boolean;
   isDummy?: boolean;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
-export default function LinkCard({ link, isAdmin, isDummy = false }: LinkCardProps) {
+export default function LinkCard({ 
+  link, 
+  isAdmin, 
+  isDummy = false, 
+  onMoveUp, 
+  onMoveDown, 
+  isFirst = false, 
+  isLast = false 
+}: LinkCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState(link.icon || "bx-link");
   const [showPicker, setShowPicker] = useState(false);
@@ -37,35 +48,61 @@ export default function LinkCard({ link, isAdmin, isDummy = false }: LinkCardPro
   return (
     <>
       <div 
-        className={`relative flex items-start gap-4 p-3 -mx-3 rounded-xl transition-colors shadow-xs border border-gray-100/30 ${
+        className={`relative flex items-start gap-4 p-3 -mx-3 rounded-xl transition-colors shadow-xs border border-gray-100/30 group ${
           isDummy ? "opacity-60 bg-gray-50/50 pointer-events-none select-none" : ""
         }`}
       >
-        <div className="text-yellow-600 transition-colors pt-0.5 text-2xl">
+        {/* Navigasi Sortir Atas Bawah (Hanya untuk Admin & Bukan Dummy) */}
+        {isAdmin && !isDummy && (
+          <div className="flex flex-col gap-0.5 self-center">
+            <button
+              onClick={onMoveUp}
+              disabled={isFirst}
+              className={`p-0.5 rounded text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors ${
+                isFirst ? "opacity-20 cursor-not-allowed" : "opacity-100"
+              }`}
+              title="Pindahkan ke atas"
+            >
+              <i className="bx bx-chevron-up text-lg"></i>
+            </button>
+            <button
+              onClick={onMoveDown}
+              disabled={isLast}
+              className={`p-0.5 rounded text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors ${
+                isLast ? "opacity-20 cursor-not-allowed" : "opacity-100"
+              }`}
+              title="Pindahkan ke bawah"
+            >
+              <i className="bx bx-chevron-down text-lg"></i>
+            </button>
+          </div>
+        )}
+
+        <div className="text-yellow-600 transition-colors pt-0.5 text-2xl shrink-0">
           <i className={`bx ${link.icon}`}></i>
         </div>
 
         <div className="space-y-0.5 flex-1 min-w-0 pr-16">
-          <h4 className="text-sm font-semibold text-gray-900">
+          <h4 className="text-sm font-semibold text-gray-900 truncate">
             {link.title} {isDummy && <span className="text-[10px] font-normal px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-sm ml-1.5">Contoh</span>}
           </h4>
           {link.description && (
-            <p className="text-xs text-gray-500 leading-relaxed">{link.description}</p>
+            <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{link.description}</p>
           )}
           <a 
             href={isDummy ? "#" : link.url}
             target={isDummy ? "_self" : "_blank"}
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 font-medium pt-1"
+            className="inline-flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 font-medium pt-1 truncate max-w-full"
           >
-            {link.url.replace(/^https?:\/\//, '')}
-            <i className="bx bx-link-external text-[10px]"></i>
+            <span className="truncate">{link.url.replace(/^https?:\/\//, '')}</span>
+            <i className="bx bx-link-external text-[10px] shrink-0"></i>
           </a>
         </div>
 
-        {/* Tombol aksi sembunyi total jika ini adalah link preview/dummy */}
+        {/* Tombol Aksi Edit dan Hapus */}
         {isAdmin && !isDummy && (
-          <div className="absolute top-3 right-3 flex gap-1">
+          <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
             <button 
               onClick={() => {
                 setSelectedIcon(link.icon || "bx-link");
@@ -81,7 +118,7 @@ export default function LinkCard({ link, isAdmin, isDummy = false }: LinkCardPro
                   deleteLink(link._id.toString());
                 }
               }}
-              className="p-1.5 w-fit h-fit flex text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors"
+              className="p-1.5 w-fit h-fit flex text-gray-400 hover:bg-rose-50 hover:text-rose-600 rounded-md transition-colors"
             >
               <i className="bx bx-trash text-base"></i>
             </button>
@@ -166,7 +203,6 @@ export default function LinkCard({ link, isAdmin, isDummy = false }: LinkCardPro
               </div>
             </form>
           </div>
-          // 
         </div>
       )}
     </>

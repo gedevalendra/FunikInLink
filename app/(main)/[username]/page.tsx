@@ -2,8 +2,7 @@ import { Metadata } from "next";
 import Header from "../../../components/layout/header"; 
 import Footer from "../../../components/layout/footer"; 
 import ProfileSettings from "../../../components/ui/profileSettings";
-import AddLinkModal from "../../../components/ui/addLinkModal";
-import LinkCard from "../../../components/ui/linkCard";
+import LinkListWrapper from "../../../components/ui/linkListWrapper";
 import OnboardingModal from "../../../components/ui/onboardingModal"; 
 import { connectDB } from "../../../lib/db";
 import { SharedLink, User } from "../../../lib/models";
@@ -106,8 +105,8 @@ export default async function DynamicProfilePage({ params }: Props) {
   // LOGIKA POP-UP ONBOARDING SETUP PROFILE
   const showOnboarding = isAdmin && (session?.user as any)?.isNewUser;
 
-  // 3. Ambil data Link asli milik username ini
-  const sharedLinks = await SharedLink.find({ username: user.username }).sort({ _id: -1 }).lean();
+  // 3. Ambil data Link asli milik username ini dari database
+  const sharedLinks = await SharedLink.find({ username: user.username }).lean();
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900 font-sans">
@@ -116,16 +115,13 @@ export default async function DynamicProfilePage({ params }: Props) {
       <main className="flex-grow max-w-xl w-full mx-auto px-6 py-12">
         
         <div className="flex items-start justify-between gap-4">
-          {/* Tambahan min-w-0 agar flex container anak bisa memotong teks dengan benar */}
           <div className="flex items-center gap-4 min-w-0 flex-1">
             <div className="w-14 h-14 rounded-full bg-gray-900 text-white font-medium flex items-center justify-center text-lg flex-shrink-0 uppercase">
               {String(user.name || "U").substring(0, 2)}
             </div>
-            {/* Tambahan min-w-0 agar pembungkus h2 dan p tidak meluber melewati container */}
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 w-full">
                 <h2 className="text-lg font-bold tracking-tight flex items-center gap-1 w-full">
-                  {/* Memotong nama user jika panjang dan menambahkan titik-titik (...) */}
                   <span className="truncate">
                     {user.name}
                   </span>
@@ -156,46 +152,15 @@ export default async function DynamicProfilePage({ params }: Props) {
 
         <hr className="my-8 border-gray-100" />
 
-        <div className="space-y-2">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">Tautan Resmi</h3>
-          </div>
+        {/* Menggunakan LinkListWrapper sebagai penampung interaktif 
+          agar daftar tautan dapat diatur posisinya dari terkecil ke terbesar secara client-side
+        */}
+        <LinkListWrapper 
+          initialLinks={sharedLinks} 
+          isAdmin={isAdmin} 
+          dummyLinks={DUMMY_PREVIEW_LINKS} 
+        />
 
-          {/* Tombol tambah link hanya muncul jika kamu adalah pemilik profil tersebut */}
-          {isAdmin && <AddLinkModal />}
-          
-          {sharedLinks.length === 0 ? (
-            <div className="flex flex-col gap-3 pt-2">
-              {/* Notifikasi khusus pemilik/admin agar tidak bingung */}
-              {isAdmin && (
-                <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-700 leading-relaxed font-medium">
-                  <i className="bx bx-info-circle mr-1 text-sm align-middle"></i>
-                  Kamu belum menambahkan tautan apa pun. Di bawah ini adalah pratinjau tampilan profilmu jika nanti sudah diisi:
-                </div>
-              )}
-              
-              {/* Me-render 3 dummy preview link (GitHub, LinkedIn, TikTok) */}
-              {DUMMY_PREVIEW_LINKS.map((dummy) => (
-                <LinkCard 
-                  key={dummy._id} 
-                  link={dummy} 
-                  isAdmin={isAdmin} 
-                  isDummy={true} 
-                />
-              ))}
-            </div>
-          ) : (
-            // Jika ada tautan asli dari database, tampilkan data aslinya
-            sharedLinks.map((link: any) => (
-              <LinkCard 
-                key={link._id.toString()} 
-                link={link} 
-                isAdmin={isAdmin} 
-                isDummy={false} 
-              />
-            ))
-          )}
-        </div>
       </main>
     </div>
   );
