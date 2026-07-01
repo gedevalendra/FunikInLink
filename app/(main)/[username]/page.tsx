@@ -132,7 +132,7 @@ export default async function DynamicProfilePage({ params }: Props) {
 
       {/* Konten Utama dengan Pembungkus Desain Dinamis */}
       <main className={`grow max-w-xl w-full mx-auto px-6 py-12 my-6 border transition-all duration-300
-        ${custom.isBlur ? "bg-white/60 backdrop-blur-md border-white/40 shadow-xl" : "bg-white border-gray-100 shadow-sm"}
+        ${custom.isBlur ? "backdrop-blur-md" : ""}
         ${custom.rounded}
       `}>
         
