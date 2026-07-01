@@ -166,37 +166,43 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
 
             {/* Menu Akun Tambahan */}
-            {session && (
-              <>
-                <div className="border-b border-slate-100">
-                  <Link
-                    href={`/${userUsername}`}
-                    onClick={onClose}
-                    className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
-                      isOpen ? "translate-y-0 opacity-100 delay-[200ms]" : "-translate-y-4 opacity-0"
-                    }`}
-                  >
-                    <i className="bx bx-user text-xl"></i>
-                    Profile Saya
-                  </Link>
-                </div>
+{/* Cari di bagian Menu Akun Tambahan */}
+{session && (
+  <>
+    <div className="border-b border-slate-100">
+      <Link
+        href={`/${userUsername}`}
+        onClick={onClose}
+        className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
+          isOpen ? "translate-y-0 opacity-100 delay-[200ms]" : "-translate-y-4 opacity-0"
+        }`}
+      >
+        <i className="bx bx-user text-xl"></i>
+        Profile Saya
+      </Link>
+    </div>
 
-                {(session.user as any)?.role === "admin" && (
-                  <div className="border-b border-slate-100">
-                    <Link
-                      href="/admin"
-                      onClick={onClose}
-                      className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-blue-600 hover:bg-blue-50 transition-all transform duration-300 ${
-                        isOpen ? "translate-y-0 opacity-100 delay-[250ms]" : "-translate-y-4 opacity-0"
-                      }`}
-                    >
-                      <i className="bx bx-shield-quarter text-xl"></i>
-                      Admin Panel
-                    </Link>
-                  </div>
-                )}
-              </>
-            )}
+    {/* 🚀 MENU BARU: KERANJANG */}
+    <div className="border-b border-slate-100">
+      <Link
+        href={`/${userUsername}/chart`}
+        onClick={onClose}
+        className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
+          isOpen ? "translate-y-0 opacity-100 delay-[220ms]" : "-translate-y-4 opacity-0"
+        }`}
+      >
+        <i className="bx bx-cart text-xl"></i>
+        Keranjang Belanja
+      </Link>
+    </div>
+
+    {(session.user as any)?.role === "admin" && (
+      <div className="border-b border-slate-100">
+        {/* ... Admin Panel Link ... */}
+      </div>
+    )}
+  </>
+)}
           </nav>
         </div>
 

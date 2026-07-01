@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation"; // 🚀 Tambahkan useParams untuk ambil username dari URL
+import { useParams } from "next/navigation";
+import { addToCartAction } from "../../lib/actions";
 
 interface Product {
   _id: string;
@@ -20,18 +21,28 @@ interface ProfileTabsProps {
 
 export default function ProfileTabs({ linksComponent, products }: ProfileTabsProps) {
   const [activeTab, setActiveTab] = useState<"links" | "products">("links");
+  const [loadingId, setLoadingId] = useState<string | null>(null);
   const params = useParams();
-  
-  // Ambil username aktif dari URL (misal: /johndoe/produk/slug -> username = johndoe)
   const username = params?.username as string;
 
-  // Format rupiah helper
   const formatRupiah = (value: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
       minimumFractionDigits: 0,
     }).format(value);
+  };
+
+  const handleAddToCart = async (product: Product) => {
+    try {
+      setLoadingId(product._id);
+      await addToCartAction(product._id, product.name, product.price, product.image);
+      alert(`"${product.name}" berhasil dimasukkan ke keranjang belanja database!`);
+    } catch (error: any) {
+      alert(error.message || "Gagal menambahkan ke keranjang. Silakan login.");
+    } finally {
+      setLoadingId(null);
+    }
   };
 
   return (
@@ -72,7 +83,7 @@ export default function ProfileTabs({ linksComponent, products }: ProfileTabsPro
                 key={product._id}
                 className="group relative flex flex-col bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full"
               >
-                {/* Bagian Atas: Background Gambar Produk (Diubah ke /[username]/produk/[slug]) */}
+                {/* Bagian Atas: Background Gambar Produk */}
                 <a
                   href={`/${username}/produk/${product.slug}`}
                   className="relative block w-full aspect-[16/10] overflow-hidden bg-gray-50 cursor-pointer"
@@ -94,7 +105,6 @@ export default function ProfileTabs({ linksComponent, products }: ProfileTabsPro
                   {/* Judul & Deskripsi */}
                   <div className="flex-grow space-y-1.5 mb-4">
                     <h3 className="font-bold text-gray-800 text-sm sm:text-base line-clamp-1 group-hover:text-blue-600 transition-colors">
-                      {/* Diubah ke /[username]/produk/[slug] */}
                       <a href={`/${username}/produk/${product.slug}`}>{product.name}</a>
                     </h3>
                     <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
@@ -113,12 +123,17 @@ export default function ProfileTabs({ linksComponent, products }: ProfileTabsPro
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        alert(`Berhasil menambahkan "${product.name}" ke keranjang!`);
+                        handleAddToCart(product);
                       }}
-                      className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-900 text-white hover:bg-gray-800 active:scale-95 transition-all shadow-sm"
+                      disabled={loadingId === product._id}
+                      className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-900 text-white hover:bg-gray-800 active:scale-95 transition-all shadow-sm disabled:bg-gray-400"
                       title="Tambah ke Keranjang"
                     >
-                      <i className="bx bx-cart text-lg"></i>
+                      {loadingId === product._id ? (
+                        <i className="bx bx-loader-alt animate-spin text-base"></i>
+                      ) : (
+                        <i className="bx bx-cart text-lg"></i>
+                      )}
                     </button>
                   </div>
                 </div>

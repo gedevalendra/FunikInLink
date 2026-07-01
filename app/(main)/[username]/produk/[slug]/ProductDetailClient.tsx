@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { addToCartAction } from "../../../../../lib/actions";
 
 interface ProductDetailClientProps {
   product: {
+    _id: string;
     name: string;
     slug: string;
     description: string;
@@ -23,6 +25,7 @@ interface ProductDetailClientProps {
 export default function ProductDetailClient({ product, user, otherProducts }: ProductDetailClientProps) {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const [isDescExpanded, setIsDescExpanded] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
   const formatRupiah = (value: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -38,6 +41,18 @@ export default function ProductDetailClient({ product, user, otherProducts }: Pr
 
   const prevSlide = () => {
     setCurrentImgIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
+  };
+
+  const handleAddToCart = async () => {
+    try {
+      setIsAdding(true);
+      await addToCartAction(product._id, product.name, product.price, product.images[0]);
+      alert(`"${product.name}" berhasil ditambahkan ke keranjang belanja database!`);
+    } catch (error: any) {
+      alert(error.message || "Gagal menambah ke keranjang belanja. Tolong pastikan kamu sudah login.");
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   return (
@@ -102,7 +117,24 @@ export default function ProductDetailClient({ product, user, otherProducts }: Pr
           </div>
         </div>
 
-        {/* 4. DESKRIPSI DENGAN GRADASI OPACITY MULUS */}
+        {/* 4. TOMBOL KERANJANG UTAMA DI DETAIL PRODUK */}
+        <button
+          onClick={handleAddToCart}
+          disabled={isAdding}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm transition-all active:scale-[0.99] shadow-md shadow-blue-100 disabled:bg-gray-400"
+        >
+          {isAdding ? (
+            <>
+              <i className="bx bx-loader-alt animate-spin text-lg"></i> Memproses...
+            </>
+          ) : (
+            <>
+              <i className="bx bx-cart-add text-lg"></i> Masukkan ke Keranjang Belanja
+            </>
+          )}
+        </button>
+
+        {/* 5. DESKRIPSI DENGAN GRADASI OPACITY MULUS */}
         <div className="space-y-2">
           <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400">Deskripsi Produk</h2>
           <div className="relative">
@@ -111,7 +143,6 @@ export default function ProductDetailClient({ product, user, otherProducts }: Pr
                 isDescExpanded ? "max-h-[2000px]" : "max-h-[7.5rem]" 
               }`}
               style={{
-                // 7.5rem setara dengan tinggi ±5 baris teks
                 display: "-webkit-box",
                 WebkitBoxOrient: "vertical",
                 WebkitLineClamp: isDescExpanded ? "unset" : 5,
@@ -141,7 +172,7 @@ export default function ProductDetailClient({ product, user, otherProducts }: Pr
 
         <hr className="border-gray-100 my-2" />
 
-        {/* 5. INFORMASI PROFIL PEMILIK */}
+        {/* 6. INFORMASI PROFIL PEMILIK */}
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100/50">
           <div className="flex items-center gap-3 min-w-0">
             <div className={`w-11 h-11 rounded-full bg-gray-900 text-white font-bold flex items-center justify-center text-sm shrink-0 uppercase
@@ -162,7 +193,7 @@ export default function ProductDetailClient({ product, user, otherProducts }: Pr
           </Link>
         </div>
 
-        {/* 6. DAFTAR PRODUK LAIN */}
+        {/* 7. DAFTAR PRODUK LAIN */}
         <div className="pt-4 space-y-4">
           <h3 className="text-sm font-bold text-gray-800 flex items-center gap-1">
             <i className="bx bx-grid-alt text-base text-gray-400"></i> Produk Lain dari Toko Ini

@@ -1,7 +1,7 @@
 "use server";
 
 import { connectDB } from "./db";
-import { SharedLink, User } from "./models";
+import { SharedLink, User, Chart } from "./models";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth";
@@ -114,5 +114,89 @@ export async function updateProfile(formData: FormData) {
     }
 
     revalidatePath(`/${updatedUser.username}`);
+  }
+}
+
+// ========================================================
+// 🚀 SERVER ACTIONS INTEGRASI KERANJANG (CHART) KE MONGODB
+// ========================================================
+
+// 1. Aksi Menambah Item ke Dalam Koleksi Chart
+export async function addToCartAction(productId: string, title: string, price: number, image: string) {
+  await connectDB();
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user) {
+    throw new Error("Kamu harus login terlebih dahulu untuk menambah ke keranjang!");
+  }
+  
+  // Ambil ID User dari Token JWT Session yang sedang aktif
+  const userId = (session.user as any).id;
+  if (!userId) {
+    throw new Error("ID pengguna tidak valid di dalam session!");
+  }
+
+  // Cari tahu apakah barang ini dengan User ini sudah ada record-nya di database
+  const existingCartItem = await Chart.findOne({ userId, productId });
+
+  if (existingCartItem) {
+    // Jika barangnya kembar di keranjang user tersebut, cukup naikkan Qty nya (+1)
+    existingCartItem.qty += 1;
+    await existingCartItem.save();
+  } else {
+    // Jika produk baru pertama kali dimasukkan, create baris dokumen baru
+    await Chart.create({
+      userId,
+      productId,
+      title,
+      price,
+      image,
+      qty: 1
+    });
+  }
+
+  // Ambil data detail user untuk keperluan revalidasi link cache Next.js router
+  const userDoc = await User.findById(userId);
+  if (userDoc) {
+    revalidatePath(`/${userDoc.username}/chart`);
+  }
+}
+
+// 2. Aksi Mengubah Angka Kuantitas (+ / -) dari Sisi Keranjang
+export async function updateCartQtyAction(cartId: string, delta: number) {
+  await connectDB();
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    throw new Error("Akses tidak sah! Sila login.");
+  }
+
+  const cartItem = await Chart.findById(cartId);
+  if (cartItem) {
+    // Memastikan kuantitas tidak drop di bawah angka 1
+    cartItem.qty = Math.max(1, cartItem.qty + delta);
+    await cartItem.save();
+    
+    const userId = (session.user as any).id;
+    const userDoc = await User.findById(userId);
+    if (userDoc) {
+      revalidatePath(`/${userDoc.username}/chart`);
+    }
+  }
+}
+
+// 3. Aksi Menghapus Item dari Keranjang Belanja secara Permanen
+export async function removeFromCartAction(cartId: string) {
+  await connectDB();
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    throw new Error("Akses tidak sah! Sila login.");
+  }
+
+  await Chart.findByIdAndDelete(cartId);
+  
+  const userId = (session.user as any).id;
+  const userDoc = await User.findById(userId);
+  if (userDoc) {
+    revalidatePath(`/${userDoc.username}/chart`);
   }
 }

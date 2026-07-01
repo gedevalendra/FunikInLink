@@ -53,28 +53,34 @@ const AdminListSchema = new mongoose.Schema({
 
 export const AdminList = mongoose.models.AdminList || mongoose.model("AdminList", AdminListSchema);
 
-
-// ========================================================
-// 🚀 MODEL BARU: Skema untuk Koleksi Produk (Koleksi: "Produk")
-// ========================================================
+// 4. Model untuk Koleksi Produk
 const ProdukSchema = new mongoose.Schema({
-  // Relasi kepemilikan produk (bisa diisi username atau ID User pemiliknya)
   username: { type: String, required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  
-  // Informasi Utama Produk
   name: { type: String, required: true },
-  slug: { type: String, required: true, unique: true }, // URL ramah SEO, contoh: "premium-notion-template"
+  slug: { type: String, required: true, unique: true }, 
   description: { type: String, default: "" },
-  image: { type: String, required: true }, // Menyimpan URL string dari image hosting (Unsplash/Cloudinary)
-  
-  // Finansial & Statistik
+  image: { type: String, required: true }, 
   price: { type: Number, required: true, default: 0 },
-  salesCount: { type: Number, default: 0 }, // Total pembelian produk
+  salesCount: { type: Number, default: 0 }, 
 }, { 
-  collection: "Produk", // Nama koleksi di database MongoDB kamu wajib sama
-  timestamps: true      // Otomatis membuat field createdAt dan updatedAt
+  collection: "Produk", 
+  timestamps: true      
 });
 
-// Daftarkan model "Produk" agar bisa dipanggil oleh server Next.js tanpa crash duplikasi
 export const Produk = mongoose.models.Produk || mongoose.model("Produk", ProdukSchema);
+
+// 5. Model untuk Koleksi Keranjang (Koleksi: "Chart")
+const ChartSchema = new mongoose.Schema({
+  userId: { type: String, required: true }, 
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: "Produk", required: true },
+  title: { type: String, required: true },  
+  price: { type: Number, required: true },
+  image: { type: String, required: true },
+  qty: { type: Number, required: true, default: 1 },
+}, { 
+  collection: "Chart",
+  timestamps: true 
+});
+
+export const Chart = mongoose.models.Chart || mongoose.model("Chart", ChartSchema);
