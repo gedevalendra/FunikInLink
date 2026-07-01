@@ -1,24 +1,37 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { connectDB } from "@/lib/db";
+import { User } from "@/lib/models";
 
 // Inisialisasi Resend dengan API Key dari .env
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Simulasi fungsi mengambil data user dari Database (Ganti dengan ORM/Model database kamu, misal Prisma/Mongoose)
+// Fungsi mengambil data user RILL dari database MongoDB
 async function getUsersFromDatabase(targetType: "all" | "selected", selectedIds?: string[]) {
-  // CONTOH MOCK DATA: Ganti bagian ini dengan query database asli kamu
-  const mockUsers = [
-    { id: "1", email: "user1@example.com", name: "User Satu" },
-    { id: "2", email: "user2@example.com", name: "User Dua" },
-    { id: "3", email: "user3@example.com", name: "User Tiga" },
-  ];
+  await connectDB();
 
-  if (targetType === "all") {
-    return mockUsers;
-  }
-  
-  if (targetType === "selected" && selectedIds) {
-    return mockUsers.filter(user => selectedIds.includes(user.id));
+  try {
+    if (targetType === "all") {
+      // Ambil semua user, hanya ambil field name dan email agar query ringan
+      const users = await User.find({}, "name email").lean();
+      return users.map((u: any) => ({
+        id: String(u._id),
+        email: String(u.email || ""),
+        name: String(u.name || "User")
+      }));
+    }
+    
+    if (targetType === "selected" && selectedIds && selectedIds.length > 0) {
+      // Ambil user berdasarkan array ID yang dipilih oleh admin
+      const users = await User.find({ _id: { $in: selectedIds } }, "name email").lean();
+      return users.map((u: any) => ({
+        id: String(u._id),
+        email: String(u.email || ""),
+        name: String(u.name || "User")
+      }));
+    }
+  } catch (err) {
+    console.error("Gagal mengambil data user dari database:", err);
   }
 
   return [];
@@ -44,23 +57,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Elemen pesan wajib diisi lengkap!" }, { status: 400 });
     }
 
-    // 2. Ambil list email target dari database
+    // 2. Ambil list email target dari database rill
     const targetUsers = await getUsersFromDatabase(targetType, selectedUserIds);
 
-    if (targetUsers.length === 0) {
-      return NextResponse.json({ error: "Tidak ada user tujuan yang ditemukan!" }, { status: 400 });
+    // Filter email kosong / tidak valid agar Resend tidak error saat batch sending
+    const validTargetUsers = targetUsers.filter(user => user.email && user.email.includes("@"));
+
+    if (validTargetUsers.length === 0) {
+      return NextResponse.json({ error: "Tidak ada user tujuan dengan email valid yang ditemukan!" }, { status: 400 });
     }
 
     // 3. Render Elemen Isi Pesan secara Dinamis menjadi HTML Paragraph
     const renderedElementsHtml = contentElements
-      .map((el: string) => `<p style="font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 14px;">${el.replace(/\n/g, '<br>')}</p>`)
+      .map((el: string) => `<p style="font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 14px; font-family: sans-serif;">${el.replace(/\n/g, '<br>')}</p>`)
       .join("");
 
     // 4. Render Tombol Kustom secara Dinamis jika diaktifkan oleh Admin
     const buttonHtml = hasButton && buttonUrl && buttonText
       ? `
         <div style="text-align: center; margin: 30px 0 15px 0;">
-          <a href="${buttonUrl}" target="_blank" style="background-color: #3b82f6; color: #ffffff; padding: 12px 24px; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-block; font-size: 15px; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);">
+          <a href="${buttonUrl}" target="_blank" style="background-color: #3b82f6; color: #ffffff; padding: 12px 24px; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-block; font-size: 15px; font-family: sans-serif; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);">
             ${buttonText}
           </a>
         </div>
@@ -99,17 +115,16 @@ export async function POST(request: Request) {
       </html>
     `;
 
-    // 6. Kelompokkan Data Kirim untuk Fitur Batch Sending Milik Resend
-    // Resend mengizinkan pengiriman hingga 100 email berbeda dalam satu kali pemicuan API
-    const batchPayload = targetUsers.map(user => ({
-      from: "Admin Resmi <admin@domainkamu.com>", // Ganti dengan domain yang sudah kamu verifikasi di dashboard Resend
+    // 6. Kelompokkan Data Kirim sesuai spesifikasi payload array koleksi Resend SDK
+    const batchPayload = validTargetUsers.map(user => ({
+      from: "Admin Resmi <admin@domainkamu.com>", // PENTING: Ganti dengan domain yang sudah verified/di-approve di dashboard Resend kamu!
       to: [user.email],
       subject: subject,
       html: mainHtmlTemplate,
     }));
 
-    // 7. Tembakkan ke Resend menggunakan batch.send
-    const { data, error } = await resend.batches.send(batchPayload);
+    // 7. FIXED: Tembakkan langsung array objek payload ke resend.batch.send
+    const { data, error } = await resend.batch.send(batchPayload);
 
     if (error) {
       console.error("Resend Batch Error:", error);
@@ -118,7 +133,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      message: `Pesan berhasil di-broadcast ke ${targetUsers.length} user!`,
+      message: `Pesan berhasil di-broadcast ke ${validTargetUsers.length} user!`,
       batchData: data 
     });
 

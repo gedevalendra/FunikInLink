@@ -4,7 +4,7 @@ import { connectDB } from "../../lib/db";
 import { User, SharedLink, AdminList } from "../../lib/models"; 
 import { revalidatePath } from "next/cache";
 import DeleteUserButton from "../../components/ui/DeleteUserButton"; 
-import BroadcastModalClient from "../../components/ui/BroadcastModalClient"; // Kita panggil client component pembungkus modal disini
+import BroadcastModalClient from "../../components/ui/broadcastModalClient"; // Kita panggil client component pembungkus modal disini
 
 // =========================================================================
 // SERVER ACTIONS
