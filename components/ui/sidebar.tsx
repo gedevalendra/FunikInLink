@@ -49,7 +49,7 @@ export default function CartClientContainer({ initialCart, username }: Props) {
     if (currentQty === 1 && delta === -1) return;
 
     setCart(prev => prev.map(item => item.id === id ? { ...item, qty: item.qty + delta } : item));
-    
+
     try {
       await updateCartQtyAction(id, delta);
     } catch (err) {
