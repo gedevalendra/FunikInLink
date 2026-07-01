@@ -2,20 +2,18 @@
 
 import { useState } from "react";
 import EditProfileModal from "./editProfileModal";
+import CustomizeProfileModal from "./customizeProfileModal"; // Import komponen baru
 
 export default function ProfileSettings({ user, isAdmin }: { user: any, isAdmin: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showCustomizeModal, setShowCustomizeModal] = useState(false); // State baru
   const [copied, setCopied] = useState(false);
 
-  // LOGIKA PENGUNJUNG: Jika bukan admin, JANGAN tampilkan tombol setting ini sama sekali
   if (!isAdmin) return null;
 
-  // FUNGSI SHARE YANG SUDAH DIPERBAIKI
   const handleShare = async () => {
-    const currentUrl = window.location.href; // Mengambil URL profil saat ini secara dinamis
-
-    // 1. Coba gunakan Web Share API (Sangat optimal untuk browser HP/Mobile)
+    const currentUrl = window.location.href;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -26,16 +24,13 @@ export default function ProfileSettings({ user, isAdmin }: { user: any, isAdmin:
         setIsOpen(false);
         return;
       } catch (err) {
-        console.log("Web Share dibatalkan atau tidak didukung:", err);
+        console.log("Web Share dibatalkan:", err);
       }
     }
 
-    // 2. Fallback: Salin ke clipboard otomatis (Optimal untuk Desktop PC)
     try {
       await navigator.clipboard.writeText(currentUrl);
       setCopied(true);
-      
-      // Kembalikan teks status menjadi normal setelah 2 detik dan tutup dropdown
       setTimeout(() => {
         setCopied(false);
         setIsOpen(false);
@@ -50,29 +45,34 @@ export default function ProfileSettings({ user, isAdmin }: { user: any, isAdmin:
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="p-1 text-gray-400 hover:text-gray-900 transition-colors rounded-md"
-        aria-label="Settings"
       >
         <i className="bx bx-cog text-xl"></i>
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-md py-1 z-10 text-sm">
-          {/* Tombol Edit Profile */}
+        <div className="absolute right-0 mt-1 w-52 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 text-sm">
+          {/* Edit Profile */}
           <button 
             onClick={() => { setShowEditModal(true); setIsOpen(false); }}
             className="w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 flex items-center gap-2"
           >
             <i className="bx bx-edit text-base text-gray-500"></i> Edit Profile
           </button>
+
+          {/* Kustomisasi Tampilan - MENU BARU */}
+          <button 
+            onClick={() => { setShowCustomizeModal(true); setIsOpen(false); }}
+            className="w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+          >
+            <i className="bx bx-palette text-base text-indigo-500"></i> Kustomisasi Profil
+          </button>
           
-          {/* Tombol Share yang sudah diperbaiki */}
+          {/* Share Profile */}
           <button 
             onClick={handleShare}
             disabled={copied}
             className={`w-full text-left px-3 py-2 flex items-center justify-between transition-colors ${
-              copied 
-                ? "bg-green-50 text-green-600 font-medium" 
-                : "text-gray-700 hover:bg-gray-50"
+              copied ? "bg-green-50 text-green-600 font-medium" : "text-gray-700 hover:bg-gray-50"
             }`}
           >
             <div className="flex items-center gap-2">
@@ -83,8 +83,13 @@ export default function ProfileSettings({ user, isAdmin }: { user: any, isAdmin:
         </div>
       )}
 
+      {/* Modal Render */}
       {showEditModal && (
         <EditProfileModal user={user} onClose={() => setShowEditModal(false)} />
+      )}
+
+      {showCustomizeModal && (
+        <CustomizeProfileModal user={user} onClose={() => setShowCustomizeModal(false)} />
       )}
     </div>
   );

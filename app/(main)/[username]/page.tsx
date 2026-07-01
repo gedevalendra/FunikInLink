@@ -4,6 +4,7 @@ import Footer from "../../../components/layout/footer";
 import ProfileSettings from "../../../components/ui/profileSettings";
 import LinkListWrapper from "../../../components/ui/linkListWrapper";
 import OnboardingModal from "../../../components/ui/onboardingModal"; 
+import WelcomePopup from "../../../components/ui/welcomePopup"; 
 import { connectDB } from "../../../lib/db";
 import { SharedLink, User } from "../../../lib/models";
 
@@ -85,7 +86,7 @@ export default async function DynamicProfilePage({ params }: Props) {
   const username = resolvedParams.username;
 
   // 1. Ambil data profil berdasarkan username
-  const user = await User.findOne({ username: username }).lean();
+  const user = await User.findOne({ username: username }).lean() as any;
 
   if (!user) {
     return (
@@ -108,17 +109,49 @@ export default async function DynamicProfilePage({ params }: Props) {
   // 3. Ambil data Link asli milik username ini dari database
   const sharedLinks = await SharedLink.find({ username: user.username }).lean();
 
+  // 4. Fallback data kustomisasi jika belum dikonfigurasi di database
+  const custom = user.customization || {
+    background: "#ffffff",
+    isBlur: false,
+    rounded: "rounded-xl",
+    profileBorder: "none",
+    linkStyle: "solid",
+    showPopup: false,
+    popupMessage: ""
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-white text-gray-900 font-sans">
+    <div 
+      className="flex flex-col min-h-screen font-sans transition-all duration-300"
+      style={{ backgroundColor: custom.background }}
+    >
+      {/* Komponen Header Global */}
+      <Header />
+
+      {/* Tampilkan Onboarding Modal jika User Baru */}
       {showOnboarding && <OnboardingModal user={user} />}
 
-      <main className="flex-grow max-w-xl w-full mx-auto px-6 py-12">
+      {/* Tampilkan Pop-up Pesan Selamat Datang Kustom jika diaktifkan */}
+      {custom.showPopup && custom.popupMessage && (
+        <WelcomePopup message={custom.popupMessage} />
+      )}
+
+      {/* Konten Utama dengan Pembungkus Desain Dinamis */}
+      <main className={`grow max-w-xl w-full mx-auto px-6 py-12 my-6 border transition-all duration-300
+        ${custom.isBlur ? "bg-white/60 backdrop-blur-md border-white/40 shadow-xl" : "bg-white border-gray-100 shadow-sm"}
+        ${custom.rounded}
+      `}>
         
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0 flex-1">
-            <div className="w-14 h-14 rounded-full bg-gray-900 text-white font-medium flex items-center justify-center text-lg flex-shrink-0 uppercase">
+            
+            {/* Foto Profil / Avatar dengan variasi Ring Border dinamis */}
+            <div className={`w-14 h-14 rounded-full bg-gray-900 text-white font-medium flex items-center justify-center text-lg shrink-0 uppercase transition-all
+              ${custom.profileBorder !== 'none' ? `ring-2 ${custom.profileBorder}` : ""}
+            `}>
               {String(user.name || "U").substring(0, 2)}
             </div>
+
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 w-full">
                 <h2 className="text-lg font-bold tracking-tight flex items-center gap-1 w-full">
@@ -126,7 +159,7 @@ export default async function DynamicProfilePage({ params }: Props) {
                     {user.name}
                   </span>
                   {user.isVerified && (
-                    <i className="bx bxs-badge-check text-blue-500 text-lg flex-shrink-0" title="Verified Account"></i>
+                    <i className="bx bxs-badge-check text-blue-500 text-lg shrink-0" title="Verified Account"></i>
                   )}
                 </h2>
               </div>
@@ -134,7 +167,7 @@ export default async function DynamicProfilePage({ params }: Props) {
             </div>
           </div>
           
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <ProfileSettings user={user} isAdmin={isAdmin} />
           </div>
         </div>
@@ -152,9 +185,7 @@ export default async function DynamicProfilePage({ params }: Props) {
 
         <hr className="my-8 border-gray-100" />
 
-        {/* Menggunakan LinkListWrapper sebagai penampung interaktif 
-          agar daftar tautan dapat diatur posisinya dari terkecil ke terbesar secara client-side
-        */}
+        {/* Menggunakan LinkListWrapper sebagai penampung interaktif */}
         <LinkListWrapper 
           initialLinks={sharedLinks} 
           isAdmin={isAdmin} 
@@ -162,6 +193,9 @@ export default async function DynamicProfilePage({ params }: Props) {
         />
 
       </main>
+
+      {/* Komponen Footer Global */}
+      <Footer />
     </div>
   );
 }
