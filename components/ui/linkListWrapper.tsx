@@ -38,6 +38,7 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
     }
   };
 
+  // Fungsi yang dipicu otomatis saat pelepasan drag selesai dilakukan oleh Reorder
   const handleReorderEnd = (newOrder: any[]) => {
     setLinks(newOrder);
     if (isAdmin) {
@@ -76,11 +77,12 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
           ))}
         </div>
       ) : (
+        /* Menggunakan Reorder Group bawaan framer-motion untuk sumbu vertikal (axis y) */
         <Reorder.Group 
           axis="y" 
           values={links} 
           onReorder={handleReorderEnd}
-          className="flex flex-col gap-1.5 p-1 relative animate-none"
+          className="flex flex-col gap-1.5 p-1 relative"
         >
           {links.map((link, index) => (
             <LinkCard 
