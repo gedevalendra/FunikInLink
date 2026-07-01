@@ -2,8 +2,8 @@
 
 import { useState, useRef } from "react";
 import { deleteLink, updateLink } from "../../lib/actions";
-// Import Reorder dan useDragControls dari framer-motion
-import { Reorder, useDragControls } from "framer-motion";
+// Import Reorder dari framer-motion
+import { Reorder } from "framer-motion";
 
 const BOXICONS = [
   "bx-link", "bx-globe", "bxl-instagram", "bxl-tiktok", "bxl-youtube", "bxl-facebook", "bxl-twitter",
@@ -49,12 +49,9 @@ export default function LinkCard({
   const [isDraggable, setIsDraggable] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Inisialisasi kontroler drag manual bawaan framer motion
-  const dragControls = useDragControls();
 
-  // Trigger tahan cepat selama 0.2 detik (200ms) langsung jalankan sistem geser
-  const handleStartHold = (event: any) => {
+  // Fungsi trigger hold 0.5 detik (500ms)
+  const handleStartHold = () => {
     if (!isAdmin || isDummy) return;
     setIsHolding(true);
 
@@ -62,9 +59,7 @@ export default function LinkCard({
 
     timerRef.current = setTimeout(() => {
       setIsDraggable(true);
-      // FIXED: Memulai pergeseran secara paksa seketika di posisi kursor/sentuhan saat ini berada
-      dragControls.start(event);
-    }, 200); // FIXED: Diubah menjadi 0.2 detik (200ms)
+    }, 500); 
   };
 
   const handleEndHold = () => {
@@ -82,11 +77,11 @@ export default function LinkCard({
 
   return (
     <>
+      {/* MENGGUNAKAN Reorder.Item bawaan Framer Motion agar elemen lain bergeser otomatis secara halus */}
       <Reorder.Item 
         value={link}
         id={link._id.toString()}
-        dragListener={false} // Matikan listener bawaan agar tidak konflik dengan holding timer
-        dragControls={dragControls} // Sambungkan kontroler kustom kita
+        dragListener={isAdmin && !isDummy && isDraggable} // Hanya izinkan drag jika status isDraggable aktif lewat hold
         onDragEnd={handleDragEndLocal}
         className={`relative flex items-start gap-3 p-3 rounded-md transition-colors border border-gray-100/50 select-none ${
           isDummy ? "opacity-60 bg-gray-50/50 pointer-events-none" : ""
@@ -103,7 +98,7 @@ export default function LinkCard({
             className={`flex items-center justify-center self-center p-1 rounded text-gray-400 cursor-grab hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0 ${
               isDraggable ? "text-blue-600 bg-blue-50 cursor-grabbing animate-pulse" : ""
             }`}
-            title="Tahan 0.2 detik untuk menyeret urutan"
+            title="Tahan 0.5 detik untuk menyeret urutan"
           >
             <i className={`bx ${isDraggable ? 'bx-grid-vertical' : 'bx-grid-horizontal'} text-xl`}></i>
           </div>
@@ -120,7 +115,7 @@ export default function LinkCard({
             {link.title} 
             {isDummy && <span className="text-[10px] font-normal px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-sm">Contoh</span>}
             {isHolding && !isDraggable && (
-              <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1 py-0.5 rounded animate-pulse">Menyiapkan (0.2s)...</span>
+              <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1 py-0.5 rounded animate-pulse">Menyiapkan (0.5s)...</span>
             )}
             {isDraggable && (
               <span className="text-[10px] font-medium text-blue-600 bg-blue-50 px-1 py-0.5 rounded">Siap Geser!</span>
