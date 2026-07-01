@@ -48,14 +48,14 @@ export const authOptions: NextAuthOptions = {
                 // SUDAH DIUBAH: Menggunakan domain kustom kamu agar tidak terdeteksi spoofing/spam oleh Gmail
                 from: "FunikIn <noreply@funikin.it.com>", 
                 to: user.email,
-                subject: "Selamat Datang Kembali di FunikIn!",
+                subject: "Selamat Datang Kembali di FunikIn—Link!",
                 html: `
                   <!DOCTYPE html>
                   <html lang="id">
                   <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Selamat Datang di FunikIn</title>
+                    <title>Selamat Datang di FunikIn—Link</title>
                     <style>
                       body { margin: 0; padding: 0; background-color: #ffffff; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; color: #525252; -webkit-font-smoothing: antialiased; }
                       .wrapper { width: 100%; table-layout: fixed; background-color: #ffffff; padding: 40px 20px; }
@@ -86,7 +86,7 @@ export const authOptions: NextAuthOptions = {
                           
                           <div class="welcome-box">
                             <div class="welcome-label">Status Sesi</div>
-                            <div class="welcome-status">Berhasil Masuk 🎉</div>
+                            <div class="welcome-status">Berhasil Masuk</div>
                           </div>
                           
                           <p class="warning-text">Jika Anda tidak merasa melakukan login ini, segera amankan akun Google Anda dan hubungi tim bantuan kami.</p>
