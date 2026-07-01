@@ -1,12 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { addProduk } from "../../lib/actions";
 
 export default function AddProdukModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Mencegah elemen di bawahnya ikut di-scroll saat modal terbuka
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,7 +39,7 @@ export default function AddProdukModal() {
 
   return (
     <>
-      {/* Tombol Pemicu Modal (Gaya disamakan dengan AddLinkModal) */}
+      {/* Tombol Pemicu Modal */}
       <button
         onClick={() => setIsOpen(true)}
         className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded-lg text-xs sm:text-sm font-medium shadow-xs transition-all duration-200 active:scale-95"
@@ -37,11 +49,17 @@ export default function AddProdukModal() {
 
       {/* Backdrop & Dialog Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+        <div 
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-xs transition-opacity duration-300"
+          onClick={() => setIsOpen(false)}
+        >
           <div 
-            className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all p-6 text-slate-800 border border-neutral-100"
+            className="w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden p-6 text-slate-800 border border-neutral-100 max-h-[90vh] overflow-y-auto animate-slideUp sm:mb-4"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Garis Handle dekorasi untuk indikator bottom sheet di mobile */}
+            <div className="w-12 h-1 bg-neutral-200 rounded-full mx-auto mb-4 sm:hidden"></div>
+
             {/* Header Modal */}
             <div className="flex items-center justify-between border-b border-neutral-100 pb-3 mb-4">
               <h3 className="text-base font-semibold text-neutral-900 flex items-center gap-2">
@@ -49,6 +67,7 @@ export default function AddProdukModal() {
                 Tambah Produk Baru
               </h3>
               <button
+                type="button"
                 onClick={() => setIsOpen(false)}
                 className="p-1 rounded-md text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors"
               >
@@ -71,7 +90,7 @@ export default function AddProdukModal() {
                   name="name"
                   required
                   placeholder="Contoh: Ebook Panduan Next.js 15"
-                  className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all"
+                  className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all"
                 />
               </div>
 
@@ -82,7 +101,7 @@ export default function AddProdukModal() {
                   name="price"
                   required
                   placeholder="Contoh: 150000"
-                  className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all"
+                  className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all"
                 />
               </div>
 
@@ -93,7 +112,7 @@ export default function AddProdukModal() {
                   name="image"
                   required
                   placeholder="https://domain.com/gambar-produk.jpg"
-                  className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-sm font-mono focus:outline-hidden focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all"
+                  className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all"
                 />
               </div>
 
@@ -103,7 +122,7 @@ export default function AddProdukModal() {
                   name="description"
                   rows={3}
                   placeholder="Tuliskan spesifikasi atau detail singkat produk Anda..."
-                  className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all resize-none"
+                  className="w-full px-3.5 py-2.5 bg-neutral-50/50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500 transition-all resize-none"
                 />
               </div>
 
@@ -138,5 +157,4 @@ export default function AddProdukModal() {
       )}
     </>
   );
-//   
 }

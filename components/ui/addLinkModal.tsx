@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { addLink } from "../../lib/actions";
 
-// Daftar 100 Ikon Populer dari Boxicons
 const BOXICONS = [
   "bx-link", "bx-globe", "bxl-instagram", "bxl-tiktok", "bxl-youtube", "bxl-facebook", "bxl-twitter",
   "bxl-whatsapp", "bxl-telegram", "bxl-discord", "bxl-github", "bxl-linkedin", "bxl-spotify",
@@ -22,7 +21,6 @@ const BOXICONS = [
   "bx-cookie", "bx-game", "bx-ghost", "bx-bot", "bx-joystick", "bx-party"
 ];
 
-// Logika Deteksi Otomatis Ikon
 function getIconFromUrl(url: string) {
   const lowerUrl = url.toLowerCase();
   if (lowerUrl.includes('instagram.com')) return 'bxl-instagram';
@@ -35,13 +33,12 @@ function getIconFromUrl(url: string) {
   if (lowerUrl.includes('discord.com') || lowerUrl.includes('discord.gg')) return 'bxl-discord';
   if (lowerUrl.includes('github.com')) return 'bxl-github';
   if (lowerUrl.includes('linkedin.com')) return 'bxl-linkedin';
-  if (lowerUrl.includes('spotify.com')) return 'bxl-spotify';
   if (lowerUrl.includes('pinterest.com')) return 'bxl-pinterest';
   if (lowerUrl.includes('snapchat.com')) return 'bxl-snapchat';
   if (lowerUrl.includes('twitch.tv')) return 'bxl-twitch';
   if (lowerUrl.includes('reddit.com')) return 'bxl-reddit';
   if (lowerUrl.includes('medium.com')) return 'bxl-medium';
-  return 'bx-link'; // Default jika tidak ada yang cocok
+  return 'bx-link';
 }
 
 export default function AddLinkModal() {
@@ -50,7 +47,18 @@ export default function AddLinkModal() {
   const [selectedIcon, setSelectedIcon] = useState("bx-link");
   const [showPicker, setShowPicker] = useState(false);
 
-  // Otomatis ubah ikon saat user mengetik URL (jika user belum memilih ikon manual)
+  // Mencegah elemen di bawahnya ikut di-scroll saat modal terbuka
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     if (!showPicker) {
       setSelectedIcon(getIconFromUrl(url));
@@ -72,13 +80,20 @@ export default function AddLinkModal() {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl animate-fadeIn max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 transition-opacity duration-300"
+          onClick={() => setIsOpen(false)}
+        >
+          <div 
+            className="bg-white rounded-t-2xl sm:rounded-2xl p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto animate-slideUp sm:mb-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Garis Handle dekorasi untuk indikator bottom sheet di mobile */}
+            <div className="w-12 h-1 bg-neutral-200 rounded-full mx-auto mb-4 sm:hidden"></div>
+
             <h3 className="font-bold text-lg mb-4 text-gray-800">Tambah Tautan</h3>
             
             <form action={(formData) => { addLink(formData); setIsOpen(false); }} className="space-y-4">
-              
-              {/* Input Tersembunyi untuk Icon yang dipilih */}
               <input type="hidden" name="icon" value={selectedIcon} />
 
               <input 
@@ -101,7 +116,6 @@ export default function AddLinkModal() {
                 className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-yellow-500" 
               />
               
-              {/* UI Pemilihan Ikon */}
               <div className="pt-2">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Pilih Ikon</p>
@@ -121,7 +135,6 @@ export default function AddLinkModal() {
                   </div>
                 </div>
 
-                {/* GRID 100 IKON MUNCUL JIKA DIBUKA */}
                 {showPicker && (
                   <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-48 overflow-y-auto p-2 border border-gray-200 rounded-lg mt-3 bg-gray-50">
                     {BOXICONS.map(icon => (
@@ -147,7 +160,6 @@ export default function AddLinkModal() {
                 <button type="submit" className="flex-1 py-2.5 bg-yellow-500 text-white rounded-lg text-sm font-medium hover:bg-yellow-600 transition-colors">Simpan Tautan</button>
               </div>
             </form>
-
           </div>
         </div>
       )}
