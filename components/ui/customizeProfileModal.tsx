@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function CustomizeProfileModal({ user, onClose }: { user: any, onClose: () => void }) {
@@ -16,6 +16,18 @@ export default function CustomizeProfileModal({ user, onClose }: { user: any, on
 
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  // EFFECT: Mengunci scroll pada background halaman saat modal terbuka (Scroll Lock)
+  useEffect(() => {
+    // Simpan style overflow asli bawaan body halaman
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = "hidden";
+
+    // Kembalikan ke style asli saat modal ditutup/unmount
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
 
   const handleSave = async () => {
     setLoading(true);
@@ -38,14 +50,31 @@ export default function CustomizeProfileModal({ user, onClose }: { user: any, on
       console.error(error);
       alert("Terjadi kesalahan jaringan.");
     } finally {
+      loading;
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 [animation:fadeIn_0.2s_ease-out_forwards]">
+      
+      {/* Kustomisasi Inline Keyframe Tailwind CSS untuk Animasi Slide Up & Fade In */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes slideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-slide-up-custom {
+          animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}} />
+
       {/* Container Modal: Fullscreen di Mobile (slide up), Box Center di Desktop */}
-      <div className="bg-white w-full max-w-md rounded-t-2xl sm:rounded-xl shadow-2xl overflow-hidden flex flex-col h-[90vh] sm:h-auto max-h-[85vh] border border-slate-200/60 transition-all transform translate-y-0 sm:scale-100">
+      <div className="bg-white w-full max-w-md rounded-t-2xl sm:rounded-xl shadow-2xl overflow-hidden flex flex-col h-[90vh] sm:h-auto max-h-[85vh] border border-slate-200/60 transition-all transform animate-slide-up-custom sm:[animation:none] sm:scale-100">
         
         {/* HEADER MODAL */}
         <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -172,7 +201,7 @@ export default function CustomizeProfileModal({ user, onClose }: { user: any, on
               <textarea 
                 value={config.popupMessage}
                 onChange={(e) => setConfig({...config, popupMessage: e.target.value})}
-                className="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-950/10 focus:border-slate-950 transition-all min-h-[80px] resize-none animate-fade-in"
+                className="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-950/10 focus:border-slate-950 transition-all min-h-[80px] resize-none [animation:fadeIn_0.2s_ease-out_forwards]"
                 placeholder="Tulis pesan salam pembuka..."
                 maxLength={150}
               />
