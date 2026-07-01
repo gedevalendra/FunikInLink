@@ -1,6 +1,7 @@
 "use client";
 
 import { updateProfile } from "../../lib/actions";
+import { useRouter } from "next/navigation";
 
 interface Props {
   user: any;
@@ -8,19 +9,36 @@ interface Props {
 }
 
 export default function EditProfileModal({ user, onClose }: Props) {
+  const router = useRouter();
+
   return (
     <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl animate-fadeIn">
         <h3 className="font-bold text-lg mb-4 text-gray-800">Edit Profil</h3>
         
-        <form action={async (formData) => {
-          await updateProfile(formData);
-          onClose();
-        }} className="space-y-4">
+        <form 
+          action={async (formData) => {
+            // 1. Ambil username baru dari objek formData
+            const newUsername = formData.get("username") as string;
+            
+            // 2. Jalankan server action untuk menyimpan data ke database
+            await updateProfile(formData);
+            
+            // 3. Tutup modal pengaturan
+            onClose();
+
+            // 4. Jika username berubah, arahkan browser langsung ke link username baru
+            if (newUsername && newUsername !== user.username) {
+              router.push(`/${newUsername}`);
+              router.refresh(); // Memaksa Next.js mengambil data terbaru di page tersebut
+            }
+          }} 
+          className="space-y-4"
+        >
           {/* Hidden ID agar tahu user mana yang diupdate */}
           <input type="hidden" name="userId" value={user._id.toString()} />
 
-          {/* INPUT USERNAME (TAMBAHAN BARU) */}
+          {/* INPUT USERNAME */}
           <div>
             <label className="text-xs font-bold text-gray-400 uppercase">Username (Tautan Link)</label>
             <div className="flex items-center mt-1 border border-gray-200 rounded-lg focus-within:border-yellow-500 overflow-hidden px-2.5 bg-white">
@@ -30,8 +48,8 @@ export default function EditProfileModal({ user, onClose }: Props) {
                 defaultValue={user.username} 
                 required 
                 placeholder="username_kamu"
-                pattern="^[a-zA- Main0-9_-]+$"
-                title="Username hanya boleh berisi huruf, angka, garis bawah (_), dan tanda hubung (-), tanpa spasi."
+                pattern="^[a-z0-9_-]+$"
+                title="Username hanya boleh berisi huruf kecil, angka, garis bawah (_), dan tanda hubung (-), tanpa spasi."
                 className="w-full p-2.5 text-sm outline-none pl-0.5" 
                 onChange={(e) => {
                   // Otomatis mengubah spasi dan huruf kapital menjadi lowercase/tanpa spasi saat diketik
