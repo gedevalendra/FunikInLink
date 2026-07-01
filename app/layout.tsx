@@ -7,7 +7,7 @@ import AuthProvider from "../components/AuthProvider";
 import ButtonLoaderInterceptor from "../components/ui/buttonLoaderInterceptor";
 import Header from "../components/layout/header";
 import Footer from "../components/layout/footer";
-import { NotificationProvider } from "@/context/NotificationContext";
+import { NotificationProvider } from "@/components/ui/notificationContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
