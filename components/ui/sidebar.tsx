@@ -12,10 +12,15 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { data: session } = useSession();
 
-  // Ambil data profile secara aman
-  const userUsername = (session?.user as any)?.username || "";
-  const userImage = session?.user?.image || "";
+  // Ambil data profile secara aman dan akurat dari session rill
   const userName = session?.user?.name || "Pengguna";
+  const userImage = session?.user?.image || "";
+  
+  // Ambil username asli jika ada di session, jika tidak ada, ekstrak dari email sebagai fallback aman
+  const userUsername = 
+    (session?.user as any)?.username || 
+    session?.user?.email?.split("@")[0] || 
+    "user";
 
   // Efek Mengunci Scroll Halaman Belakang ketika Sidebar Aktif/Terbuka
   useEffect(() => {
@@ -98,7 +103,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   {userName.substring(0, 2)}
                 </div>
               )}
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="font-semibold text-sm text-slate-800 truncate">{userName}</p>
                 <p className="text-xs text-slate-400 font-mono truncate">@{userUsername}</p>
               </div>
@@ -198,9 +203,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* BAGIAN BAWAH: Tombol Utama Dinamis dengan Animasi Loop */}
         <div className="w-full mt-6 relative px-1">
           {session ? (
-            /* =========================================================
-               KONDISI: SUDAH LOGIN -> BUTTON FULL MERAH GRADASI BERGERAK
-               ========================================================= */
             <div className="relative group w-full">
               {/* Efek Icon Beterbangan di atas tombol merah */}
               <div className="absolute -top-4 inset-x-0 h-10 pointer-events-none overflow-visible z-20">
@@ -215,7 +217,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   signOut({ callbackUrl: "/" });
                   onClose();
                 }}
-                /* Menggunakan background gradasi merah-rose-crimson pekat dengan kelas pergeseran warna */
                 className={`w-full flex items-center justify-center gap-2 font-bold bg-gradient-to-r from-red-600 via-rose-600 to-red-700 animate-gradient-shift text-white py-3 rounded-md shadow-md text-sm tracking-wide transition-all transform duration-300 ${
                   isOpen ? "translate-y-0 opacity-100 delay-[300ms]" : "-translate-y-4 opacity-0"
                 }`}
@@ -225,9 +226,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               </button>
             </div>
           ) : (
-            /* =========================================================
-               KONDISI: BELUM LOGIN -> BUTTON OUTLINE HITAM TEGAS
-               ========================================================= */
             <div className="relative group w-full">
               {/* Efek Icon Beterbangan di atas tombol outline hitam */}
               <div className="absolute -top-4 inset-x-0 h-10 pointer-events-none overflow-visible z-20">
