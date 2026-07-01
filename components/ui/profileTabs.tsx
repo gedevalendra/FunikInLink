@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 // Pastikan nama file sesuai dengan komponen (menggunakan Huruf Besar/CamelCase)
-import ProductListWrapper from "./ProductListWrapper";
+import ProductListWrapper from "./productListWrapper";
 
 interface Product {
   _id: string;
