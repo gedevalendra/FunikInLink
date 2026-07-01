@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { deleteLink, updateLink } from "../../lib/actions";
 
 // Daftar 100 Ikon
@@ -44,21 +44,51 @@ export default function LinkCard({
   const [isEditing, setIsEditing] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState(link.icon || "bx-link");
   const [showPicker, setShowPicker] = useState(false);
+  
+  // State untuk mengontrol kemunculan tombol geser atas-bawah
+  const [canSort, setCanSort] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Fungsi saat user mulai menaruh kursor atau menyentuh layar
+  const handleStartHold = () => {
+    if (!isAdmin || isDummy) return;
+    
+    // Bersihkan timer sebelumnya jika ada
+    if (timerRef.current) clearTimeout(timerRef.current);
+    
+    // Set timer selama 3.5 detik (3500 md)
+    timerRef.current = setTimeout(() => {
+      setCanSort(true);
+    }, 3500);
+  };
+
+  // Fungsi saat kursor keluar atau sentuhan dilepas sebelum 3.5 detik
+  const handleEndHold = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    setCanSort(false);
+  };
 
   return (
     <>
       <div 
-        className={`relative flex items-start gap-4 p-3 -mx-3 rounded-xl transition-colors shadow-xs border border-gray-100/30 group ${
+        onMouseEnter={handleStartHold}
+        onMouseLeave={handleEndHold}
+        onTouchStart={handleStartHold}
+        onTouchEnd={handleEndHold}
+        className={`relative flex items-start gap-4 p-3 -mx-3 rounded-xl transition-colors border border-gray-100/30 ${
           isDummy ? "opacity-60 bg-gray-50/50 pointer-events-none select-none" : ""
         }`}
       >
-        {/* Navigasi Sortir Atas Bawah (Hanya untuk Admin & Bukan Dummy) */}
-        {isAdmin && !isDummy && (
-          <div className="flex flex-col gap-0.5 self-center">
+        {/* Navigasi Sortir Atas Bawah Muncul hanya setelah ditahan 3.5 detik */}
+        {isAdmin && !isDummy && canSort && (
+          <div className="flex flex-col gap-0.5 self-center bg-white border border-gray-200 rounded p-1 z-10 shadow-md">
             <button
               onClick={onMoveUp}
               disabled={isFirst}
-              className={`p-0.5 rounded text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors ${
+              className={`p-0.5 text-gray-400 hover:text-gray-900 transition-colors ${
                 isFirst ? "opacity-20 cursor-not-allowed" : "opacity-100"
               }`}
               title="Pindahkan ke atas"
@@ -68,7 +98,7 @@ export default function LinkCard({
             <button
               onClick={onMoveDown}
               disabled={isLast}
-              className={`p-0.5 rounded text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors ${
+              className={`p-0.5 text-gray-400 hover:text-gray-900 transition-colors ${
                 isLast ? "opacity-20 cursor-not-allowed" : "opacity-100"
               }`}
               title="Pindahkan ke bawah"
@@ -100,15 +130,15 @@ export default function LinkCard({
           </a>
         </div>
 
-        {/* Tombol Aksi Edit dan Hapus */}
+        {/* Tombol Aksi Edit dan Hapus yang selalu kelihatan dan polosan */}
         {isAdmin && !isDummy && (
-          <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
+          <div className="absolute top-3 right-3 flex gap-2">
             <button 
               onClick={() => {
                 setSelectedIcon(link.icon || "bx-link");
                 setIsEditing(true);
               }}
-              className="p-1.5 w-fit h-fit flex text-gray-400 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors"
+              className="p-1 text-gray-400 hover:text-blue-600"
             >
               <i className="bx bx-edit text-base"></i>
             </button>
@@ -118,7 +148,7 @@ export default function LinkCard({
                   deleteLink(link._id.toString());
                 }
               }}
-              className="p-1.5 w-fit h-fit flex text-gray-400 hover:bg-rose-50 hover:text-rose-600 rounded-md transition-colors"
+              className="p-1 text-gray-400 hover:text-rose-600"
             >
               <i className="bx bx-trash text-base"></i>
             </button>
