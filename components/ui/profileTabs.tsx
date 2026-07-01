@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useParams } from "next/navigation"; // 🚀 Tambahkan useParams untuk ambil username dari URL
 
 interface Product {
   _id: string;
@@ -13,12 +14,16 @@ interface Product {
 }
 
 interface ProfileTabsProps {
-  linksComponent: React.ReactNode; // Tempat menaruh LinkListWrapper bawaan
+  linksComponent: React.ReactNode;
   products: Product[];
 }
 
 export default function ProfileTabs({ linksComponent, products }: ProfileTabsProps) {
   const [activeTab, setActiveTab] = useState<"links" | "products">("links");
+  const params = useParams();
+  
+  // Ambil username aktif dari URL (misal: /johndoe/produk/slug -> username = johndoe)
+  const username = params?.username as string;
 
   // Format rupiah helper
   const formatRupiah = (value: number) => {
@@ -41,7 +46,7 @@ export default function ProfileTabs({ linksComponent, products }: ProfileTabsPro
               : "border-transparent text-gray-400 hover:text-gray-600"
           }`}
         >
-          <i className="bx bx-link-alt text-base"></i> Tautan Resmi
+          <i className="bx bx-link-alt text-base"></i> Tautan
         </button>
         <button
           onClick={() => setActiveTab("products")}
@@ -67,9 +72,9 @@ export default function ProfileTabs({ linksComponent, products }: ProfileTabsPro
                 key={product._id}
                 className="group relative flex flex-col bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full"
               >
-                {/* Bagian Atas: Background Gambar Produk (Bisa diklik menuju halaman detail) */}
+                {/* Bagian Atas: Background Gambar Produk (Diubah ke /[username]/produk/[slug]) */}
                 <a
-                  href={`/Produk/${product.slug}`}
+                  href={`/${username}/produk/${product.slug}`}
                   className="relative block w-full aspect-[16/10] overflow-hidden bg-gray-50 cursor-pointer"
                 >
                   <img
@@ -77,12 +82,10 @@ export default function ProfileTabs({ linksComponent, products }: ProfileTabsPro
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     onError={(e) => {
-                      // Fallback jika gambar error/tidak valid
                       (e.currentTarget as HTMLImageElement).src =
                         "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600";
                     }}
                   />
-                  {/* Overlay tipis saat di-hover */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
                 </a>
 
@@ -91,12 +94,12 @@ export default function ProfileTabs({ linksComponent, products }: ProfileTabsPro
                   {/* Judul & Deskripsi */}
                   <div className="flex-grow space-y-1.5 mb-4">
                     <h3 className="font-bold text-gray-800 text-sm sm:text-base line-clamp-1 group-hover:text-blue-600 transition-colors">
-                      <a href={`/Produk/${product.slug}`}>{product.name}</a>
+                      {/* Diubah ke /[username]/produk/[slug] */}
+                      <a href={`/${username}/produk/${product.slug}`}>{product.name}</a>
                     </h3>
                     <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
                       {product.description}
                     </p>
-                    {/* Total Pembelian */}
                     <p className="text-[11px] text-gray-400 flex items-center gap-1 font-medium pt-0.5">
                       <i className="bx bx-package text-xs"></i> Terjual {product.salesCount}+ produk
                     </p>
