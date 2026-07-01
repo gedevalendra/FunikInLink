@@ -58,13 +58,14 @@ export default function ProductListWrapper({ products, isAdmin, username }: Prod
 
       {/* Grid Daftar Produk */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-        {products.map((product) => (
-          <ProductCard 
-            key={product._id} 
-            product={product} 
-            username={username} 
-          />
-        ))}
+       {products.map((product) => (
+  <ProductCard 
+    key={product._id} 
+    product={product} 
+    username={username} 
+    isAdmin={isAdmin} // <-- WAJIB DIIRIMKAN DISINI JUGA AGAR CARD BISA MEMBACA HAK AKSES
+  />
+))}
       </div>
     </div>
   );

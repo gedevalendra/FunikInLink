@@ -11,16 +11,24 @@ interface Product {
   image: string;
   price: number;
   salesCount: number;
+  isDummy?: boolean; // Tambahkan properti opsional jika ada penanda dummy
 }
 
 interface ProductCardProps {
   product: Product;
   username: string;
+  isAdmin: boolean; // 1. Tambahkan prop isAdmin disini
 }
 
-export default function ProductCard({ product, username }: ProductCardProps) {
+export default function ProductCard({ product, username, isAdmin }: ProductCardProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [hasError, setHasError] = useState(false); // State untuk mendeteksi error gambar
+  const [hasError, setHasError] = useState(false);
+
+  // 2. JIKA PRODUK INI ADALAH DUMMY DAN YANG MELIHAT BUKAN ADMIN -> SEMBUNYIKAN (RETURN NULL)
+  // Kamu bisa sesuaikan kondisi di bawah (misal: product.price === 0 atau product.isDummy)
+  if (product.isDummy && !isAdmin) {
+    return null;
+  }
 
   const formatRupiah = (value: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -44,63 +52,67 @@ export default function ProductCard({ product, username }: ProductCardProps) {
 
   return (
     <div className="group relative flex flex-col bg-white border border-neutral-100 rounded-xl overflow-hidden transition-all duration-200 h-full hover:border-neutral-200">
-      {/* Gambar Produk atau Tampilan Error Segitiga */}
-      <a
-        href={`/${username}/produk/${product.slug}`}
-        className="relative block w-full aspect-[4/3] overflow-hidden bg-neutral-50 cursor-pointer"
-      >
-        {!hasError ? (
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-300"
-            onError={() => setHasError(true)} // Jika error, switch ke tampilan error
-          />
-        ) : (
-          /* Tampilan Fallback Jika Gambar Gagal Dimuat */
-          <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-neutral-50 text-neutral-400 gap-1.5 select-none">
-            <i className="bx bx-error-circle text-2xl text-neutral-300"></i>
-            <span className="text-[10px] font-normal tracking-wide text-neutral-400 text-center px-2">
-              Gambar gagal dimuat
+      {/* Tambahkan class opacity-60 jika dia dummy agar admin tahu ini hanya simulasi */}
+      <div className={`flex flex-col h-full ${product.isDummy ? "opacity-60 pointer-events-none" : ""}`}>
+        
+        {/* Gambar Produk */}
+        <a
+          href={`/${username}/produk/${product.slug}`}
+          className="relative block w-full aspect-[4/3] overflow-hidden bg-neutral-50 cursor-pointer"
+        >
+          {!hasError ? (
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-300"
+              onError={() => setHasError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-neutral-50 text-neutral-400 gap-1.5 select-none">
+              <i className="bx bx-error-circle text-2xl text-neutral-300"></i>
+              <span className="text-[10px] font-normal tracking-wide text-neutral-400 text-center px-2">
+                Gambar gagal dimuat
+              </span>
+            </div>
+          )}
+        </a>
+
+        {/* Info Produk */}
+        <div className="flex flex-col p-3.5 flex-grow bg-white">
+          <div className="flex-grow space-y-1 mb-3">
+            <h3 className="text-xs sm:text-sm font-medium text-neutral-800 line-clamp-1 group-hover:text-neutral-600 transition-colors">
+              <a href={`/${username}/produk/${product.slug}`}>{product.name}</a>
+            </h3>
+            <p className="text-[11px] sm:text-xs text-neutral-400 line-clamp-2 leading-relaxed">
+              {product.description}
+            </p>
+            <span className="inline-block text-[10px] text-neutral-400 font-light pt-1">
+              Terjual {product.salesCount}+
             </span>
           </div>
-        )}
-      </a>
 
-      {/* Info Produk */}
-      <div className="flex flex-col p-3.5 flex-grow bg-white">
-        <div className="flex-grow space-y-1 mb-3">
-          <h3 className="text-xs sm:text-sm font-medium text-neutral-800 line-clamp-1 group-hover:text-neutral-600 transition-colors">
-            <a href={`/${username}/produk/${product.slug}`}>{product.name}</a>
-          </h3>
-          <p className="text-[11px] sm:text-xs text-neutral-400 line-clamp-2 leading-relaxed">
-            {product.description}
-          </p>
-          <span className="inline-block text-[10px] text-neutral-400 font-light pt-1">
-            Terjual {product.salesCount}+
-          </span>
+          {/* Harga & Tombol Keranjang */}
+          <div className="flex items-center justify-between pt-2.5 border-t border-neutral-50 mt-auto">
+            <span className="text-xs sm:text-sm font-medium text-neutral-800">
+              {formatRupiah(product.price)}
+            </span>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                handleAddToCart();
+              }}
+              disabled={isLoading || product.isDummy}
+              className="flex items-center justify-center w-7 h-7 rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 active:scale-95 transition-all disabled:bg-neutral-300"
+            >
+              {isLoading ? (
+                <i className="bx bx-loader-alt animate-spin text-xs"></i>
+              ) : (
+                <i className="bx bx-cart text-sm"></i>
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Harga & Tombol Keranjang */}
-        <div className="flex items-center justify-between pt-2.5 border-t border-neutral-50 mt-auto">
-          <span className="text-xs sm:text-sm font-medium text-neutral-800">
-            {formatRupiah(product.price)}
-          </span>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              handleAddToCart();
-            }}
-            disabled={isLoading}
-            className="flex items-center justify-center w-7 h-7 rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 active:scale-95 transition-all disabled:bg-neutral-300"
-          >
-            {isLoading ? (
-              <i className="bx bx-loader-alt animate-spin text-xs"></i>
-            ) : (
-              <i className="bx bx-cart text-sm"></i>
-            )}
-          </button>
-        </div>
       </div>
     </div>
   );
