@@ -116,22 +116,31 @@ export default async function DynamicProfilePage({ params }: Props) {
       <main className="flex-grow max-w-xl w-full mx-auto px-6 py-12">
         
         <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-4">
+          {/* Tambahan min-w-0 agar flex container anak bisa memotong teks dengan benar */}
+          <div className="flex items-center gap-4 min-w-0 flex-1">
             <div className="w-14 h-14 rounded-full bg-gray-900 text-white font-medium flex items-center justify-center text-lg flex-shrink-0 uppercase">
               {String(user.name || "U").substring(0, 2)}
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h2 className="text-lg font-bold tracking-tight">{user.name}</h2>
-                {user.isVerified && (
-                  <i className="bx bxs-badge-check text-blue-500 text-lg" title="Verified Account"></i>
-                )}
+            {/* Tambahan min-w-0 agar pembungkus h2 dan p tidak meluber melewati container */}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 w-full">
+                <h2 className="text-lg font-bold tracking-tight flex items-center gap-1 w-full">
+                  {/* Memotong nama user jika panjang dan menambahkan titik-titik (...) */}
+                  <span className="truncate">
+                    {user.name}
+                  </span>
+                  {user.isVerified && (
+                    <i className="bx bxs-badge-check text-blue-500 text-lg flex-shrink-0" title="Verified Account"></i>
+                  )}
+                </h2>
               </div>
-              <p className="text-xs text-gray-500 font-mono">@{user.username}</p>
+              <p className="text-xs text-gray-500 font-mono truncate">@{user.username}</p>
             </div>
           </div>
           
-          <ProfileSettings user={user} isAdmin={isAdmin} />
+          <div className="flex-shrink-0">
+            <ProfileSettings user={user} isAdmin={isAdmin} />
+          </div>
         </div>
 
         <div className="mt-4 space-y-3">
