@@ -81,7 +81,7 @@ export default function ProfileTabs({ linksComponent, products, isAdmin }: Profi
           <div className="space-y-4">
             {/* Tombol Tambah Produk khusus Admin */}
             {isAdmin && (
-              <div className="w-full flex justify-end">
+              <div className="w-full flex justify-start">
                 <AddProdukModal />
               </div>
             )}

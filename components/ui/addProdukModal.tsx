@@ -30,10 +30,10 @@ export default function AddProdukModal() {
       {/* Tombol Pemicu Modal (Gaya disamakan dengan AddLinkModal) */}
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-medium shadow-xs transition-all duration-200 active:scale-95"
+        className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded-lg text-xs sm:text-sm font-medium shadow-xs transition-all duration-200 active:scale-95"
       >
         <i className="bx bx-plus-circle text-base"></i>
-        <span>Tambah Produk</span>
+        <span>Tambah Produk Baru</span>
       </button>
 
       {/* Backdrop & Dialog Modal */}
