@@ -125,6 +125,8 @@ export default async function DynamicProfilePage({ params }: Props) {
       className="flex flex-col min-h-screen font-sans transition-all duration-300"
       style={{ backgroundColor: custom.background }}
     >
+      {/* Tambahkan kembali komponen Header & Footer jika memang diperlukan di halaman ini */}
+      <Header />
 
       {/* Tampilkan Onboarding Modal jika User Baru */}
       {showOnboarding && <OnboardingModal user={user} />}
@@ -188,9 +190,12 @@ export default async function DynamicProfilePage({ params }: Props) {
           initialLinks={sharedLinks} 
           isAdmin={isAdmin} 
           dummyLinks={DUMMY_PREVIEW_LINKS} 
+          customVariant={custom.linkStyle} // Dikirim ke komponen anak agar style tombol berubah dinamis
         />
 
       </main>
+
+      <Footer />
     </div>
   );
 }

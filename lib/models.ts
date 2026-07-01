@@ -24,6 +24,18 @@ const UserSchema = new mongoose.Schema({
   hashtags: { type: [String], default: [] },
   isNewUser: { type: Boolean, default: true },
   isVerified: { type: Boolean, default: false }, 
+  // ==========================================
+  // FIELD BARU: PENTING AGAR KUSTOMISASI TERSIMPAN
+  // ==========================================
+  customization: {
+    background: { type: String, default: "#ffffff" },
+    isBlur: { type: Boolean, default: false },
+    rounded: { type: String, default: "rounded-xl" },
+    profileBorder: { type: String, default: "none" },
+    linkStyle: { type: String, default: "solid" },
+    showPopup: { type: Boolean, default: false },
+    popupMessage: { type: String, default: "" }
+  }
 }, { 
   collection: "User"
 });
