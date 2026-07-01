@@ -130,9 +130,12 @@ export default async function DynamicProfilePage({ params }: Props) {
         <WelcomePopup message={custom.popupMessage} />
       )}
 
-      {/* Konten Utama dengan Pembungkus Desain Dinamis */}
-      <main className={`grow max-w-xl w-full mx-auto px-6 py-12 my-6 border transition-all duration-300
-        ${custom.isBlur ? "backdrop-blur-md" : ""}
+      {/* KONTEN UTAMA:
+        - Lebar dinaikkan menjadi max-w-3xl agar optimal di laptop.
+        - Class 'border' dan 'border-gray-100' dihapus sesuai request.
+      */}
+      <main className={`grow max-w-3xl w-full mx-auto px-6 py-12 my-6 transition-all duration-300
+        ${custom.isBlur ? "bg-white/60 backdrop-blur-md shadow-xl" : "bg-white shadow-sm"}
         ${custom.rounded}
       `}>
         
@@ -167,7 +170,7 @@ export default async function DynamicProfilePage({ params }: Props) {
         </div>
 
         <div className="mt-4 space-y-3">
-          <p className="text-sm text-gray-600 leading-relaxed max-w-md">
+          <p className="text-sm text-gray-600 leading-relaxed max-w-2xl">
             {user.bio || "Belum ada bio."}
           </p>
           <div className="flex flex-wrap gap-2 text-xs font-mono text-blue-600">
