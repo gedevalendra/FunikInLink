@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { addLink } from "../../lib/actions";
 
 const BOXICONS = [
@@ -46,9 +47,10 @@ export default function AddLinkModal() {
   const [url, setUrl] = useState("");
   const [selectedIcon, setSelectedIcon] = useState("bx-link");
   const [showPicker, setShowPicker] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // Mencegah elemen di bawahnya ikut di-scroll saat modal terbuka
   useEffect(() => {
+    setMounted(true);
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -65,6 +67,8 @@ export default function AddLinkModal() {
     }
   }, [url, showPicker]);
 
+  if (!mounted) return null;
+
   return (
     <>
       <button 
@@ -79,17 +83,17 @@ export default function AddLinkModal() {
         <i className="bx bx-plus text-lg"></i> Tambah Tautan Baru
       </button>
 
-      {isOpen && (
+      {isOpen && createPortal(
         <div 
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 transition-opacity duration-300"
+          className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/50 backdrop-blur-md"
           onClick={() => setIsOpen(false)}
         >
           <div 
-            className="bg-white rounded-t-2xl sm:rounded-2xl p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto animate-slideUp sm:mb-4"
+            className="bg-white rounded-t-3xl p-6 w-full max-w-md shadow-2xl max-h-[85vh] overflow-y-auto text-slate-800"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Garis Handle dekorasi untuk indikator bottom sheet di mobile */}
-            <div className="w-12 h-1 bg-neutral-200 rounded-full mx-auto mb-4 sm:hidden"></div>
+            {/* Handle Bar (Gaya Bottom Sheet iOS) */}
+            <div className="w-12 h-1 bg-neutral-200 rounded-full mx-auto mb-5"></div>
 
             <h3 className="font-bold text-lg mb-4 text-gray-800">Tambah Tautan</h3>
             
@@ -100,7 +104,7 @@ export default function AddLinkModal() {
                 name="title" 
                 placeholder="Judul (misal: YouTube Saya)" 
                 required 
-                className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-yellow-500" 
+                className="w-full p-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-yellow-500" 
               />
               <input 
                 name="url" 
@@ -108,12 +112,12 @@ export default function AddLinkModal() {
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="URL Lengkap (misal: https://youtube.com/...)" 
                 required 
-                className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-yellow-500" 
+                className="w-full p-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-yellow-500" 
               />
               <input 
                 name="description" 
                 placeholder="Deskripsi singkat (Opsional)" 
-                className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-yellow-500" 
+                className="w-full p-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-yellow-500" 
               />
               
               <div className="pt-2">
@@ -128,7 +132,7 @@ export default function AddLinkModal() {
                   </button>
                 </div>
 
-                <div className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                <div className="flex items-center gap-4 p-3 border border-gray-200 rounded-xl bg-gray-50">
                   <i className={`bx ${selectedIcon} text-3xl text-yellow-600 bg-yellow-100 p-2 rounded-lg`}></i>
                   <div className="text-xs text-gray-500">
                     Ikon disesuaikan secara otomatis. Klik "Lihat Semua Ikon" jika ingin mengubahnya secara manual.
@@ -136,7 +140,7 @@ export default function AddLinkModal() {
                 </div>
 
                 {showPicker && (
-                  <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-48 overflow-y-auto p-2 border border-gray-200 rounded-lg mt-3 bg-gray-50">
+                  <div className="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto p-2 border border-gray-200 rounded-xl mt-3 bg-gray-50">
                     {BOXICONS.map(icon => (
                       <button
                         key={icon}
@@ -156,12 +160,13 @@ export default function AddLinkModal() {
               </div>
               
               <div className="flex gap-3 mt-6 pt-4">
-                <button type="button" onClick={() => setIsOpen(false)} className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">Batal</button>
-                <button type="submit" className="flex-1 py-2.5 bg-yellow-500 text-white rounded-lg text-sm font-medium hover:bg-yellow-600 transition-colors">Simpan Tautan</button>
+                <button type="button" onClick={() => setIsOpen(false)} className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors">Batal</button>
+                <button type="submit" className="flex-1 py-2.5 bg-yellow-500 text-white rounded-xl text-sm font-medium hover:bg-yellow-600 transition-colors">Simpan Tautan</button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

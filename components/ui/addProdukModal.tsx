@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { addProduk } from "../../lib/actions";
 
 export default function AddProdukModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // Mencegah elemen di bawahnya ikut di-scroll saat modal terbuka
   useEffect(() => {
+    setMounted(true);
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -37,9 +39,10 @@ export default function AddProdukModal() {
     }
   };
 
+  if (!mounted) return null;
+
   return (
     <>
-      {/* Tombol Pemicu Modal */}
       <button
         onClick={() => setIsOpen(true)}
         className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded-lg text-xs sm:text-sm font-medium shadow-xs transition-all duration-200 active:scale-95"
@@ -47,20 +50,19 @@ export default function AddProdukModal() {
         <i className="bx bx-plus text-lg"></i> Tambah Produk Baru
       </button>
 
-      {/* Backdrop & Dialog Modal */}
-      {isOpen && (
+      {isOpen && createPortal(
         <div 
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-xs transition-opacity duration-300"
+          className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/50 backdrop-blur-md"
           onClick={() => setIsOpen(false)}
         >
           <div 
-            className="w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden p-6 text-slate-800 border border-neutral-100 max-h-[90vh] overflow-y-auto animate-slideUp sm:mb-4"
+            className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl p-6 text-slate-800 border-t border-neutral-100 max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Garis Handle dekorasi untuk indikator bottom sheet di mobile */}
-            <div className="w-12 h-1 bg-neutral-200 rounded-full mx-auto mb-4 sm:hidden"></div>
+            {/* Handle Bar (Gaya Bottom Sheet iOS) */}
+            <div className="w-12 h-1 bg-neutral-200 rounded-full mx-auto mb-5"></div>
 
-            {/* Header Modal */}
+            {/* Header */}
             <div className="flex items-center justify-between border-b border-neutral-100 pb-3 mb-4">
               <h3 className="text-base font-semibold text-neutral-900 flex items-center gap-2">
                 <i className="bx bx-store text-yellow-500 text-xl"></i>
@@ -75,7 +77,7 @@ export default function AddProdukModal() {
               </button>
             </div>
 
-            {/* Form Pengisian Data */}
+            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600 font-normal">
@@ -126,20 +128,20 @@ export default function AddProdukModal() {
                 />
               </div>
 
-              {/* Tombol Aksi */}
+              {/* Action Buttons */}
               <div className="flex gap-3 mt-6 pt-2">
                 <button
                   type="button"
                   disabled={loading}
                   onClick={() => setIsOpen(false)}
-                  className="flex-1 py-2.5 bg-neutral-100 text-neutral-600 rounded-xl text-xs sm:text-sm font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50"
+                  className="flex-1 py-2.5 bg-neutral-100 text-neutral-600 rounded-xl text-sm font-medium hover:bg-neutral-200 transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 py-2.5 bg-yellow-500 text-white rounded-xl text-xs sm:text-sm font-medium hover:bg-yellow-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 bg-yellow-500 text-white rounded-xl text-sm font-medium hover:bg-yellow-600 transition-colors flex items-center justify-center gap-1.5"
                 >
                   {loading ? (
                     <>
@@ -153,7 +155,8 @@ export default function AddProdukModal() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import ProductListWrapper from "./productListWrapper";
+// Pastikan nama file sesuai dengan komponen (menggunakan Huruf Besar/CamelCase)
+import ProductListWrapper from "./ProductListWrapper";
 
 interface Product {
   _id: string;
@@ -52,15 +53,20 @@ export default function ProfileTabs({ linksComponent, products, isAdmin }: Profi
       </div>
 
       {/* Konten Halaman */}
-      <div className="transition-all duration-300">
+      {/* Menghapus 'transition-all duration-300' dari div pembungkus utama ini 
+        agar tidak merusak rendering sub-komponen atau element berposisi absolut/fixed.
+      */}
+      <div className="w-full">
         {activeTab === "links" ? (
-          <div>{linksComponent}</div>
+          <div className="animate-fadeIn">{linksComponent}</div>
         ) : (
-          <ProductListWrapper 
-            products={products} 
-            isAdmin={isAdmin} 
-            username={username} 
-          />
+          <div className="animate-fadeIn">
+            <ProductListWrapper 
+              products={products} 
+              isAdmin={isAdmin} 
+              username={username} 
+            />
+          </div>
         )}
       </div>
     </div>
