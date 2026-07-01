@@ -32,8 +32,7 @@ export default function AddProdukModal() {
         onClick={() => setIsOpen(true)}
         className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded-lg text-xs sm:text-sm font-medium shadow-xs transition-all duration-200 active:scale-95"
       >
-        <i className="bx bx-plus-circle text-base"></i>
-        <span>Tambah Produk Baru</span>
+        <i className="bx bx-plus text-lg"></i> Tambah Produk Baru
       </button>
 
       {/* Backdrop & Dialog Modal */}

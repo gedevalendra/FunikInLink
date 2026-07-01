@@ -82,7 +82,7 @@ export default function LinkCard({
           )}
         </h4>
         {link.description && (
-          <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{link.description}</p>
+          <p className="text-xs text-gray-500 leading-relaxed line-clamp-1">{link.description}</p>
         )}
         <a 
           href={isDummy ? "#" : link.url}

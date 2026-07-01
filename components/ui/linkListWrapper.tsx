@@ -144,7 +144,7 @@ function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number
       layout
       onDragEnd={handleDragEndLocal}
       // Menghilangkan scale membesar agar kartu tidak melompat (efek magnet hilang)
-      className={`relative flex items-start gap-3 py-3 rounded-md border select-none transition-shadow duration-150 ${
+      className={`relative flex items-start gap-3 p-3 rounded-md border select-none transition-shadow duration-150 ${
         isDraggable 
           ? "bg-slate-50 border-gray-300 shadow-md z-50 cursor-grabbing" 
           : "bg-white border-gray-100/70 shadow-sm"
