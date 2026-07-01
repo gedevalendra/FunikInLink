@@ -28,7 +28,6 @@ interface LinkCardProps {
   isAdmin: boolean;
   isDummy?: boolean;
   index: number;
-  // Menggunakan tipe data any pada spesifikasi event agar tidak bertabrakan dengan internal event handler milik Framer Motion
   onDragStart: (e: any, index: number) => void;
   onDragOver: (e: any, index: number) => void;
   onDragEnd: () => void;
@@ -46,20 +45,23 @@ export default function LinkCard({
   const [isEditing, setIsEditing] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState(link.icon || "bx-link");
   const [showPicker, setShowPicker] = useState(false);
-  
+
   const [isDraggable, setIsDraggable] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleStartHold = () => {
+  // Memicu trigger holding selama 0.5 detik (500ms)
+  const handleStartHold = (e: any) => {
     if (!isAdmin || isDummy) return;
     setIsHolding(true);
-    
+
     if (timerRef.current) clearTimeout(timerRef.current);
-    
+
     timerRef.current = setTimeout(() => {
       setIsDraggable(true);
-    }, 2000);
+      // Teruskan pemicu event awal ke arsitektur list induk kustom jika dibutuhkan
+      onDragStart(e, index);
+    }, 500); // FIXED: Diubah menjadi 0.5 detik
   };
 
   const handleEndHold = () => {
@@ -72,6 +74,7 @@ export default function LinkCard({
 
   const handleDragEndLocal = () => {
     setIsDraggable(false);
+    setIsHolding(false);
     onDragEnd();
   };
 
@@ -84,12 +87,14 @@ export default function LinkCard({
           stiffness: 300,
           damping: 30
         }}
-        draggable={isAdmin && !isDummy && isDraggable}
-        onDragStart={(e) => onDragStart(e, index)}
-        onDragOver={(e) => onDragOver(e, index)}
-        onDragEnd={handleDragEndLocal}
-        className={`relative flex items-start gap-3 p-3 rounded-md transition-colors border border-gray-100/50 ${
-          isDummy ? "opacity-60 bg-gray-50/50 pointer-events-none select-none" : ""
+        // Gunakan native drag over handler hanya untuk kalkulasi pertukaran posisi
+        onDragOver={(e) => {
+          if (isDraggable) {
+            onDragOver(e, index);
+          }
+        }}
+        className={`relative flex items-start gap-3 p-3 rounded-md transition-colors border border-gray-100/50 select-none ${
+          isDummy ? "opacity-60 bg-gray-50/50 pointer-events-none" : ""
         } ${isDraggable ? "bg-slate-50 border-dashed border-slate-300 shadow-lg scale-[1.01] z-50 cursor-grabbing" : "bg-white"}`}
       >
         {/* INDICATOR HANDLE DRAG */}
@@ -100,10 +105,13 @@ export default function LinkCard({
             onMouseLeave={handleEndHold}
             onTouchStart={handleStartHold}
             onTouchEnd={handleEndHold}
+            // Kaitkan event drag end html native agar sinkronisasi state mati merata
+            draggable={isDraggable}
+            onDragEnd={handleDragEndLocal}
             className={`flex items-center justify-center self-center p-1 rounded text-gray-400 cursor-grab hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0 ${
               isDraggable ? "text-blue-600 bg-blue-50 cursor-grabbing animate-pulse" : ""
             }`}
-            title="Tahan 2 detik untuk menyeret urutan"
+            title="Tahan 0.5 detik untuk menyeret urutan"
           >
             <i className={`bx ${isDraggable ? 'bx-grid-vertical' : 'bx-grid-horizontal'} text-xl`}></i>
           </div>
@@ -120,7 +128,7 @@ export default function LinkCard({
             {link.title} 
             {isDummy && <span className="text-[10px] font-normal px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-sm">Contoh</span>}
             {isHolding && !isDraggable && (
-              <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1 py-0.5 rounded animate-pulse">Menyiapkan (2s)...</span>
+              <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1 py-0.5 rounded animate-pulse">Menyiapkan (0.5s)...</span>
             )}
             {isDraggable && (
               <span className="text-[10px] font-medium text-blue-600 bg-blue-50 px-1 py-0.5 rounded">Siap Geser!</span>
@@ -171,7 +179,7 @@ export default function LinkCard({
         <div className="fixed inset-0 bg-black/40 z-[200] flex items-center justify-center p-4">
           <div className="bg-white rounded-md p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
             <h3 className="font-bold text-lg mb-4 text-gray-800">Edit Tautan</h3>
-            
+
             <form action={(formData) => { updateLink(formData); setIsEditing(false); }} className="space-y-4">
               <input type="hidden" name="id" value={link._id.toString()} />
               <input type="hidden" name="icon" value={selectedIcon} />
@@ -196,7 +204,7 @@ export default function LinkCard({
                 placeholder="Deskripsi singkat (Opsional)" 
                 className="w-full p-2.5 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-yellow-500" 
               />
-              
+
               <div className="pt-2">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Pilih Ikon</p>
@@ -233,7 +241,7 @@ export default function LinkCard({
                   </div>
                 )}
               </div>
-              
+
               <div className="flex gap-3 mt-6 pt-4">
                 <button type="button" onClick={() => setIsEditing(false)} className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors">Batal</button>
                 <button type="submit" className="flex-1 py-2.5 bg-yellow-500 text-white rounded-md text-sm font-medium hover:bg-yellow-600 transition-colors">Simpan Perubahan</button>
