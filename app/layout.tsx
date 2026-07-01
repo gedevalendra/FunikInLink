@@ -76,9 +76,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         {/* 2. Membungkus Interceptor dengan Suspense agar lolos build prerender Vercel */}
-        <Suspense fallback={null}>
-          <ButtonLoaderInterceptor />
-        </Suspense>
+   
         <AuthProvider>
         <Header />
           {children}
