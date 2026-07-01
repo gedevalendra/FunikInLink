@@ -116,12 +116,14 @@ export async function POST(request: Request) {
     `;
 
     // 6. Kelompokkan Data Kirim sesuai spesifikasi payload array koleksi Resend SDK
-    const batchPayload = validTargetUsers.map(user => ({
-      from: "Admin Resmi <admin@domainkamu.com>", // PENTING: Ganti dengan domain yang sudah verified/di-approve di dashboard Resend kamu!
-      to: [user.email],
-      subject: subject,
-      html: mainHtmlTemplate,
-    }));
+// 6. Kelompokkan Data Kirim sesuai spesifikasi payload array koleksi Resend SDK
+const batchPayload = validTargetUsers.map(user => ({
+  // SEKARANG SUDAH DIGANTI MENGGUNAKAN DOMAIN KAMU
+  from: "Funikin <noreply@funikin.it.com>", 
+  to: [user.email],
+  subject: subject,
+  html: mainHtmlTemplate,
+}));
 
     // 7. FIXED: Tembakkan langsung array objek payload ke resend.batch.send
     const { data, error } = await resend.batch.send(batchPayload);
