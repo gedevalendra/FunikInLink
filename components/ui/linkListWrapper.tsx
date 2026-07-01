@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import LinkCard from "./linkCard";
 import AddLinkModal from "./addLinkModal";
-import { Reorder, useDragControls } from "framer-motion";
+import { Reorder } from "framer-motion";
 
 interface LinkListWrapperProps {
   initialLinks: any[];
@@ -82,7 +82,7 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
           axis="y" 
           values={links} 
           onReorder={handleReorderEnd}
-          className="flex flex-col gap-1.5 p-1 relative"
+          className="flex flex-col gap-2 p-1 relative"
           style={{ touchAction: "none" }}
         >
           {links.map((link, index) => {
@@ -103,67 +103,46 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
 
 // Sub-komponen pembungkus item
 function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number, isAdmin: boolean }) {
-  const [isDraggable, setIsDraggable] = useState(false);
-  const [isHolding, setIsHolding] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const dragControls = useDragControls();
-
-  const handleStartHold = (event: React.PointerEvent) => {
-    if (!isAdmin) return;
-    setIsHolding(true);
-    
-    // Simpan nativeEvent agar data koordinat sentuhan tidak hilang di dalam antrean asynchronous setTimeout
-    const savedEvent = event.nativeEvent || event;
-
-    if (timerRef.current) clearTimeout(timerRef.current);
-
-    timerRef.current = setTimeout(() => {
-      setIsDraggable(true);
-      
-      // Amankan layar HP agar tidak ter-scroll atau memicu pull-to-refresh bawaan browser mobile
-      document.body.style.overflow = "hidden";
-      document.body.style.touchAction = "none";
-      
-      // Tembakkan eksekusi geser paksa seketika di titik koordinat sentuhan berada
-      dragControls.start(savedEvent);
-    }, 200); // 0.2 detik penahanan responsif
-  };
-
-  const handleEndHold = () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setIsHolding(false);
-  };
-
-  const handleDragEndLocal = () => {
-    setIsDraggable(false);
-    setIsHolding(false);
-    
-    // Kembalikan fungsionalitas scroll layar HP normal setelah drag selesai dilakukan
-    document.body.style.overflow = "";
-    document.body.style.touchAction = "";
-  };
+  const [activeDrag, setActiveDrag] = useState(false);
 
   return (
     <Reorder.Item 
       value={link}
       id={link._id.toString()}
-      dragListener={false}
-      dragControls={dragControls}
-      onDragEnd={handleDragEndLocal}
-      className={`relative flex items-start gap-3 p-3 rounded-md transition-all border border-gray-100/50 select-none ${
-        isDraggable ? "bg-slate-50 border-dashed border-slate-300 shadow-lg scale-[1.01] z-50 cursor-grabbing" : "bg-white"
+      // Menggunakan drag native agar tracking koordinat sentuhan di HP 100% real-time & mulus
+      dragListener={isAdmin}
+      dragElastic={0.4}
+      layout
+      onDragStart={() => {
+        setActiveDrag(true);
+        document.body.style.overflow = "hidden";
+      }}
+      onDragEnd={() => {
+        setActiveDrag(false);
+        document.body.style.overflow = "";
+      }}
+      className={`relative flex items-start gap-3 p-3 rounded-md border select-none transition-shadow duration-200 ${
+        activeDrag 
+          ? "bg-slate-50 border-blue-400 shadow-xl z-50 scale-[1.02]" 
+          : "bg-white border-gray-100/70 shadow-sm"
       }`}
-      style={{ touchAction: "none", userSelect: "none", WebkitUserSelect: "none" }}
+      style={{ 
+        touchAction: "none", 
+        userSelect: "none", 
+        WebkitUserSelect: "none"
+      }}
+      // Konfigurasi animasi pegas (spring) bawaan framer agar pertukaran posisi sangat fluid
+      transition={{ type: "spring", stiffness: 500, damping: 40 }}
     >
       <LinkCard 
         link={link} 
         isAdmin={isAdmin} 
         isDummy={false} 
         index={index}
-        isDraggable={isDraggable}
-        isHolding={isHolding}
-        handleStartHold={handleStartHold}
-        handleEndHold={handleEndHold}
+        isDraggable={activeDrag}
+        isHolding={false}
+        handleStartHold={() => {}}
+        handleEndHold={() => {}}
       />
     </Reorder.Item>
   );
