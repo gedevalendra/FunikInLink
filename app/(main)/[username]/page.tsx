@@ -256,8 +256,6 @@ export default async function DynamicProfilePage({ params }: Props) {
           </div>
         </div>
 
-        <hr className="my-6 border-gray-100" />
-
         {/* 🚀 RENDER SISTEM TAB BARU (Tautan VS Produk Grid 2x4) */}
         <ProfileTabs 
           linksComponent={renderLinksComponent} 

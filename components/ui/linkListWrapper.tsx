@@ -46,24 +46,34 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
   };
 
   return (
-    <div className="space-y-2 relative">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">Tautan Resmi</h3>
+    <div className="space-y-3.5 relative w-full max-w-xl mx-auto px-2">
+      {/* Header Section Minimalis */}
+      <div className="flex justify-between items-center border-b border-neutral-50 pb-1.5">
+        <h3 className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-neutral-400">
+          Tautan Resmi
+        </h3>
       </div>
 
-      {isAdmin && <AddLinkModal />}
+      {isAdmin && (
+        <div className="w-full flex justify-end">
+          <AddLinkModal />
+        </div>
+      )}
 
       {links.length === 0 ? (
-        <div className="flex flex-col gap-3 pt-2">
+        <div className="flex flex-col gap-2.5 pt-1">
           {isAdmin && (
-            <div className="p-3 bg-amber-50 border border-amber-100 rounded-md text-xs text-amber-700 leading-relaxed font-medium">
-              <i className="bx bx-info-circle mr-1 text-sm align-middle"></i>
-              Kamu belum menambahkan tautan apa pun.
+            <div className="p-3 bg-neutral-50 border border-neutral-100 rounded-xl text-[11px] sm:text-xs text-neutral-500 leading-relaxed font-normal flex items-center gap-2">
+              <i className="bx bx-info-circle text-neutral-400 text-sm shrink-0"></i>
+              <span>Kamu belum menambahkan tautan apa pun.</span>
             </div>
           )}
 
           {dummyLinks.map((dummy, idx) => (
-            <div key={dummy._id} className="relative flex items-start gap-3 p-3 rounded-md border border-gray-100/50 opacity-60 bg-gray-50/50 pointer-events-none">
+            <div 
+              key={dummy._id} 
+              className="relative flex items-center gap-2.5 p-3 rounded-xl border border-neutral-100/60 opacity-50 bg-neutral-50/40 pointer-events-none select-none"
+            >
               <LinkCard 
                 link={dummy} 
                 isAdmin={isAdmin} 
@@ -82,7 +92,7 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
           axis="y" 
           values={links} 
           onReorder={handleReorderEnd}
-          className="flex flex-col gap-2 p-1 relative"
+          className="flex flex-col gap-2.5 relative"
           style={{ touchAction: "none" }}
         >
           {links.map((link, index) => {
@@ -101,7 +111,7 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
   );
 }
 
-// Sub-komponen pembungkus item
+// Sub-komponen pembungkus item reorder (dioptimalkan untuk handphone)
 function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number, isAdmin: boolean }) {
   const [isDraggable, setIsDraggable] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
@@ -118,13 +128,9 @@ function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number
 
     timerRef.current = setTimeout(() => {
       setIsDraggable(true);
-      
-      // Kunci layar agar halaman web tidak ikut bergulir ke atas/bawah
       document.body.style.overflow = "hidden";
-      
-      // Tembakkan instruksi geser langsung saat detik ke-0.2 tanpa angkat jari
       dragControls.start(savedEvent);
-    }, 500); 
+    }, 400); // Dipercepat ke 0.4 detik agar lebih responsif di handphone
   };
 
   const handleEndHold = () => {
@@ -146,19 +152,17 @@ function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number
       dragControls={dragControls}
       layout
       onDragEnd={handleDragEndLocal}
-      // Menghilangkan scale membesar agar kartu tidak melompat (efek magnet hilang)
-      className={`relative flex items-start gap-3 p-3 rounded-md border select-none transition-shadow duration-150 ${
+      className={`relative flex items-center gap-3 p-3 rounded-xl border select-none transition-all duration-200 ${
         isDraggable 
-          ? "bg-slate-50 border-gray-300 shadow-md z-50 cursor-grabbing" 
-          : "bg-white border-gray-100/70 shadow-sm"
+          ? "bg-neutral-50/90 border-neutral-300 shadow-md z-50 cursor-grabbing backdrop-blur-xs" 
+          : "bg-white border-neutral-100 hover:border-neutral-200 shadow-xs"
       }`}
       style={{ 
         touchAction: "none", 
         userSelect: "none", 
         WebkitUserSelect: "none"
       }}
-      // Menggunakan animasi transisi normal linier tanpa efek pegas bouncy berlebih
-      transition={{ type: "tween", duration: 0.18 }}
+      transition={{ type: "tween", duration: 0.15 }}
     >
       <LinkCard 
         link={link} 

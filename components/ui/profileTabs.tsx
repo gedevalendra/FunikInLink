@@ -48,7 +48,7 @@ export default function ProfileTabs({ linksComponent, products }: ProfileTabsPro
   return (
     <div className="w-full space-y-5 px-2 max-w-xl mx-auto">
       {/* Tab Navigasi Minimalis */}
-      <div className="flex items-center justify-center gap-6 border-b border-gray-100 pb-px">
+      <div className="flex items-center justify-left gap-6 border-b border-gray-100 pb-px">
         <button
           onClick={() => setActiveTab("links")}
           className={`flex items-center gap-1.5 pb-2 text-xs sm:text-sm font-medium border-b transition-all ${

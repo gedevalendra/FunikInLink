@@ -78,14 +78,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="flex flex-col">
           {/* Tombol Close & Logo */}
           <div className="w-full flex items-center justify-between mb-6">
-            <span className="text-lg font-bold tracking-tight text-black">
+            <span className="text-base sm:text-lg font-medium tracking-tight text-black">
               Funik<span className="text-yellow-500">In</span> Link
             </span>
             <button
               onClick={onClose}
               className="p-1.5 flex cursor-pointer rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 active:scale-95 transition-all duration-150"
             >
-              <i className="bx bx-x text-2xl"></i>
+              <i className="bx bx-x text-xl sm:text-2xl"></i>
             </button>
           </div>
 
@@ -97,15 +97,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               }`}
             >
               {userImage ? (
-                <img src={userImage} alt={userName} className="w-10 h-10 rounded-md border border-slate-200 object-cover" />
+                <img src={userImage} alt={userName} className="w-9 h-9 sm:w-10 sm:h-10 rounded-md border border-slate-200 object-cover" />
               ) : (
-                <div className="w-10 h-10 rounded-md bg-slate-800 text-white font-semibold flex items-center justify-center text-sm uppercase shrink-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-slate-800 text-white font-medium flex items-center justify-center text-xs uppercase shrink-0">
                   {userName.substring(0, 2)}
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-sm text-slate-800 truncate">{userName}</p>
-                <p className="text-xs text-slate-400 font-mono truncate">@{userUsername}</p>
+                <p className="font-medium text-xs sm:text-sm text-slate-800 truncate">{userName}</p>
+                <p className="text-[10px] sm:text-xs text-slate-400 font-mono truncate">@{userUsername}</p>
               </div>
             </div>
           ) : (
@@ -114,18 +114,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 isOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"
               }`}
             >
-              <div className="w-10 h-10 rounded-md bg-yellow-500 text-white font-bold flex items-center justify-center text-base shrink-0 shadow-xs">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-yellow-500 text-white flex items-center justify-center text-sm sm:text-base shrink-0">
                 <i className="bx bx-user-circle"></i>
               </div>
               <div className="min-w-0">
-                <p className="font-bold text-sm text-slate-800 truncate">Tamu FunikIn</p>
-                <p className="text-[11px] text-yellow-600 font-medium truncate">Silahkan masuk ke akun anda</p>
+                <p className="font-medium text-xs sm:text-sm text-slate-800 truncate">Tamu FunikIn</p>
+                <p className="text-[10px] sm:text-[11px] text-yellow-600 font-medium truncate">Silahkan masuk ke akun anda</p>
               </div>
             </div>
           )}
 
           {/* Daftar Navigasi Utama Ber-HR */}
-          <nav className="flex flex-col">
+          <nav className="flex flex-col text-xs sm:text-sm">
             <div className="border-b border-slate-100">
               <Link
                 href="/"
@@ -134,7 +134,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   isOpen ? "translate-y-0 opacity-100 delay-[50ms]" : "-translate-y-4 opacity-0"
                 }`}
               >
-                <i className="bx bx-home-alt text-xl"></i>
+                <i className="bx bx-home-alt text-lg"></i>
                 Home
               </Link>
             </div>
@@ -147,7 +147,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   isOpen ? "translate-y-0 opacity-100 delay-[100ms]" : "-translate-y-4 opacity-0"
                 }`}
               >
-                <i className="bx bx-info-circle text-xl"></i>
+                <i className="bx bx-info-circle text-lg"></i>
                 About
               </Link>
             </div>
@@ -160,49 +160,58 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   isOpen ? "translate-y-0 opacity-100 delay-[150ms]" : "-translate-y-4 opacity-0"
                 }`}
               >
-                <i className="bx bx-shield-alt-2 text-xl"></i>
+                <i className="bx bx-shield-alt-2 text-lg"></i>
                 Privacy
               </Link>
             </div>
 
             {/* Menu Akun Tambahan */}
-{/* Cari di bagian Menu Akun Tambahan */}
-{session && (
-  <>
-    <div className="border-b border-slate-100">
-      <Link
-        href={`/${userUsername}`}
-        onClick={onClose}
-        className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
-          isOpen ? "translate-y-0 opacity-100 delay-[200ms]" : "-translate-y-4 opacity-0"
-        }`}
-      >
-        <i className="bx bx-user text-xl"></i>
-        Profile Saya
-      </Link>
-    </div>
+            {session && (
+              <>
+                <div className="border-b border-slate-100">
+                  <Link
+                    href={`/${userUsername}`}
+                    onClick={onClose}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
+                      isOpen ? "translate-y-0 opacity-100 delay-[200ms]" : "-translate-y-4 opacity-0"
+                    }`}
+                  >
+                    <i className="bx bx-user text-lg"></i>
+                    Profile Saya
+                  </Link>
+                </div>
 
-    {/* 🚀 MENU BARU: KERANJANG */}
-    <div className="border-b border-slate-100">
-      <Link
-        href={`/${userUsername}/chart`}
-        onClick={onClose}
-        className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
-          isOpen ? "translate-y-0 opacity-100 delay-[220ms]" : "-translate-y-4 opacity-0"
-        }`}
-      >
-        <i className="bx bx-cart text-xl"></i>
-        Keranjang Belanja
-      </Link>
-    </div>
+                {/* 🚀 MENU BARU: KERANJANG */}
+                <div className="border-b border-slate-100">
+                  <Link
+                    href={`/${userUsername}/chart`}
+                    onClick={onClose}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
+                      isOpen ? "translate-y-0 opacity-100 delay-[220ms]" : "-translate-y-4 opacity-0"
+                    }`}
+                  >
+                    <i className="bx bx-cart text-lg"></i>
+                    Keranjang Belanja
+                  </Link>
+                </div>
 
-    {(session.user as any)?.role === "admin" && (
-      <div className="border-b border-slate-100">
-        {/* ... Admin Panel Link ... */}
-      </div>
-    )}
-  </>
-)}
+                {/* 🚀 BERHASIL DIPERBAIKI: MENU ADMIN PANEL AKTIF */}
+                {(session.user as any)?.role === "admin" && (
+                  <div className="border-b border-slate-100">
+                    <Link
+                      href="/admin"
+                      onClick={onClose}
+                      className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-red-600 transition-all transform duration-300 ${
+                        isOpen ? "translate-y-0 opacity-100 delay-[240ms]" : "-translate-y-4 opacity-0"
+                      }`}
+                    >
+                      <i className="bx bx-grid-alt text-lg text-red-500"></i>
+                      Admin Panel
+                    </Link>
+                  </div>
+                )}
+              </>
+            )}
           </nav>
         </div>
 
@@ -212,10 +221,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <div className="relative group w-full">
               {/* Efek Icon Beterbangan di atas tombol merah */}
               <div className="absolute -top-4 inset-x-0 h-10 pointer-events-none overflow-visible z-20">
-                <i className="bx bx-heart icon-fly text-red-500 text-sm" style={{ left: '15%', animationDuration: '2.5s', animationDelay: '0s' }}></i>
-                <i className="bx bx-link-alt icon-fly text-rose-400 text-xs" style={{ left: '35%', animationDuration: '3.2s', animationDelay: '0.6s' }}></i>
-                <i className="bx bxs-star icon-fly text-red-600 text-[11px]" style={{ left: '55%', animationDuration: '2.8s', animationDelay: '1.2s' }}></i>
-                <i className="bx bx-message-rounded icon-fly text-rose-500 text-xs" style={{ left: '80%', animationDuration: '3.5s', animationDelay: '0.3s' }}></i>
+                <i className="bx bx-heart icon-fly text-red-500 text-xs" style={{ left: '15%', animationDuration: '2.5s', animationDelay: '0s' }}></i>
+                <i className="bx bx-link-alt icon-fly text-rose-400 text-[10px]" style={{ left: '35%', animationDuration: '3.2s', animationDelay: '0.6s' }}></i>
+                <i className="bx bxs-star icon-fly text-red-600 text-[10px]" style={{ left: '55%', animationDuration: '2.8s', animationDelay: '1.2s' }}></i>
+                <i className="bx bx-message-rounded icon-fly text-rose-500 text-[10px]" style={{ left: '80%', animationDuration: '3.5s', animationDelay: '0.3s' }}></i>
               </div>
 
               <button
@@ -223,11 +232,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   signOut({ callbackUrl: "/" });
                   onClose();
                 }}
-                className={`w-full flex items-center justify-center gap-2 font-bold bg-gradient-to-r from-red-600 via-rose-600 to-red-700 animate-gradient-shift text-white py-3 rounded-md shadow-md text-sm tracking-wide transition-all transform duration-300 ${
+                className={`w-full flex items-center justify-center gap-2 font-normal bg-gradient-to-r from-red-600 via-rose-600 to-red-700 animate-gradient-shift text-white py-2.5 rounded-md text-xs sm:text-sm tracking-wide transition-all transform duration-300 ${
                   isOpen ? "translate-y-0 opacity-100 delay-[300ms]" : "-translate-y-4 opacity-0"
                 }`}
               >
-                <i className="bx bx-log-out text-base animate-pulse"></i>
+                <i className="bx bx-log-out text-sm animate-pulse"></i>
                 Keluar Akun
               </button>
             </div>
@@ -235,15 +244,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <div className="relative group w-full">
               {/* Efek Icon Beterbangan di atas tombol outline hitam */}
               <div className="absolute -top-4 inset-x-0 h-10 pointer-events-none overflow-visible z-20">
-                <i className="bx bx-link icon-fly text-slate-700 text-sm" style={{ left: '20%', animationDuration: '3s', animationDelay: '0.2s' }}></i>
-                <i className="bx bx-camera icon-fly text-slate-500 text-xs" style={{ left: '45%', animationDuration: '2.4s', animationDelay: '0s' }}></i>
-                <i className="bx bx-user icon-fly text-slate-600 text-xs" style={{ left: '70%', animationDuration: '3.6s', animationDelay: '0.8s' }}></i>
+                <i className="bx bx-link icon-fly text-slate-700 text-xs" style={{ left: '20%', animationDuration: '3s', animationDelay: '0.2s' }}></i>
+                <i className="bx bx-camera icon-fly text-slate-500 text-[10px]" style={{ left: '45%', animationDuration: '2.4s', animationDelay: '0s' }}></i>
+                <i className="bx bx-user icon-fly text-slate-600 text-[10px]" style={{ left: '70%', animationDuration: '3.6s', animationDelay: '0.8s' }}></i>
               </div>
 
               <Link
                 href="/registrasi"
                 onClick={onClose}
-                className={`w-full block text-center font-bold bg-transparent text-slate-900 border-2 border-slate-900 py-3 rounded-md text-sm tracking-wide transition-all transform duration-300 ${
+                className={`w-full block text-center font-normal bg-transparent text-slate-900 border border-slate-900 py-2.5 rounded-md text-xs sm:text-sm tracking-wide transition-all transform duration-300 ${
                   isOpen ? "translate-y-0 opacity-100 delay-[200ms]" : "-translate-y-4 opacity-0"
                 }`}
               >
