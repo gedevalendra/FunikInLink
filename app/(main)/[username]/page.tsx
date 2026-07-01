@@ -210,7 +210,7 @@ export default async function DynamicProfilePage({ params }: Props) {
         <WelcomePopup message={custom.popupMessage} />
       )}
 
-      <main className={`grow max-w-4xl w-full mx-auto px-6 pt-14 py-12 mt-2 -mb-2 transition-all duration-300
+      <main className={`grow max-w-4xl w-full mx-auto px-4 pt-14 py-12 mt-2 -mb-2 transition-all duration-300
         ${custom.isBlur ? "bg-white/60 backdrop-blur-md shadow-xl" : "bg-white shadow-sm"}
         ${custom.rounded}
       `}>
