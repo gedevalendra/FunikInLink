@@ -35,63 +35,54 @@ export default function ProductDetailClient({ product, user, otherProducts }: Pr
     }).format(value);
   };
 
-  const nextSlide = () => {
-    setCurrentImgIndex((prev) => (prev + 1) % product.images.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentImgIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
-  };
-
   const handleAddToCart = async () => {
     try {
       setIsAdding(true);
       await addToCartAction(product._id, product.name, product.price, product.images[0]);
-      alert(`"${product.name}" berhasil ditambahkan ke keranjang belanja database!`);
+      alert(`"${product.name}" dimasukkan ke keranjang.`);
     } catch (error: any) {
-      alert(error.message || "Gagal menambah ke keranjang belanja. Tolong pastikan kamu sudah login.");
+      alert(error.message || "Gagal menambah ke keranjang belanja. Silakan login.");
     } finally {
       setIsAdding(false);
     }
   };
 
   return (
-    <div>
-      {/* 1. BAGIAN ATAS: SLIDER GAMBAR */}
-      <div className="relative w-full aspect-[4/3] bg-gray-50 overflow-hidden group">
+    <div className="px-3 sm:px-0">
+      {/* 1. SLIDER GAMBAR MINIMALIS */}
+      <div className="relative w-full aspect-[4/3] bg-neutral-50 rounded-xl overflow-hidden group border border-neutral-100">
         <img
           src={product.images[currentImgIndex]}
           alt={product.name}
-          className="w-full h-full object-cover transition-all duration-500"
+          className="w-full h-full object-cover transition-all duration-300"
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).src =
               "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600";
           }}
         />
 
-        {/* Navigasi Panah jika Gambar > 1 */}
         {product.images.length > 1 && (
           <>
             <button
-              onClick={prevSlide}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 backdrop-blur shadow-sm flex items-center justify-center text-gray-700 hover:bg-white active:scale-95 transition-all"
+              onClick={() => setCurrentImgIndex((prev) => (prev - 1 + product.images.length) % product.images.length)}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 border border-neutral-100 shadow-sm flex items-center justify-center text-neutral-600 hover:bg-white active:scale-95 transition-all"
             >
-              <i className="bx bx-chevron-left text-xl"></i>
+              <i className="bx bx-chevron-left text-lg"></i>
             </button>
             <button
-              onClick={nextSlide}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 backdrop-blur shadow-sm flex items-center justify-center text-gray-700 hover:bg-white active:scale-95 transition-all"
+              onClick={() => setCurrentImgIndex((prev) => (prev + 1) % product.images.length)}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 border border-neutral-100 shadow-sm flex items-center justify-center text-neutral-600 hover:bg-white active:scale-95 transition-all"
             >
-              <i className="bx bx-chevron-right text-xl"></i>
+              <i className="bx bx-chevron-right text-lg"></i>
             </button>
 
-            {/* Indikator Titik Posisi Slider */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/20 px-2 py-1 rounded-full backdrop-blur-sm">
+            {/* Titik Indikator */}
+            <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1 bg-neutral-900/10 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
               {product.images.map((_, idx) => (
                 <div
                   key={idx}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    idx === currentImgIndex ? "w-3 bg-white" : "w-1.5 bg-white/50"
+                  className={`h-1 rounded-full transition-all duration-300 ${
+                    idx === currentImgIndex ? "w-2.5 bg-white" : "w-1 bg-white/60"
                   }`}
                 />
               ))}
@@ -100,47 +91,47 @@ export default function ProductDetailClient({ product, user, otherProducts }: Pr
         )}
       </div>
 
-      <div className="px-6 pt-5 space-y-5">
-        {/* 2. JUDUL PRODUK (Maksimal 2 baris) */}
-        <h1 className="text-xl font-extrabold text-gray-900 tracking-tight leading-snug line-clamp-2">
+      <div className="pt-4 space-y-4">
+        {/* 2. JUDUL PRODUK (Maksimal 2 baris, responsif hf) */}
+        <h1 className="text-base sm:text-lg font-normal text-neutral-800 leading-snug line-clamp-2">
           {product.name}
         </h1>
 
-        {/* 3. INFORMASI JUMLAH PEMBELI & HARGA */}
-        <div className="flex items-center justify-between bg-gray-50/50 border border-gray-100 rounded-xl p-3.5">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500">
-            <i className="bx bx-package text-base text-gray-400"></i>
-            <span>Terjual {product.salesCount}+ produk</span>
+        {/* 3. INFO PEMBELI & HARGA */}
+        <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
+          <div className="flex items-center gap-1 text-[11px] sm:text-xs text-neutral-400">
+            <i className="bx bx-package text-sm"></i>
+            <span>Terjual {product.salesCount}+</span>
           </div>
-          <div className="text-lg font-black text-gray-900">
+          <div className="text-sm sm:text-base font-medium text-neutral-900">
             {formatRupiah(product.price)}
           </div>
         </div>
 
-        {/* 4. TOMBOL KERANJANG UTAMA DI DETAIL PRODUK */}
+        {/* 4. BUTTON KERANJANG */}
         <button
           onClick={handleAddToCart}
           disabled={isAdding}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm transition-all active:scale-[0.99] shadow-md shadow-blue-100 disabled:bg-gray-400"
+          className="w-full bg-neutral-900 hover:bg-neutral-800 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm transition-all disabled:bg-neutral-300"
         >
           {isAdding ? (
             <>
-              <i className="bx bx-loader-alt animate-spin text-lg"></i> Memproses...
+              <i className="bx bx-loader-alt animate-spin"></i> Menyimpan...
             </>
           ) : (
             <>
-              <i className="bx bx-cart-add text-lg"></i> Masukkan ke Keranjang Belanja
+              <i className="bx bx-cart-add text-sm sm:text-base"></i> Masukkan ke Keranjang
             </>
           )}
         </button>
 
-        {/* 5. DESKRIPSI DENGAN GRADASI OPACITY MULUS */}
-        <div className="space-y-2">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400">Deskripsi Produk</h2>
+        {/* 5. DESKRIPSI DENGAN GRADASI OPACITY SLOW */}
+        <div className="space-y-1 pt-1">
+          <h2 className="text-[10px] uppercase font-medium tracking-wider text-neutral-400">Deskripsi</h2>
           <div className="relative">
             <div
-              className={`text-sm text-gray-600 leading-relaxed overflow-hidden transition-all duration-500 ${
-                isDescExpanded ? "max-h-[2000px]" : "max-h-[7.5rem]" 
+              className={`text-xs sm:text-sm text-neutral-500 leading-relaxed overflow-hidden transition-all duration-300 ${
+                isDescExpanded ? "max-h-[2000px]" : "max-h-[6.5rem]" 
               }`}
               style={{
                 display: "-webkit-box",
@@ -151,78 +142,74 @@ export default function ProductDetailClient({ product, user, otherProducts }: Pr
               {product.description}
             </div>
 
-            {/* Efek Gradasi Fade Putih Menutup Baris Bawah saat tertutup */}
             {!isDescExpanded && (
-              <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none transition-opacity duration-300" />
+              <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white via-white/70 to-transparent pointer-events-none" />
             )}
           </div>
 
-          {/* Tombol Lihat Deskripsi */}
           <button
             onClick={() => setIsDescExpanded(!isDescExpanded)}
-            className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 pt-1 active:scale-95 transition-transform"
+            className="text-[11px] font-medium text-neutral-600 hover:text-neutral-900 flex items-center gap-0.5 pt-1"
           >
             {isDescExpanded ? (
-              <>Sembunyikan <i className="bx bx-chevron-up text-base"></i></>
+              <>Sembunyikan <i className="bx bx-chevron-up"></i></>
             ) : (
-              <>Lihat Deskripsi Lengkap <i className="bx bx-chevron-down text-base"></i></>
+              <>Lihat Selengkapnya <i className="bx bx-chevron-down"></i></>
             )}
           </button>
         </div>
 
-        <hr className="border-gray-100 my-2" />
+        <hr className="border-neutral-100/70" />
 
-        {/* 6. INFORMASI PROFIL PEMILIK */}
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100/50">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className={`w-11 h-11 rounded-full bg-gray-900 text-white font-bold flex items-center justify-center text-sm shrink-0 uppercase
-              ${user.profileBorder !== 'none' ? `ring-2 ${user.profileBorder}` : ""}
-            `}>
+        {/* 6. PROFIL PEMILIK (MINIMALIS) */}
+        <div className="flex items-center justify-between p-3 border border-neutral-100 rounded-xl bg-neutral-50/50">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-full bg-neutral-200 text-neutral-700 flex items-center justify-center text-xs shrink-0 uppercase">
               {user.name.substring(0, 2)}
             </div>
             <div className="min-w-0">
-              <h4 className="text-sm font-bold text-gray-800 truncate">{user.name}</h4>
-              <p className="text-xs text-gray-400 font-mono truncate">@{user.username}</p>
+              <h4 className="text-xs sm:text-sm font-medium text-neutral-800 truncate">{user.name}</h4>
+              <p className="text-[10px] sm:text-xs text-neutral-400 font-mono truncate">@{user.username}</p>
             </div>
           </div>
           <Link
             href={`/${user.username}`}
-            className="text-xs font-bold bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 active:scale-95 transition-all shadow-sm shrink-0"
+            className="text-[11px] bg-white border border-neutral-200 text-neutral-700 px-3 py-1.5 rounded-lg hover:bg-neutral-50 active:scale-95 transition-all"
           >
             Kunjungi
           </Link>
         </div>
 
-        {/* 7. DAFTAR PRODUK LAIN */}
-        <div className="pt-4 space-y-4">
-          <h3 className="text-sm font-bold text-gray-800 flex items-center gap-1">
-            <i className="bx bx-grid-alt text-base text-gray-400"></i> Produk Lain dari Toko Ini
+        {/* 7. PRODUK LAIN */}
+        <div className="pt-3 space-y-3">
+          <h3 className="text-xs font-medium text-neutral-400 flex items-center gap-1">
+            Produk Lain Dari Toko Ini
           </h3>
 
           {otherProducts.length === 0 ? (
-            <p className="text-xs text-gray-400 italic bg-gray-50/50 rounded-lg p-4 text-center border border-dashed border-gray-200">
+            <p className="text-xs text-neutral-400 font-light bg-neutral-50 rounded-lg p-4 text-center border border-dashed border-neutral-200">
               (tidak ada produk lain)
             </p>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               {otherProducts.map((item) => (
                 <Link
                   key={item._id}
                   href={`/${user.username}/produk/${item.slug}`}
-                  className="group block bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-sm transition-all"
+                  className="group block bg-white border border-neutral-100 rounded-xl overflow-hidden hover:border-neutral-200 transition-all"
                 >
-                  <div className="w-full aspect-[4/3] bg-gray-50 overflow-hidden">
+                  <div className="w-full aspect-[4/3] bg-neutral-50 overflow-hidden">
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-300"
                     />
                   </div>
-                  <div className="p-3 space-y-1">
-                    <h4 className="text-xs font-bold text-gray-700 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                  <div className="p-2.5 space-y-0.5">
+                    <h4 className="text-[11px] sm:text-xs text-neutral-700 line-clamp-1">
                       {item.name}
                     </h4>
-                    <p className="text-xs font-extrabold text-gray-950">
+                    <p className="text-xs font-medium text-neutral-900">
                       {formatRupiah(item.price)}
                     </p>
                   </div>
@@ -231,7 +218,6 @@ export default function ProductDetailClient({ product, user, otherProducts }: Pr
             </div>
           )}
         </div>
-
       </div>
     </div>
   );

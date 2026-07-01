@@ -37,7 +37,7 @@ export default function ProfileTabs({ linksComponent, products }: ProfileTabsPro
     try {
       setLoadingId(product._id);
       await addToCartAction(product._id, product.name, product.price, product.image);
-      alert(`"${product.name}" berhasil dimasukkan ke keranjang belanja database!`);
+      alert(`"${product.name}" berhasil dimasukkan ke keranjang belanja.`);
     } catch (error: any) {
       alert(error.message || "Gagal menambahkan ke keranjang. Silakan login.");
     } finally {
@@ -46,78 +46,75 @@ export default function ProfileTabs({ linksComponent, products }: ProfileTabsPro
   };
 
   return (
-    <div className="w-full space-y-6">
-      {/* Tombol Navigasi Tab */}
-      <div className="flex items-center gap-2 border-b border-gray-100 pb-px">
+    <div className="w-full space-y-5 px-2 max-w-xl mx-auto">
+      {/* Tab Navigasi Minimalis */}
+      <div className="flex items-center justify-center gap-6 border-b border-gray-100 pb-px">
         <button
           onClick={() => setActiveTab("links")}
-          className={`flex items-center gap-2 pb-3 text-sm font-medium border-b-2 transition-all px-2 ${
+          className={`flex items-center gap-1.5 pb-2 text-xs sm:text-sm font-medium border-b transition-all ${
             activeTab === "links"
-              ? "border-gray-900 text-gray-900 font-semibold"
-              : "border-transparent text-gray-400 hover:text-gray-600"
+              ? "border-neutral-800 text-neutral-800 font-normal"
+              : "border-transparent text-neutral-400 hover:text-neutral-600"
           }`}
         >
-          <i className="bx bx-link-alt text-base"></i> Tautan
+          <i className="bx bx-link-alt text-sm"></i> Tautan
         </button>
         <button
           onClick={() => setActiveTab("products")}
-          className={`flex items-center gap-2 pb-3 text-sm font-medium border-b-2 transition-all px-2 ${
+          className={`flex items-center gap-1.5 pb-2 text-xs sm:text-sm font-medium border-b transition-all ${
             activeTab === "products"
-              ? "border-gray-900 text-gray-900 font-semibold"
-              : "border-transparent text-gray-400 hover:text-gray-600"
+              ? "border-neutral-800 text-neutral-800 font-normal"
+              : "border-transparent text-neutral-400 hover:text-neutral-600"
           }`}
         >
-          <i className="bx bx-shopping-bag text-base"></i> Produk
+          <i className="bx bx-shopping-bag text-sm"></i> Produk
         </button>
       </div>
 
-      {/* Konten Berdasarkan Tab yang Aktif */}
+      {/* Konten Halaman */}
       <div className="transition-all duration-300">
         {activeTab === "links" ? (
           <div>{linksComponent}</div>
         ) : (
-          /* Grid 2 Kolom Skala 2x4 */
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {products.map((product) => (
               <div
                 key={product._id}
-                className="group relative flex flex-col bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full"
+                className="group relative flex flex-col bg-white border border-neutral-100 rounded-xl overflow-hidden transition-all duration-200 h-full hover:border-neutral-200"
               >
-                {/* Bagian Atas: Background Gambar Produk */}
+                {/* Gambar Produk */}
                 <a
                   href={`/${username}/produk/${product.slug}`}
-                  className="relative block w-full aspect-[16/10] overflow-hidden bg-gray-50 cursor-pointer"
+                  className="relative block w-full aspect-[4/3] overflow-hidden bg-neutral-50 cursor-pointer"
                 >
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-300"
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).src =
                         "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600";
                     }}
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
                 </a>
 
-                {/* Bagian Bawah: Konten Informasi Ber-background Putih */}
-                <div className="flex flex-col p-4 flex-grow bg-white">
-                  {/* Judul & Deskripsi */}
-                  <div className="flex-grow space-y-1.5 mb-4">
-                    <h3 className="font-bold text-gray-800 text-sm sm:text-base line-clamp-1 group-hover:text-blue-600 transition-colors">
+                {/* Info Produk */}
+                <div className="flex flex-col p-3.5 flex-grow bg-white">
+                  <div className="flex-grow space-y-1 mb-3">
+                    <h3 className="text-xs sm:text-sm font-medium text-neutral-800 line-clamp-1 group-hover:text-neutral-600 transition-colors">
                       <a href={`/${username}/produk/${product.slug}`}>{product.name}</a>
                     </h3>
-                    <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+                    <p className="text-[11px] sm:text-xs text-neutral-400 line-clamp-2 leading-relaxed">
                       {product.description}
                     </p>
-                    <p className="text-[11px] text-gray-400 flex items-center gap-1 font-medium pt-0.5">
-                      <i className="bx bx-package text-xs"></i> Terjual {product.salesCount}+ produk
-                    </p>
+                    <span className="inline-block text-[10px] text-neutral-400 font-light pt-1">
+                      Terjual {product.salesCount}+
+                    </span>
                   </div>
 
-                  {/* Bagian Paling Bawah: Harga (Kiri) & Keranjang (Kanan) */}
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-auto">
-                    <span className="font-bold text-gray-900 text-sm sm:text-base">
+                  {/* Harga & Tombol Keranjang */}
+                  <div className="flex items-center justify-between pt-2.5 border-t border-neutral-50 mt-auto">
+                    <span className="text-xs sm:text-sm font-medium text-neutral-800">
                       {formatRupiah(product.price)}
                     </span>
                     <button
@@ -126,13 +123,12 @@ export default function ProfileTabs({ linksComponent, products }: ProfileTabsPro
                         handleAddToCart(product);
                       }}
                       disabled={loadingId === product._id}
-                      className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-900 text-white hover:bg-gray-800 active:scale-95 transition-all shadow-sm disabled:bg-gray-400"
-                      title="Tambah ke Keranjang"
+                      className="flex items-center justify-center w-7 h-7 rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 active:scale-95 transition-all disabled:bg-neutral-300"
                     >
                       {loadingId === product._id ? (
-                        <i className="bx bx-loader-alt animate-spin text-base"></i>
+                        <i className="bx bx-loader-alt animate-spin text-xs"></i>
                       ) : (
-                        <i className="bx bx-cart text-lg"></i>
+                        <i className="bx bx-cart text-sm"></i>
                       )}
                     </button>
                   </div>

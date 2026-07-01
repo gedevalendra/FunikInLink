@@ -21,7 +21,7 @@ export default async function CartPage({ params }: Props) {
   const resolvedParams = await params;
   const username = resolvedParams.username;
 
-  // Ambil data keranjang asli dari database MongoDB milik user tersebut
+  // Mengambil data keranjang riil dari koleksi Chart MongoDB
   const dbCartItems = await Chart.find({ userId }).lean();
 
   const serializedCart = dbCartItems.map((item: any) => ({
@@ -33,9 +33,13 @@ export default async function CartPage({ params }: Props) {
   }));
 
   return (
-    <CartClientContainer 
-      initialCart={serializedCart} 
-      username={username} 
-    />
+    <div className="min-h-screen bg-neutral-50/40">
+      <div className="max-w-md mx-auto bg-white min-h-screen shadow-sm border-x border-neutral-100/60">
+        <CartClientContainer 
+          initialCart={serializedCart} 
+          username={username} 
+        />
+      </div>
+    </div>
   );
 }
