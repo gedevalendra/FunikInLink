@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import LinkCard from "./linkCard";
 import AddLinkModal from "./addLinkModal";
+// Import AnimatePresence untuk mendeteksi siklus hidup animasi jika ada item yang bergeser
+import { AnimatePresence } from "framer-motion";
 
 interface LinkListWrapperProps {
   initialLinks: any[];
@@ -12,21 +14,17 @@ interface LinkListWrapperProps {
 }
 
 export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, customVariant }: LinkListWrapperProps) {
-  // Urutkan data awal berdasarkan index order dari terkecil ke terbesar (0, 1, 2, ...)
   const sortedInitial = [...initialLinks].sort((a, b) => (a.order || 0) - (b.order || 0));
   const [links, setLinks] = useState(sortedInitial);
 
-  // Sinkronisasi state jika initialLinks dari Server Component berubah
   useEffect(() => {
     const updatedSorted = [...initialLinks].sort((a, b) => (a.order || 0) - (b.order || 0));
     setLinks(updatedSorted);
   }, [initialLinks]);
 
-  // Ref untuk melacak elemen yang sedang diseret dan elemen target di bawahnya
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
 
-  // Fungsi untuk menyimpan urutan baru ke database via API internal
   const saveNewOrder = async (updatedLinks: any[]) => {
     try {
       await fetch("/api/links/reorder", {
@@ -35,7 +33,7 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
         body: JSON.stringify({
           links: updatedLinks.map((link, index) => ({
             id: link._id.toString(),
-            order: index // Urutan otomatis diset dari 0, 1, 2, dst.
+            order: index
           }))
         })
       });
@@ -44,36 +42,35 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
     }
   };
 
-  // Fungsi pemicu saat baris mulai diseret (Drag Start)
   const handleDragStart = (e: React.DragEvent, position: number) => {
     dragItem.current = position;
   };
 
-  // Fungsi pemicu saat melewati baris lain (Drag Over)
   const handleDragOver = (e: React.DragEvent, position: number) => {
-    e.preventDefault(); // Mengizinkan elemen ditaruh di sini
+    e.preventDefault();
+    if (dragItem.current === null || dragItem.current === position) return;
+    
     dragOverItem.current = position;
+    
+    // LIVE ANIMATION SWAP: Tukar posisi array langsung di sini saat hover
+    // Ini yang memicu elemen-elemen lain otomatis bergerak minggir/kegeser lewat Framer Motion
+    const copyListItems = [...links];
+    const dragItemContent = copyListItems[dragItem.current];
+    
+    copyListItems.splice(dragItem.current, 1);
+    copyListItems.splice(dragOverItem.current, 0, dragItemContent);
+    
+    // Perbarui referensi index posisi yang baru diseret agar tetap sinkron
+    dragItem.current = position; 
+    setLinks(copyListItems);
   };
 
-  // Fungsi saat seretan dilepas (Drag End) - Mengatur ulang posisi array dan simpan ke DB
   const handleDragEnd = () => {
-    if (dragItem.current !== null && dragOverItem.current !== null) {
-      if (dragItem.current !== dragOverItem.current) {
-        const copyListItems = [...links];
-        const dragItemContent = copyListItems[dragItem.current];
-        
-        // Hapus elemen lama dan masukkan ke indeks posisi target yang baru
-        copyListItems.splice(dragItem.current, 1);
-        copyListItems.splice(dragOverItem.current, 0, dragItemContent);
-        
-        setLinks(copyListItems);
-
-        if (isAdmin) {
-          saveNewOrder(copyListItems);
-        }
+    if (dragItem.current !== null) {
+      if (isAdmin) {
+        saveNewOrder(links);
       }
     }
-    // Reset data tracking ref
     dragItem.current = null;
     dragOverItem.current = null;
   };
@@ -109,19 +106,22 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
           ))}
         </div>
       ) : (
-        <div className="flex flex-col gap-1">
-          {links.map((link, index) => (
-            <LinkCard 
-              key={link._id.toString()} 
-              link={link} 
-              isAdmin={isAdmin} 
-              isDummy={false}
-              index={index}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDragEnd={handleDragEnd}
-            />
-          ))}
+        // Menggunakan flex-col dengan tumpukan elemen motion
+        <div className="flex flex-col gap-1.5 overflow-hidden p-1">
+          <AnimatePresence initial={false}>
+            {links.map((link, index) => (
+              <LinkCard 
+                key={link._id.toString()} 
+                link={link} 
+                isAdmin={isAdmin} 
+                isDummy={false}
+                index={index}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDragEnd}
+              />
+            ))}
+          </AnimatePresence>
         </div>
       )}
     </div>

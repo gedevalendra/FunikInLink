@@ -2,8 +2,9 @@
 
 import { useState, useRef } from "react";
 import { deleteLink, updateLink } from "../../lib/actions";
+// Import motion dari framer-motion untuk mendaftarkan animasi layout bergeser
+import { motion } from "framer-motion";
 
-// Daftar 100 Ikon
 const BOXICONS = [
   "bx-link", "bx-globe", "bxl-instagram", "bxl-tiktok", "bxl-youtube", "bxl-facebook", "bxl-twitter",
   "bxl-whatsapp", "bxl-telegram", "bxl-discord", "bxl-github", "bxl-linkedin", "bxl-spotify",
@@ -45,12 +46,10 @@ export default function LinkCard({
   const [selectedIcon, setSelectedIcon] = useState(link.icon || "bx-link");
   const [showPicker, setShowPicker] = useState(false);
   
-  // Mengontrol izin seret (draggable)
   const [isDraggable, setIsDraggable] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Mulai menahan (Hold) gagang selama 2 detik (2000 md)
   const handleStartHold = () => {
     if (!isAdmin || isDummy) return;
     setIsHolding(true);
@@ -62,7 +61,6 @@ export default function LinkCard({
     }, 2000);
   };
 
-  // Lepas tahanan / Batal sebelum atau sesudah 2 detik
   const handleEndHold = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -78,16 +76,25 @@ export default function LinkCard({
 
   return (
     <>
-      <div 
+      {/* MENGGUNAKAN <motion.div> + Properti layout & transition.
+        Ini yang membuat elemen-elemen lain bergerak meluncur mulus saat posisinya digeser.
+      */}
+      <motion.div 
+        layout
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 30
+        }}
         draggable={isAdmin && !isDummy && isDraggable}
         onDragStart={(e) => onDragStart(e, index)}
         onDragOver={(e) => onDragOver(e, index)}
         onDragEnd={handleDragEndLocal}
-        className={`relative flex items-start gap-3 p-3 -mx-3 rounded-xl transition-all border border-gray-100/30 ${
+        className={`relative flex items-start gap-3 p-3 rounded-md transition-colors border border-gray-100/50 ${
           isDummy ? "opacity-60 bg-gray-50/50 pointer-events-none select-none" : ""
-        } ${isDraggable ? "bg-slate-50 border-dashed border-slate-300 shadow-md scale-[1.01] cursor-grabbing" : "bg-white"}`}
+        } ${isDraggable ? "bg-slate-50 border-dashed border-slate-300 shadow-lg scale-[1.01] z-50 cursor-grabbing" : "bg-white"}`}
       >
-        {/* INDICATOR HANDLE DRAG (Hanya Muncul jika Admin) */}
+        {/* INDICATOR HANDLE DRAG */}
         {isAdmin && !isDummy && (
           <div 
             onMouseDown={handleStartHold}
@@ -115,7 +122,7 @@ export default function LinkCard({
             {link.title} 
             {isDummy && <span className="text-[10px] font-normal px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-sm">Contoh</span>}
             {isHolding && !isDraggable && (
-              <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1 py-0.5 rounded animate-pulse">Menyiapkan...</span>
+              <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1 py-0.5 rounded animate-pulse">Menyiapkan (2s)...</span>
             )}
             {isDraggable && (
               <span className="text-[10px] font-medium text-blue-600 bg-blue-50 px-1 py-0.5 rounded">Siap Geser!</span>
@@ -159,7 +166,7 @@ export default function LinkCard({
             </button>
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* MODAL EDIT TAUTAN */}
       {isEditing && !isDummy && (
