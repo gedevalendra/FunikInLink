@@ -3,8 +3,10 @@ import ProfileSettings from "../../../components/ui/profileSettings";
 import LinkListWrapper from "../../../components/ui/linkListWrapper";
 import OnboardingModal from "../../../components/ui/onboardingModal"; 
 import WelcomePopup from "../../../components/ui/welcomePopup"; 
+import ProfileTabs from "../../../components/ui/profileTabs"; // 🚀 Import komponen tab baru kita
 import { connectDB } from "../../../lib/db";
 import { SharedLink, User } from "../../../lib/models";
+import mongoose from "mongoose";
 
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../lib/auth";
@@ -13,7 +15,7 @@ interface Props {
   params: Promise<{ username: string }> | { username: string };
 }
 
-// Data Dummy Preview saat tautan user masih kosong
+// Data Dummy Tautan
 const DUMMY_PREVIEW_LINKS = [
   { 
     _id: "dummy-github", 
@@ -35,6 +37,46 @@ const DUMMY_PREVIEW_LINKS = [
     description: "Kumpulan video dokumentasi daily life dan tips coding ringkas.", 
     icon: "bxl-tiktok", 
     url: "https://tiktok.com" 
+  }
+];
+
+// Data Dummy Produk jika di database belum ada isi data koleksi produknya
+const DUMMY_PRODUCTS = [
+  {
+    _id: "dummy-prod-1",
+    name: "Premium Notion Template Dashboard",
+    slug: "premium-notion-template-dashboard",
+    description: "Atur seluruh produktivitas kerja, catatan kuliah, tugas, keuangan, dan schedule harian dalam satu dashboard Notion terintegrasi.",
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600",
+    price: 89000,
+    salesCount: 142
+  },
+  {
+    _id: "dummy-prod-2",
+    name: "E-Book: Roadmap Menjadi Fullstack Web Dev",
+    slug: "ebook-roadmap-menjadi-fullstack-web-dev",
+    description: "Buku panduan lengkap dari nol langkah demi langkah menguasai JavaScript, React, Next.js, Node.js hingga strategi riset portofolio kerja.",
+    image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=600",
+    price: 45000,
+    salesCount: 389
+  },
+  {
+    _id: "dummy-prod-3",
+    name: "Exclusive UI/UX Icon Set Bundle",
+    slug: "exclusive-ui-ux-icon-set-bundle",
+    description: "Koleksi lebih dari 1500+ aset icon SVG berbasis vektor siap pakai untuk mempercantik UI desain website atau aplikasi mobile kamu.",
+    image: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=600",
+    price: 120000,
+    salesCount: 64
+  },
+  {
+    _id: "dummy-prod-4",
+    name: "SaaS Starter Kit Next.js Tailwind",
+    slug: "saas-starter-kit-nextjs-tailwind",
+    description: "Source code lengkap boilerplate Next.js App Router yang sudah dilengkapi setup autentikasi, database, Stripe, dan styling UI premium.",
+    image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600",
+    price: 350000,
+    salesCount: 28
   }
 ];
 
@@ -107,7 +149,38 @@ export default async function DynamicProfilePage({ params }: Props) {
   // 3. Ambil data Link asli milik username ini dari database
   const sharedLinks = await SharedLink.find({ username: user.username }).lean();
 
-  // 4. Fallback data kustomisasi jika belum dikonfigurasi di database
+  // 4. AMBIL DATA DARI KOLEKSI PRODUK (Menggunakan Mongoose Dinamis)
+  let productsData: any[] = [];
+  try {
+    // Pastikan model "Produk" sudah diregistrasi di berkas models kamu, jika belum kita amankan agar tidak crash
+    const ProductModel = mongoose.models.Produk || mongoose.models.Product;
+    
+    if (ProductModel) {
+      // Ambil produk milik user ini (bisa difilter berdasarkan userId atau username sesuai skema DB-mu)
+      const dbProducts = await ProductModel.find({ 
+        $or: [{ userId: user._id }, { username: user.username }] 
+      }).lean();
+      
+      productsData = dbProducts.map((p: any) => ({
+        _id: String(p._id),
+        name: String(p.name || "Nama Produk"),
+        slug: String(p.slug || "produk-detail"),
+        description: String(p.description || ""),
+        image: String(p.image || ""),
+        price: Number(p.price || 0),
+        salesCount: Number(p.salesCount || 0)
+      }));
+    }
+  } catch (error) {
+    console.error("Gagal mengambil koleksi produk, beralih ke data dummy:", error);
+  }
+
+  // Jika di database tidak ada produk sama sekali, suntikkan dummy produk biar tetep muncul layoutnya
+  if (productsData.length === 0) {
+    productsData = DUMMY_PRODUCTS;
+  }
+
+  // 5. Fallback data kustomisasi jika belum dikonfigurasi di database
   const custom = user.customization || {
     background: "#ffffff",
     isBlur: false,
@@ -118,10 +191,17 @@ export default async function DynamicProfilePage({ params }: Props) {
     popupMessage: ""
   };
 
+  // Bungkus komponen LinkListWrapper ke dalam variabel untuk disalurkan ke sistem tab
+  const renderLinksComponent = (
+    <LinkListWrapper 
+      initialLinks={sharedLinks} 
+      isAdmin={isAdmin} 
+      dummyLinks={DUMMY_PREVIEW_LINKS} 
+    />
+  );
+
   return (
     <div className="flex flex-col min-h-screen font-sans bg-gray-50 transition-all duration-300">
-      {/* Tambahkan kembali komponen Header & Footer jika memang diperlukan di halaman ini */}
-
       {/* Tampilkan Onboarding Modal jika User Baru */}
       {showOnboarding && <OnboardingModal user={user} />}
 
@@ -130,10 +210,6 @@ export default async function DynamicProfilePage({ params }: Props) {
         <WelcomePopup message={custom.popupMessage} />
       )}
 
-      {/* KONTEN UTAMA:
-        - Lebar dinaikkan menjadi max-w-4xl agar optimal di laptop.
-        - Class 'border' dan 'border-gray-100' dihapus sesuai request.
-      */}
       <main className={`grow max-w-4xl w-full mx-auto px-6 pt-14 py-12 mt-2 -mb-2 transition-all duration-300
         ${custom.isBlur ? "bg-white/60 backdrop-blur-md shadow-xl" : "bg-white shadow-sm"}
         ${custom.rounded}
@@ -180,13 +256,12 @@ export default async function DynamicProfilePage({ params }: Props) {
           </div>
         </div>
 
-        <hr className="my-8 border-gray-100" />
+        <hr className="my-6 border-gray-100" />
 
-        {/* Menggunakan LinkListWrapper sebagai penampung interaktif */}
-        <LinkListWrapper 
-          initialLinks={sharedLinks} 
-          isAdmin={isAdmin} 
-          dummyLinks={DUMMY_PREVIEW_LINKS} 
+        {/* 🚀 RENDER SISTEM TAB BARU (Tautan VS Produk Grid 2x4) */}
+        <ProfileTabs 
+          linksComponent={renderLinksComponent} 
+          products={productsData} 
         />
 
       </main>
