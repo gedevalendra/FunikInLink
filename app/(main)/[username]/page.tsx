@@ -125,8 +125,6 @@ export default async function DynamicProfilePage({ params }: Props) {
       className="flex flex-col min-h-screen font-sans transition-all duration-300"
       style={{ backgroundColor: custom.background }}
     >
-      {/* Komponen Header Global */}
-      <Header />
 
       {/* Tampilkan Onboarding Modal jika User Baru */}
       {showOnboarding && <OnboardingModal user={user} />}
@@ -193,9 +191,6 @@ export default async function DynamicProfilePage({ params }: Props) {
         />
 
       </main>
-
-      {/* Komponen Footer Global */}
-      <Footer />
     </div>
   );
 }
