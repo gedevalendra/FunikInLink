@@ -45,7 +45,7 @@ export default function RegistrasiPage() {
         return;
       }
 
-      // Log ini opsional, bisa kamu hapus kalau sudah masuk production
+      // Log untuk memastikan token berhasil masuk di konsol local
       console.log("Token Cloudflare Turnstile Berhasil Didapat:", token);
 
       // 4. Jalankan proses sign-in Google jika lolos verifikasi
@@ -90,8 +90,8 @@ export default function RegistrasiPage() {
           {isSubmitting ? "Memverifikasi Keamanan..." : "Lanjutkan dengan Google"}
         </button>
 
-        {/* Komponen Cloudflare Turnstile (Disembunyikan menggunakan utility class Tailwind) */}
-        <div className="hidden">
+        {/* Komponen Cloudflare Turnstile (Disembunyikan dengan opacity agar tetap bekerja di DOM) */}
+        <div className="opacity-0 absolute pointer-events-none">
           <Turnstile
             ref={turnstileRef}
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
