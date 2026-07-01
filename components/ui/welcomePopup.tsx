@@ -46,13 +46,9 @@ export default function WelcomePopup({ message }: { message: string }) {
         }}
       >
         {/* CONTAINER ICON - Ditambahkan animasi 'bx-tada' bawaan Boxicons */}
-        <div className="w-14 h-14 bg-amber-50 text-amber-500 rounded-md flex items-center justify-center mx-auto text-2xl border border-amber-100/70 shadow-xs">
-          <i className="bx bx-party bx-tada"></i>
-        </div>
 
         {/* KONTEN PESAN */}
         <div className="space-y-1">
-          <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pesan Sambutan</h4>
           <p className="text-sm text-slate-700 leading-relaxed font-medium px-2">
             {message}
           </p>
