@@ -1,10 +1,9 @@
-
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import LinkCard from "./linkCard";
 import AddLinkModal from "./addLinkModal";
-import { AnimatePresence } from "framer-motion";
+import { Reorder } from "framer-motion";
 
 interface LinkListWrapperProps {
   initialLinks: any[];
@@ -21,9 +20,6 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
     const updatedSorted = [...initialLinks].sort((a, b) => (a.order || 0) - (b.order || 0));
     setLinks(updatedSorted);
   }, [initialLinks]);
-
-  const dragItem = useRef<number | null>(null);
-  const dragOverItem = useRef<number | null>(null);
 
   const saveNewOrder = async (updatedLinks: any[]) => {
     try {
@@ -42,35 +38,12 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
     }
   };
 
-  // FIXED: Mengubah type parameter menjadi any agar selaras dengan event Framer Motion
-  const handleDragStart = (e: any, position: number) => {
-    dragItem.current = position;
-  };
-
-  const handleDragOver = (e: any, position: number) => {
-    if (dragItem.current === null || dragItem.current === position) return;
-
-    dragOverItem.current = position;
-
-    const copyListItems = [...links];
-    const dragItemContent = copyListItems[dragItem.current];
-
-    // Lakukan mutasi penataan urutan array secara real-time
-    copyListItems.splice(dragItem.current, 1);
-    copyListItems.splice(dragOverItem.current, 0, dragItemContent);
-
-    dragItem.current = position; 
-    setLinks(copyListItems);
-  };
-
-  const handleDragEnd = () => {
-    if (dragItem.current !== null) {
-      if (isAdmin) {
-        saveNewOrder(links);
-      }
+  // Fungsi yang dipicu otomatis saat pelepasan drag selesai dilakukan oleh Reorder
+  const handleReorderEnd = (newOrder: any[]) => {
+    setLinks(newOrder);
+    if (isAdmin) {
+      saveNewOrder(newOrder);
     }
-    dragItem.current = null;
-    dragOverItem.current = null;
   };
 
   return (
@@ -104,23 +77,26 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
           ))}
         </div>
       ) : (
-        // FIXED: Dihapus overflow-hidden agar efek shadow dan scale komponen saat di-drag tidak terpotong
-        <div className="flex flex-col gap-1.5 p-1 relative">
-          <AnimatePresence initial={false}>
-            {links.map((link, index) => (
-              <LinkCard 
-                key={link._id.toString()} 
-                link={link} 
-                isAdmin={isAdmin} 
-                isDummy={false}
-                index={index}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDragEnd={handleDragEnd}
-              />
-            ))}
-          </AnimatePresence>
-        </div>
+        /* Menggunakan Reorder Group bawaan framer-motion untuk sumbu vertikal (axis y) */
+        <Reorder.Group 
+          axis="y" 
+          values={links} 
+          onReorder={handleReorderEnd}
+          className="flex flex-col gap-1.5 p-1 relative"
+        >
+          {links.map((link, index) => (
+            <LinkCard 
+              key={link._id.toString()} 
+              link={link} 
+              isAdmin={isAdmin} 
+              isDummy={false}
+              index={index}
+              onDragStart={() => {}}
+              onDragOver={() => {}}
+              onDragEnd={() => {}}
+            />
+          ))}
+        </Reorder.Group>
       )}
     </div>
   );
