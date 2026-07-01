@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@marsidev/react-turnstile": "^1.5.3",
     "framer-motion": "^12.42.1",
     "mongodb": "^7.4.0",
     "mongoose": "^9.7.3",

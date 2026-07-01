@@ -3,38 +3,56 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import ReCAPTCHA from "react-google-recaptcha";
+import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 
 export default function RegistrasiPage() {
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fungsi utama saat tombol Google diklik
   const handleGoogleSignIn = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
-      // 1. Pemicu reCAPTCHA Invisible untuk bekerja di latar belakang
-      const token = await recaptchaRef.current?.executeAsync();
+      // 1. Jalankan Turnstile secara manual di latar belakang
+      // Kita panggil reset dulu untuk memastikan token fresh, lalu execute
+      turnstileRef.current?.reset();
+      
+      // Tunggu jeda sebentar agar Turnstile siap mengeksekusi
+      const token = await new Promise<string | null>((resolve) => {
+        // Kita modifikasi sedikit flow-nya menggunakan callback bawaan Turnstile
+        // Namun cara paling aman di Turnstile adalah membiarkannya mendapatkan token otomatis
+        // atau mengeksekusinya via ref jika diset ke 'invisible'.
+        const checkToken = setInterval(() => {
+          const currentToken = turnstileRef.current?.getResponse();
+          if (currentToken) {
+            clearInterval(checkToken);
+            resolve(currentToken);
+          }
+        }, 100);
+
+        // Jika dalam 5 detik tidak merespon, kita batalkan
+        setTimeout(() => {
+          clearInterval(checkToken);
+          resolve(null);
+        }, 5000);
+      });
 
       if (!token) {
-        alert("Gagal memverifikasi CAPTCHA. Silakan coba lagi.");
+        alert("Gagal memverifikasi keamanan (Turnstile). Silakan coba lagi.");
         setIsSubmitting(false);
         return;
       }
 
-      // (Opsional) Jika kamu mau verifikasi token di backend kamu dulu, lakukan di sini.
-      // console.log("Token CAPTCHA Berhasil Didapat:", token);
+      // (Opsional) Token bisa dikirim ke backend untuk divalidasi via API Cloudflare
+      // console.log("Token Cloudflare Turnstile:", token);
 
-      // 2. Jika lolos verifikasi latar belakang, jalankan sign-in Google
+      // 2. Jalankan proses sign-in Google jika lolos
       await signIn("google", { callbackUrl: "/" });
     } catch (error) {
-      console.error("Error captcha:", error);
+      console.error("Error Turnstile:", error);
       alert("Terjadi kesalahan sistem.");
     } finally {
-      // Reset reCAPTCHA agar bisa digunakan kembali jika klik selanjutnya gagal
-      recaptchaRef.current?.reset();
       setIsSubmitting(false);
     }
   };
@@ -71,12 +89,17 @@ export default function RegistrasiPage() {
           {isSubmitting ? "Memverifikasi..." : "Lanjutkan dengan Google"}
         </button>
 
-        {/* Komponen CAPTCHA (Sekarang Invisible & Tersembunyi) */}
-        <ReCAPTCHA
-          ref={recaptchaRef}
-          size="invisible" // <-- WAJIB diganti ke invisible
-          sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""} 
-        />
+        {/* Komponen Cloudflare Turnstile (Invisible) */}
+        <div className="hidden">
+          <Turnstile
+            ref={turnstileRef}
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
+            options={{
+              action: "login",
+              theme: "light",
+            }}
+          />
+        </div>
 
         {/* Tombol Kembali */}
         <div className="pt-4">
