@@ -1,7 +1,7 @@
 "use server";
 
 import { connectDB } from "./db";
-import { SharedLink, User, Chart } from "./models";
+import { SharedLink, User, Chart, Produk } from "./models";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./auth";
@@ -199,4 +199,40 @@ export async function removeFromCartAction(cartId: string) {
   if (userDoc) {
     revalidatePath(`/${userDoc.username}/chart`);
   }
+}
+
+export async function addProduk(formData: FormData) {
+  await connectDB();
+  
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) throw new Error("Kamu harus login terlebih dahulu!");
+
+  const currentUser = await User.findOne({ email: session.user.email });
+  if (!currentUser) throw new Error("User tidak ditemukan!");
+
+  const name = formData.get("name") as string;
+  const priceInput = formData.get("price") as string;
+  const description = formData.get("description") as string;
+  const image = formData.get("image") as string;
+
+  if (!name || !priceInput || !image) {
+    throw new Error("Nama produk, harga, dan gambar wajib diisi!");
+  }
+
+  // Membuat slug otomatis yang aman & unik dari nama produk
+  const baseSlug = name.toLowerCase().trim().replace(/[^a-z0-8]+/g, "-").replace(/(^-|-$)/g, "");
+  const uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
+
+  await Produk.create({
+    username: currentUser.username,
+    userId: currentUser._id,
+    name,
+    slug: uniqueSlug,
+    description: description || "",
+    image,
+    price: Number(priceInput) || 0,
+    salesCount: 0
+  });
+  
+  revalidatePath(`/${currentUser.username}`);
 }

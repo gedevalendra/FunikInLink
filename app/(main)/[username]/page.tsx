@@ -260,8 +260,9 @@ export default async function DynamicProfilePage({ params }: Props) {
 
         {/* 🚀 RENDER SISTEM TAB BARU (Tautan VS Produk Grid 2x4) */}
         <ProfileTabs 
+          isAdmin={isAdmin}
+          products={productsData}
           linksComponent={renderLinksComponent} 
-          products={productsData} 
         />
 
       </main>
