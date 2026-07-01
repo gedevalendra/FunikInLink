@@ -64,7 +64,6 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
 
           {dummyLinks.map((dummy, idx) => (
             <div key={dummy._id} className="relative flex items-start gap-3 p-3 rounded-md border border-gray-100/50 opacity-60 bg-gray-50/50 pointer-events-none">
-              {/* FIXED: Properti yang dikirim disamakan dengan interface LinkCardProps milik linkCard.tsx */}
               <LinkCard 
                 link={dummy} 
                 isAdmin={isAdmin} 
@@ -84,6 +83,7 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
           values={links} 
           onReorder={handleReorderEnd}
           className="flex flex-col gap-1.5 p-1 relative"
+          style={{ touchAction: "none" }}
         >
           {links.map((link, index) => {
             return (
@@ -101,29 +101,32 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
   );
 }
 
-// Sub-komponen pembungkus item agar useDragControls terpanggil dengan benar di dalam Reorder.Group
-// Jalankan perbaikan pada fungsi ReorderItemWrapper di bagian bawah file LinkListWrapper.tsx
-
+// Sub-komponen pembungkus item
 function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number, isAdmin: boolean }) {
   const [isDraggable, setIsDraggable] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const dragControls = useDragControls();
 
-  const handleStartHold = (event: any) => {
+  const handleStartHold = (event: React.PointerEvent) => {
     if (!isAdmin) return;
     setIsHolding(true);
+    
+    // Simpan nativeEvent agar data koordinat sentuhan tidak hilang di dalam antrean asynchronous setTimeout
+    const savedEvent = event.nativeEvent || event;
+
     if (timerRef.current) clearTimeout(timerRef.current);
 
     timerRef.current = setTimeout(() => {
       setIsDraggable(true);
       
-      // FIXED: Matikan scroll layar HP saat item mulai digeser agar tidak bentrok
+      // Amankan layar HP agar tidak ter-scroll atau memicu pull-to-refresh bawaan browser mobile
       document.body.style.overflow = "hidden";
       document.body.style.touchAction = "none";
       
-      dragControls.start(event);
-    }, 200); // Tahan 0.2 detik
+      // Tembakkan eksekusi geser paksa seketika di titik koordinat sentuhan berada
+      dragControls.start(savedEvent);
+    }, 200); // 0.2 detik penahanan responsif
   };
 
   const handleEndHold = () => {
@@ -135,7 +138,7 @@ function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number
     setIsDraggable(false);
     setIsHolding(false);
     
-    // FIXED: Kembalikan fungsi scroll layar HP seperti semula setelah jari dilepas
+    // Kembalikan fungsionalitas scroll layar HP normal setelah drag selesai dilakukan
     document.body.style.overflow = "";
     document.body.style.touchAction = "";
   };
@@ -147,10 +150,10 @@ function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number
       dragListener={false}
       dragControls={dragControls}
       onDragEnd={handleDragEndLocal}
-      // FIXED: touch-none ditambahkan agar browser HP tidak salah paham mengira ini perintah scroll halaman
-      className={`relative flex items-start gap-3 p-3 rounded-md transition-colors border border-gray-100/50 select-none touch-none ${
-        isDraggable ? "bg-slate-50 border-dashed border-slate-300 shadow-lg scale-[1.02] z-50 cursor-grabbing" : "bg-white"
+      className={`relative flex items-start gap-3 p-3 rounded-md transition-all border border-gray-100/50 select-none ${
+        isDraggable ? "bg-slate-50 border-dashed border-slate-300 shadow-lg scale-[1.01] z-50 cursor-grabbing" : "bg-white"
       }`}
+      style={{ touchAction: "none", userSelect: "none", WebkitUserSelect: "none" }}
     >
       <LinkCard 
         link={link} 
