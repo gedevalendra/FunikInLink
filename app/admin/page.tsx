@@ -4,6 +4,7 @@ import { connectDB } from "../../lib/db";
 import { User, SharedLink, AdminList } from "../../lib/models"; 
 import { revalidatePath } from "next/cache";
 import DeleteUserButton from "../../components/ui/DeleteUserButton"; 
+import BroadcastModalClient from "../../components/ui/BroadcastModalClient"; // Kita panggil client component pembungkus modal disini
 
 // =========================================================================
 // SERVER ACTIONS
@@ -72,7 +73,7 @@ async function toggleBadgeVerificationAction(formData: FormData) {
   revalidatePath("/admin");
 }
 
-// 4. SERVER ACTION BARU: Mengangkat Jabatan User Menjadi Admin / Menurunkannya
+// 4. Server Action untuk Mengangkat Jabatan User Menjadi Admin / Menurunkannya
 async function toggleAdminRoleAction(formData: FormData) {
   "use server";
   await connectDB();
@@ -88,17 +89,14 @@ async function toggleAdminRoleAction(formData: FormData) {
   const isCurrentlyAdmin = formData.get("isCurrentlyAdmin") === "true";
 
   if (isCurrentlyAdmin) {
-    // Antisipasi: Jangan sampai Admin utama tidak sengaja menurunkan jabatannya sendiri jika tidak ada admin lain
     if (userEmail === session.user.email) {
       const totalAdminCount = await AdminList.countDocuments({});
       if (totalAdminCount <= 1) {
         throw new Error("Anda tidak bisa menurunkan jabatan Anda sendiri karena Anda adalah satu-satunya admin tersisa!");
       }
     }
-    // Jika dia admin, turunkan jabatan dengan menghapus dari AdminList
     await AdminList.deleteOne({ email: userEmail });
   } else {
-    // Jika bukan admin, daftarkan email dan nama rill ke AdminList
     await AdminList.create({
       nama: userName,
       email: userEmail
@@ -175,7 +173,7 @@ export default async function admin() {
         bio: String(u.bio || ""),
         isNewUser: u.isNewUser !== undefined ? Boolean(u.isNewUser) : false,
         isVerified: u.isVerified !== undefined ? Boolean(u.isVerified) : false,
-        isAdmin: isUserAdmin, // Flag status penentu role admin
+        isAdmin: isUserAdmin, 
         hashtags: Array.isArray(u.hashtags) ? u.hashtags.map((tag: any) => String(tag)) : [],
         linkCount: Number(linkCount)
       };
@@ -189,8 +187,8 @@ export default async function admin() {
 
       <main className="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-6">
         
-        {/* Atas: Ringkasan Judul */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-2">
+        {/* Atas: Ringkasan Judul & Tombol Pemicu Broadcast */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2">
           <div>
             <h1 className="text-xl font-medium tracking-tight text-slate-900 flex items-center gap-2">
               <i className="bx bx-shield-quarter text-slate-600"></i> Admin Panel
@@ -198,6 +196,11 @@ export default async function admin() {
             <p className="text-xs text-slate-400 mt-0.5">
               Sesi aktif sebagai: <span className="text-slate-600 font-medium">{String(checkAdmin.nama)}</span>
             </p>
+          </div>
+
+          {/* MENYALURKAN DATA USER DARI MONGODB KE BUTTON MODAL CLIENT */}
+          <div>
+            <BroadcastModalClient users={processedUsers} />
           </div>
         </div>
 
@@ -319,7 +322,6 @@ export default async function admin() {
                         </div>
                       </td>
 
-                      {/* KOLOM ROLE JABATAN ADMIN / USER */}
                       <td className="p-4">
                         {user.isAdmin ? (
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-red-50 text-red-700 px-2 py-0.5 rounded-md border border-red-200">
@@ -363,7 +365,6 @@ export default async function admin() {
                       <td className="p-4 pr-6">
                         <div className="flex items-center justify-end gap-2">
                           
-                          {/* FORM BARU: UTK MENGATUR ROLE ADMIN / BUKAN */}
                           <form action={toggleAdminRoleAction}>
                             <input type="hidden" name="userEmail" value={user.email} />
                             <input type="hidden" name="userName" value={user.name} />
@@ -430,7 +431,6 @@ export default async function admin() {
               processedUsers.map((user) => (
                 <div key={user._id} className="p-4 space-y-4 hover:bg-slate-50/30 transition-colors">
                   
-                  {/* Info Header Kartu */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-full bg-slate-800 text-white font-medium flex items-center justify-center text-xs uppercase shrink-0">
@@ -445,7 +445,6 @@ export default async function admin() {
                       </div>
                     </div>
                     
-                    {/* Status Flags */}
                     <div className="shrink-0 flex flex-col gap-1 items-end">
                       {user.isAdmin && (
                         <span className="text-[9px] font-bold bg-red-50 text-red-700 px-1.5 py-0.5 rounded border border-red-200">Admin</span>
@@ -463,7 +462,6 @@ export default async function admin() {
                     </div>
                   </div>
 
-                  {/* Metadata Ringkas */}
                   <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-lg text-xs font-mono text-slate-500">
                     <div>
                       <p className="text-[10px] text-slate-400 uppercase tracking-tight">Username</p>
@@ -475,10 +473,8 @@ export default async function admin() {
                     </div>
                   </div>
 
-                  {/* TOMBOL AKSI HP */}
                   <div className="grid grid-cols-2 gap-2 w-full pt-1">
                     
-                    {/* Toggle Admin */}
                     <form action={toggleAdminRoleAction} className="w-full">
                       <input type="hidden" name="userEmail" value={user.email} />
                       <input type="hidden" name="userName" value={user.name} />
@@ -493,7 +489,6 @@ export default async function admin() {
                       </button>
                     </form>
                     
-                    {/* Toggle Verified */}
                     <form action={toggleBadgeVerificationAction} className="w-full">
                       <input type="hidden" name="userId" value={user._id} />
                       <input type="hidden" name="currentVerifiedStatus" value={String(user.isVerified)} />
@@ -507,7 +502,6 @@ export default async function admin() {
                       </button>
                     </form>
 
-                    {/* Reset Setup */}
                     <form action={toggleVerifyUserAction} className="w-full">
                       <input type="hidden" name="userId" value={user._id} />
                       <input type="hidden" name="currentStatus" value={String(user.isNewUser)} />
@@ -519,7 +513,6 @@ export default async function admin() {
                       </button>
                     </form>
 
-                    {/* Hapus Profil */}
                     <div className="w-full [&>button]:w-full [&>button]:text-[10px] sm:[&>button]:text-xs [&>button]:py-1.5 [&>button]:px-1 [&>button]:rounded-md">
                       <DeleteUserButton 
                         userId={user._id} 
