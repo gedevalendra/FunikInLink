@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import LinkCard from "./linkCard";
 import AddLinkModal from "./addLinkModal";
 import { Reorder } from "framer-motion";
@@ -103,27 +103,52 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
 
 // Sub-komponen pembungkus item
 function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number, isAdmin: boolean }) {
-  const [activeDrag, setActiveDrag] = useState(false);
+  const [isDraggable, setIsDraggable] = useState(false);
+  const [isHolding, setIsHolding] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleStartHold = () => {
+    if (!isAdmin) return;
+    setIsHolding(true);
+
+    if (timerRef.current) clearTimeout(timerRef.current);
+
+    // Kunci timer selama 0.2 detik sebelum drag diizinkan aktif
+    timerRef.current = setTimeout(() => {
+      setIsDraggable(true);
+      // Kunci layar agar halaman web tidak bergoyang naik-turun sewaktu di-drag
+      document.body.style.overflow = "hidden";
+    }, 200);
+  };
+
+  const handleEndHold = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setIsHolding(false);
+    // Jika dilepas sebelum 200ms, batalkan mode drag kustom
+    if (!isDraggable) {
+      setIsDraggable(false);
+    }
+  };
+
+  const handleDragEndLocal = () => {
+    setIsDraggable(false);
+    setIsHolding(false);
+    // Kembalikan fungsionalitas scroll layar HP normal setelah drag selesai dilakukan
+    document.body.style.overflow = "";
+  };
 
   return (
     <Reorder.Item 
       value={link}
       id={link._id.toString()}
-      // Menggunakan drag native agar tracking koordinat sentuhan di HP 100% real-time & mulus
-      dragListener={isAdmin}
-      dragElastic={0.4}
+      // dragListener bernilai true jika durasi hold 0.2 detik sudah terlewati
+      dragListener={isAdmin && isDraggable}
+      dragElastic={0.2}
       layout
-      onDragStart={() => {
-        setActiveDrag(true);
-        document.body.style.overflow = "hidden";
-      }}
-      onDragEnd={() => {
-        setActiveDrag(false);
-        document.body.style.overflow = "";
-      }}
+      onDragEnd={handleDragEndLocal}
       className={`relative flex items-start gap-3 p-3 rounded-md border select-none transition-shadow duration-200 ${
-        activeDrag 
-          ? "bg-slate-50 border-blue-400 shadow-xl z-50 scale-[1.02]" 
+        isDraggable 
+          ? "bg-slate-50 border-blue-400 shadow-xl z-50 scale-[1.015]" 
           : "bg-white border-gray-100/70 shadow-sm"
       }`}
       style={{ 
@@ -131,18 +156,18 @@ function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number
         userSelect: "none", 
         WebkitUserSelect: "none"
       }}
-      // Konfigurasi animasi pegas (spring) bawaan framer agar pertukaran posisi sangat fluid
-      transition={{ type: "spring", stiffness: 500, damping: 40 }}
+      // Efek snap/menempel tajam dikendalikan melalui konfigurasi damping tinggi (efek membal dikurangi)
+      transition={{ type: "spring", stiffness: 600, damping: 45 }}
     >
       <LinkCard 
         link={link} 
         isAdmin={isAdmin} 
         isDummy={false} 
         index={index}
-        isDraggable={activeDrag}
-        isHolding={false}
-        handleStartHold={() => {}}
-        handleEndHold={() => {}}
+        isDraggable={isDraggable}
+        isHolding={isHolding}
+        handleStartHold={handleStartHold}
+        handleEndHold={handleEndHold}
       />
     </Reorder.Item>
   );
