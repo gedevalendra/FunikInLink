@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -41,23 +42,23 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
     }
   };
 
-  // Type diturunkan menjadi React.DragEvent agar cocok dengan interaksi di wrapper
-  const handleDragStart = (e: React.DragEvent, position: number) => {
+  // FIXED: Mengubah type parameter menjadi any agar selaras dengan event Framer Motion
+  const handleDragStart = (e: any, position: number) => {
     dragItem.current = position;
   };
 
-  const handleDragOver = (e: React.DragEvent, position: number) => {
-    e.preventDefault();
+  const handleDragOver = (e: any, position: number) => {
     if (dragItem.current === null || dragItem.current === position) return;
-    
+
     dragOverItem.current = position;
-    
+
     const copyListItems = [...links];
     const dragItemContent = copyListItems[dragItem.current];
-    
+
+    // Lakukan mutasi penataan urutan array secara real-time
     copyListItems.splice(dragItem.current, 1);
     copyListItems.splice(dragOverItem.current, 0, dragItemContent);
-    
+
     dragItem.current = position; 
     setLinks(copyListItems);
   };
@@ -79,7 +80,7 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
       </div>
 
       {isAdmin && <AddLinkModal />}
-      
+
       {links.length === 0 ? (
         <div className="flex flex-col gap-3 pt-2">
           {isAdmin && (
@@ -88,7 +89,7 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
               Kamu belum menambahkan tautan apa pun. Di bawah ini adalah pratinjau tampilan profilmu jika nanti sudah diisi:
             </div>
           )}
-          
+
           {dummyLinks.map((dummy, idx) => (
             <LinkCard 
               key={dummy._id} 
@@ -103,7 +104,8 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
           ))}
         </div>
       ) : (
-        <div className="flex flex-col gap-1.5 overflow-hidden p-1">
+        // FIXED: Dihapus overflow-hidden agar efek shadow dan scale komponen saat di-drag tidak terpotong
+        <div className="flex flex-col gap-1.5 p-1 relative">
           <AnimatePresence initial={false}>
             {links.map((link, index) => (
               <LinkCard 
