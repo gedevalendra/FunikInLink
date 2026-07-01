@@ -51,16 +51,17 @@ export default function LinkCard({
       {/* INDICATOR HANDLE DRAG */}
       {isAdmin && !isDummy && (
         <div 
+          // Menggunakan Pointer Event agar universal Mouse (PC) & Touch (HP)
           onPointerDown={handleStartHold}
           onPointerUp={handleEndHold}
           onPointerLeave={handleEndHold}
-          className={`flex items-center justify-center self-center p-2 rounded text-gray-400 cursor-grab active:cursor-grabbing hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0 touch-none select-none ${
+          className={`flex items-center justify-center self-center p-2 rounded text-gray-400 cursor-grab hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 touch-none select-none ${
             isDraggable ? "text-blue-600 bg-blue-50 scale-110" : ""
           }`}
-          style={{ touchAction: "none", WebkitUserSelect: "none" }}
+          style={{ touchAction: "none", WebkitUserSelect: "none", pointerEvents: "auto" }}
           title="Tahan 0.2 detik untuk menyeret urutan"
         >
-          <i className={`bx ${isDraggable ? 'bx-grid-vertical text-blue-600 animate-pulse' : 'bx-grid-horizontal'} text-xl`}></i>
+          <i className={`bx bx-grid-vertical text-xl ${isDraggable ? 'animate-pulse' : ''}`}></i>
         </div>
       )}
 
@@ -75,10 +76,10 @@ export default function LinkCard({
           {link.title} 
           {isDummy && <span className="text-[10px] font-normal px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-sm">Contoh</span>}
           {isHolding && !isDraggable && (
-            <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1 py-0.5 rounded animate-pulse">Menahan...</span>
+            <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1 py-0.5 rounded animate-pulse">Menyiapkan...</span>
           )}
           {isDraggable && (
-            <span className="text-[10px] font-medium text-blue-600 bg-blue-50 px-1 py-0.5 rounded">Siap Geser!</span>
+            <span className="text-[10px] font-medium text-blue-600 bg-blue-50 px-1 py-0.5 rounded">Magnet Aktif!</span>
           )}
         </h4>
         {link.description && (
