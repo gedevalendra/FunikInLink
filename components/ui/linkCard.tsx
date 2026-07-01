@@ -2,8 +2,8 @@
 
 import { useState, useRef } from "react";
 import { deleteLink, updateLink } from "../../lib/actions";
-// Import motion dari framer-motion
-import { motion } from "framer-motion";
+// Import Reorder dari framer-motion
+import { Reorder } from "framer-motion";
 
 const BOXICONS = [
   "bx-link", "bx-globe", "bxl-instagram", "bxl-tiktok", "bxl-youtube", "bxl-facebook", "bxl-twitter",
@@ -50,8 +50,8 @@ export default function LinkCard({
   const [isHolding, setIsHolding] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Memicu trigger holding selama 0.5 detik (500ms)
-  const handleStartHold = (e: any) => {
+  // Fungsi trigger hold 0.5 detik (500ms)
+  const handleStartHold = () => {
     if (!isAdmin || isDummy) return;
     setIsHolding(true);
 
@@ -59,7 +59,7 @@ export default function LinkCard({
 
     timerRef.current = setTimeout(() => {
       setIsDraggable(true);
-    }, 500); // Tahan 0.5 detik
+    }, 500); 
   };
 
   const handleEndHold = () => {
@@ -73,25 +73,16 @@ export default function LinkCard({
   const handleDragEndLocal = () => {
     setIsDraggable(false);
     setIsHolding(false);
-    onDragEnd();
   };
 
   return (
     <>
-      <motion.div 
-        layout
-        // Menggunakan sistem drag murni Framer Motion vertikal (Sumbu Y)
-        drag={isAdmin && !isDummy && isDraggable ? "y" : false}
-        dragConstraints={{ top: 0, bottom: 0 }} // Membantu merestart posisi balik setelah dilepas
-        dragElastic={1}
-        onDragStart={(e) => onDragStart(e, index)}
-        onDrag={(e) => onDragOver(e, index)}
+      {/* MENGGUNAKAN Reorder.Item bawaan Framer Motion agar elemen lain bergeser otomatis secara halus */}
+      <Reorder.Item 
+        value={link}
+        id={link._id.toString()}
+        dragListener={isAdmin && !isDummy && isDraggable} // Hanya izinkan drag jika status isDraggable aktif lewat hold
         onDragEnd={handleDragEndLocal}
-        transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 30
-        }}
         className={`relative flex items-start gap-3 p-3 rounded-md transition-colors border border-gray-100/50 select-none ${
           isDummy ? "opacity-60 bg-gray-50/50 pointer-events-none" : ""
         } ${isDraggable ? "bg-slate-50 border-dashed border-slate-300 shadow-lg scale-[1.02] z-50 cursor-grabbing" : "bg-white"}`}
@@ -168,7 +159,7 @@ export default function LinkCard({
             </button>
           </div>
         )}
-      </motion.div>
+      </Reorder.Item>
 
       {/* MODAL EDIT TAUTAN */}
       {isEditing && !isDummy && (
