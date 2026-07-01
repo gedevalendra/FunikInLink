@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { updateCartQtyAction, removeFromCartAction } from "../../../lib/actions";
+import { updateCartQtyAction, removeFromCartAction } from "../../../../../lib/actions";
 
 interface CartItem {
   id: string;
