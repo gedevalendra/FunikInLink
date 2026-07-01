@@ -9,49 +9,50 @@ export default function RegistrasiPage() {
   const turnstileRef = useRef<TurnstileInstance>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Fungsi utama saat tombol Google diklik
   const handleGoogleSignIn = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
-      // 1. Jalankan Turnstile secara manual di latar belakang
-      // Kita panggil reset dulu untuk memastikan token fresh, lalu execute
+      // 1. Reset Turnstile terlebih dahulu untuk memastikan token selalu baru
       turnstileRef.current?.reset();
       
-      // Tunggu jeda sebentar agar Turnstile siap mengeksekusi
+      // 2. Berikan jeda waktu (polling) sebentar agar Turnstile menghasilkan token fresh di latar belakang
       const token = await new Promise<string | null>((resolve) => {
-        // Kita modifikasi sedikit flow-nya menggunakan callback bawaan Turnstile
-        // Namun cara paling aman di Turnstile adalah membiarkannya mendapatkan token otomatis
-        // atau mengeksekusinya via ref jika diset ke 'invisible'.
+        let attempts = 0;
         const checkToken = setInterval(() => {
           const currentToken = turnstileRef.current?.getResponse();
+          attempts++;
+
           if (currentToken) {
             clearInterval(checkToken);
             resolve(currentToken);
           }
-        }, 100);
 
-        // Jika dalam 5 detik tidak merespon, kita batalkan
-        setTimeout(() => {
-          clearInterval(checkToken);
-          resolve(null);
-        }, 5000);
+          // Batasi waktu tunggu maksimal 5 detik (50 x 100ms)
+          if (attempts > 50) {
+            clearInterval(checkToken);
+            resolve(null);
+          }
+        }, 100);
       });
 
+      // 3. Validasi token hasil verifikasi latar belakang
       if (!token) {
         alert("Gagal memverifikasi keamanan (Turnstile). Silakan coba lagi.");
         setIsSubmitting(false);
         return;
       }
 
-      // (Opsional) Token bisa dikirim ke backend untuk divalidasi via API Cloudflare
-      // console.log("Token Cloudflare Turnstile:", token);
+      // Log ini opsional, bisa kamu hapus kalau sudah masuk production
+      console.log("Token Cloudflare Turnstile Berhasil Didapat:", token);
 
-      // 2. Jalankan proses sign-in Google jika lolos
+      // 4. Jalankan proses sign-in Google jika lolos verifikasi
       await signIn("google", { callbackUrl: "/" });
     } catch (error) {
       console.error("Error Turnstile:", error);
-      alert("Terjadi kesalahan sistem.");
+      alert("Terjadi kesalahan sistem saat memproses login.");
     } finally {
       setIsSubmitting(false);
     }
@@ -86,10 +87,10 @@ export default function RegistrasiPage() {
             alt="Google Logo" 
             className="w-5 h-5"
           />
-          {isSubmitting ? "Memverifikasi..." : "Lanjutkan dengan Google"}
+          {isSubmitting ? "Memverifikasi Keamanan..." : "Lanjutkan dengan Google"}
         </button>
 
-        {/* Komponen Cloudflare Turnstile (Invisible) */}
+        {/* Komponen Cloudflare Turnstile (Disembunyikan menggunakan utility class Tailwind) */}
         <div className="hidden">
           <Turnstile
             ref={turnstileRef}
