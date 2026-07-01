@@ -7,7 +7,7 @@ import AuthProvider from "../components/AuthProvider";
 import ButtonLoaderInterceptor from "../components/ui/buttonLoaderInterceptor";
 import Header from "../components/layout/header";
 import Footer from "../components/layout/footer";
-
+import { NotificationProvider } from "@/context/NotificationContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,16 +22,23 @@ const geistMono = Geist_Mono({
 // === KONFIGURASI SEO GLOBAL & OPEN GRAPH ===
 export const metadata: Metadata = {
   // Ganti dengan domain asli Anda nanti saat sudah online
-  metadataBase: new URL("https://funikin.com"), 
-  
+  metadataBase: new URL("https://funikin.com"),
+
   title: {
     default: "FunikIn Link - Satu Tautan untuk Semua",
-    template: "%s | FunikIn Link" // Format judul untuk halaman lain
+    template: "%s | FunikIn Link", // Format judul untuk halaman lain
   },
-  description: "Kelola portofolio, media sosial, dan tautan pentingmu dalam satu halaman profil kustom yang indah dan responsif.",
-  keywords: ["link in bio", "portfolio", "social media", "funikin link", "profil kreator"],
+  description:
+    "Kelola portofolio, media sosial, dan tautan pentingmu dalam satu halaman profil kustom yang indah dan responsif.",
+  keywords: [
+    "link in bio",
+    "portfolio",
+    "social media",
+    "funikin link",
+    "profil kreator",
+  ],
   authors: [{ name: "FunikIn Dev" }],
-  
+
   // Konfigurasi Open Graph (Ini yang dibaca oleh WhatsApp, Facebook, LinkedIn)
   openGraph: {
     type: "website",
@@ -39,23 +46,25 @@ export const metadata: Metadata = {
     url: "https://funikin.com",
     siteName: "FunikIn Link",
     title: "FunikIn Link - Satu Tautan untuk Semua",
-    description: "Kelola portofolio, media sosial, dan tautan pentingmu dalam satu halaman profil kustom yang indah dan responsif.",
+    description:
+      "Kelola portofolio, media sosial, dan tautan pentingmu dalam satu halaman profil kustom yang indah dan responsif.",
     images: [
       {
         // Pastikan Anda menaruh gambar banner ukuran 1200x630px di folder 'public' dengan nama 'og-image.jpg'
-        url: "/og-image.jpg", 
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "FunikIn Link Cover",
       },
     ],
   },
-  
+
   // Konfigurasi Twitter / X
   twitter: {
     card: "summary_large_image",
     title: "FunikIn Link - Satu Tautan untuk Semua",
-    description: "Kelola portofolio, media sosial, dan tautan pentingmu dalam satu halaman profil kustom.",
+    description:
+      "Kelola portofolio, media sosial, dan tautan pentingmu dalam satu halaman profil kustom.",
     images: ["/og-image.jpg"], // Sama dengan gambar OG
   },
 };
@@ -72,21 +81,26 @@ export default function RootLayout({
     >
       <head>
         {/* Memindahkan CSS Boxicons ke dalam head agar valid secara struktur HTML */}
-        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet' />
+        <link
+          href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+          rel="stylesheet"
+        />
       </head>
       <body className="min-h-full flex flex-col">
         {/* 2. Membungkus Interceptor dengan Suspense agar lolos build prerender Vercel */}
-   
-        <AuthProvider>
-        <Header />
-          {children}
-        <Footer/>
-        </AuthProvider>
-        <Script 
-          src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js" 
-          strategy="afterInteractive" 
+
+        <NotificationProvider>
+          <AuthProvider>
+            <Header />
+            {children}
+            <Footer />
+          </AuthProvider>
+        </NotificationProvider>
+        <Script
+          src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"
+          strategy="afterInteractive"
         />
-        
+
         <Script
           src="https://app.sandbox.midtrans.com/snap/snap.js"
           data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
