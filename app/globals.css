@@ -144,3 +144,33 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* --- ANIMASI BOTTOM SHEET (TAMBAHKAN DI PALING BAWAH FILE GLOBAL.CSS) --- */
+
+/* 1. Definisi Gerakan Animasi */
+@keyframes slideUp {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* 2. Daftarkan Class ke Browser */
+.animate-slideUp {
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out forwards !important;
+}
