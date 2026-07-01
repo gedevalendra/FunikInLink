@@ -1,4 +1,4 @@
-import { Metadata } from "next"; // <-- PERBAIKAN: Import Metadata dari Next.js
+import { Metadata } from "next"; 
 import Header from "../../../components/layout/header"; 
 import Footer from "../../../components/layout/footer"; 
 import ProfileSettings from "../../../components/ui/profileSettings";
@@ -15,20 +15,41 @@ interface Props {
   params: Promise<{ username: string }> | { username: string };
 }
 
+// Data Dummy Preview saat tautan user masih kosong
+const DUMMY_PREVIEW_LINKS = [
+  { 
+    _id: "dummy-github", 
+    title: "GitHub Repository", 
+    description: "Lihat koleksi kode proyek open-source saya di sini.", 
+    icon: "bxl-github", 
+    url: "https://github.com" 
+  },
+  { 
+    _id: "dummy-linkedin", 
+    title: "LinkedIn Professional", 
+    description: "Mari terhubung secara profesional dan bicarakan karir.", 
+    icon: "bxl-linkedin", 
+    url: "https://linkedin.com" 
+  },
+  { 
+    _id: "dummy-tiktok", 
+    title: "TikTok Content", 
+    description: "Kumpulan video dokumentasi daily life dan tips coding ringkas.", 
+    icon: "bxl-tiktok", 
+    url: "https://tiktok.com" 
+  }
+];
+
 // ==========================================
 // 1. FUNGSI SEO DINAMIS (generateMetadata)
 // ==========================================
-// Fungsi ini otomatis dipanggil oleh Next.js sebelum merender halaman 
-// untuk menyusun tag <head> dan Meta Open Graph (untuk preview WhatsApp)
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   await connectDB();
   const resolvedParams = await params;
   const username = resolvedParams.username;
 
-  // Ambil data profil berdasarkan username
   const user = await User.findOne({ username: username }).lean();
 
-  // Jika tidak ditemukan, kembalikan SEO error 404
   if (!user) {
     return {
       title: "Profil Tidak Ditemukan | FunikIn Link",
@@ -36,7 +57,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  // Susun SEO berdasarkan data asli user
   const pageTitle = `${user.name} (@${user.username}) | FunikIn Link`;
   const pageDescription = user.bio || `Lihat semua tautan, media sosial, dan portofolio milik ${user.name} di FunikIn Link.`;
 
@@ -47,8 +67,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: pageTitle,
       description: pageDescription,
       type: "profile",
-      // (Opsional) Jika Anda menyimpan URL foto profil di database, Anda bisa mengganti "/og-image.jpg" dengan URL foto profil mereka.
-      // images: [user.profilePictureUrl || "/og-image.jpg"], 
     },
     twitter: {
       card: "summary_large_image",
@@ -64,14 +82,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function DynamicProfilePage({ params }: Props) {
   await connectDB();
   
-  // Resolving params untuk mendukung Next.js versi terbaru (Next 14/15)
   const resolvedParams = await params;
   const username = resolvedParams.username;
 
   // 1. Ambil data profil berdasarkan username
   const user = await User.findOne({ username: username }).lean();
 
-  // Jika username tidak ada di database, tampilkan pesan error 404
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 font-sans">
@@ -85,20 +101,16 @@ export default async function DynamicProfilePage({ params }: Props) {
 
   // 2. Cek siapa yang sedang login saat ini via Google Auth
   const session = await getServerSession(authOptions);
-  
-  // Logika Utama: Pengunjung dianggap ADMIN jika email yang login COCOK dengan email pemilik profil ini
   const isAdmin = session?.user?.email === user.email;
 
   // LOGIKA POP-UP ONBOARDING SETUP PROFILE
-  // Muncul hanya jika dia pemilik halaman profil ini dan status session-nya masih merupakan user baru (isNewUser)
   const showOnboarding = isAdmin && (session?.user as any)?.isNewUser;
 
-  // 3. Ambil data Link yang HANYA dimiliki oleh username ini saja
+  // 3. Ambil data Link asli milik username ini
   const sharedLinks = await SharedLink.find({ username: user.username }).sort({ _id: -1 }).lean();
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900 font-sans">
-      {/* JIKA MEMENUHI SYARAT ONBOARDING, TAMPILKAN POP-UP SECARA OTOMATIS */}
       {showOnboarding && <OnboardingModal user={user} />}
 
       <main className="flex-grow max-w-xl w-full mx-auto px-6 py-12">
@@ -111,7 +123,6 @@ export default async function DynamicProfilePage({ params }: Props) {
             <div>
               <div className="flex items-center gap-1.5">
                 <h2 className="text-lg font-bold tracking-tight">{user.name}</h2>
-                {/* Centang biru hanya akan muncul jika properti isVerified bernilai true di DB */}
                 {user.isVerified && (
                   <i className="bx bxs-badge-check text-blue-500 text-lg" title="Verified Account"></i>
                 )}
@@ -120,7 +131,6 @@ export default async function DynamicProfilePage({ params }: Props) {
             </div>
           </div>
           
-          {/* Tombol setting gear hanya akan muncul jika isAdmin bernilai TRUE */}
           <ProfileSettings user={user} isAdmin={isAdmin} />
         </div>
 
@@ -146,15 +156,38 @@ export default async function DynamicProfilePage({ params }: Props) {
           {isAdmin && <AddLinkModal />}
           
           {sharedLinks.length === 0 ? (
-            <p className="text-xs text-gray-400 font-mono italic pt-2">Belum ada tautan di profil ini...</p>
+            <div className="flex flex-col gap-3 pt-2">
+              {/* Notifikasi khusus pemilik/admin agar tidak bingung */}
+              {isAdmin && (
+                <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-700 leading-relaxed font-medium">
+                  <i className="bx bx-info-circle mr-1 text-sm align-middle"></i>
+                  Kamu belum menambahkan tautan apa pun. Di bawah ini adalah pratinjau tampilan profilmu jika nanti sudah diisi:
+                </div>
+              )}
+              
+              {/* Me-render 3 dummy preview link (GitHub, LinkedIn, TikTok) */}
+              {DUMMY_PREVIEW_LINKS.map((dummy) => (
+                <LinkCard 
+                  key={dummy._id} 
+                  link={dummy} 
+                  isAdmin={isAdmin} 
+                  isDummy={true} 
+                />
+              ))}
+            </div>
           ) : (
+            // Jika ada tautan asli dari database, tampilkan data aslinya
             sharedLinks.map((link: any) => (
-              <LinkCard key={link._id.toString()} link={link} isAdmin={isAdmin} />
+              <LinkCard 
+                key={link._id.toString()} 
+                link={link} 
+                isAdmin={isAdmin} 
+                isDummy={false} 
+              />
             ))
           )}
         </div>
       </main>
-      
     </div>
   );
 }
