@@ -1,6 +1,4 @@
 import { Metadata } from "next"; 
-import Header from "../../../components/layout/header"; 
-import Footer from "../../../components/layout/footer"; 
 import ProfileSettings from "../../../components/ui/profileSettings";
 import LinkListWrapper from "../../../components/ui/linkListWrapper";
 import OnboardingModal from "../../../components/ui/onboardingModal"; 
@@ -126,7 +124,6 @@ export default async function DynamicProfilePage({ params }: Props) {
       style={{ backgroundColor: custom.background }}
     >
       {/* Tambahkan kembali komponen Header & Footer jika memang diperlukan di halaman ini */}
-      <Header />
 
       {/* Tampilkan Onboarding Modal jika User Baru */}
       {showOnboarding && <OnboardingModal user={user} />}
@@ -195,7 +192,6 @@ export default async function DynamicProfilePage({ params }: Props) {
 
       </main>
 
-      <Footer />
     </div>
   );
 }
