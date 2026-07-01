@@ -18,7 +18,9 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         await connectDB();
+        
         try {
+          // 1. Ambil atau Buat User di Database
           const existingUser = await User.findOne({ email: user.email });
           
           if (!existingUser) {
@@ -35,12 +37,14 @@ export const authOptions: NextAuthOptions = {
             });
           }
 
-          // KONDISI INTEGRASI EMAIL: Kirim email notifikasi setelah berhasil masuk/daftar
+          // 2. INTEGRASI EMAIL (Wajib ditunggu menggunakan await yang tepat)
           if (user.email) {
             try {
               const username = user.name || "Pengguna";
               
-              await resend.emails.send({
+              console.log(`[Resend] Memulai pengiriman email ke: ${user.email}`);
+              
+              const emailResponse = await resend.emails.send({
                 from: "FunikIn <onboarding@resend.dev>", // Ganti jika sudah ada domain kustom
                 to: user.email,
                 subject: "Selamat Datang Kembali di FunikIn!",
@@ -95,16 +99,19 @@ export const authOptions: NextAuthOptions = {
                   </html>
                 `,
               });
-              console.log(`Email onboarding sukses terkirim ke ${user.email}`);
+              
+              console.log("[Resend] Respons API:", JSON.stringify(emailResponse));
+              console.log(`[Resend] Email onboarding sukses terkirim ke ${user.email}`);
             } catch (emailError) {
-              // Jika kuota Resend habis atau error, aplikasi tidak boleh crash / memblokir user login
-              console.error("Gagal mengirim notifikasi email:", emailError);
+              // Jika kuota Resend habis, log akan terekam jelas di Vercel tanpa memblokir login
+              console.error("[Resend] Gagal mengirim notifikasi email:", emailError);
             }
           }
 
+          // Return true dipindahkan ke posisi paling akhir setelah block try selesai memproses semuanya
           return true;
         } catch (error) {
-          console.log("Error saat menyimpan profil user:", error);
+          console.error("Error saat menyimpan profil user atau memproses login:", error);
           return false;
         }
       }
@@ -117,10 +124,10 @@ export const authOptions: NextAuthOptions = {
       if (token.email) {
         const userDoc = await User.findOne({ email: token.email }).lean();
         if (userDoc) {
-          token.id = (userDoc as any)._id.toString(); // Simpan ID user untuk mempermudah transaksi
+          token.id = (userDoc as any)._id.toString(); 
           token.username = (userDoc as any).username; 
           token.isNewUser = (userDoc as any).isNewUser;
-          token.subscriptionStatus = (userDoc as any).subscriptionStatus || "free"; // <-- MASUKKAN STATUS KE TOKEN
+          token.subscriptionStatus = (userDoc as any).subscriptionStatus || "free"; 
         }
       }
 
@@ -141,7 +148,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).role = token.role;
         (session.user as any).username = token.username; 
         (session.user as any).isNewUser = token.isNewUser; 
-        (session.user as any).subscriptionStatus = token.subscriptionStatus; // <-- KIRIM KE FRONTEND
+        (session.user as any).subscriptionStatus = token.subscriptionStatus; 
       }
       return session;
     }
