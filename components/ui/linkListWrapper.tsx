@@ -13,17 +13,14 @@ interface LinkListWrapperProps {
 }
 
 export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, customVariant }: LinkListWrapperProps) {
-  // Urutkan initial data berdasarkan order database (ascending)
   const sortedInitial = [...initialLinks].sort((a, b) => (a.order || 0) - (b.order || 0));
   const [links, setLinks] = useState(sortedInitial);
 
-  // Memicu Server Component update ketika initialLinks berubah
   useEffect(() => {
     const updatedSorted = [...initialLinks].sort((a, b) => (a.order || 0) - (b.order || 0));
     setLinks(updatedSorted);
   }, [initialLinks]);
 
-  // Fungsi menyimpan urutan baru ke API Backend
   const saveNewOrder = async (updatedLinks: any[]) => {
     try {
       await fetch("/api/links/reorder", {
@@ -32,7 +29,7 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
         body: JSON.stringify({
           links: updatedLinks.map((link, index) => ({
             id: link._id.toString(),
-            order: index // Gunakan index array sebagai order baru
+            order: index
           }))
         })
       });
@@ -41,11 +38,10 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
     }
   };
 
-  // Dipicu otomatis oleh Reorder.Group sewaktu pergeseran selesai
   const handleReorderEnd = (newOrder: any[]) => {
     setLinks(newOrder);
     if (isAdmin) {
-      saveNewOrder(newOrder); // Simpan permanen jika admin
+      saveNewOrder(newOrder);
     }
   };
 
@@ -57,7 +53,6 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
 
       {isAdmin && <AddLinkModal />}
 
-      {/* RENDER MODE KOSONG / DUMMY */}
       {links.length === 0 ? (
         <div className="flex flex-col gap-3 pt-2">
           {isAdmin && (
@@ -68,7 +63,6 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
           )}
 
           {dummyLinks.map((dummy, idx) => (
-            // Dummy item diset statis tanpa reorder system
             <div key={dummy._id} className="relative flex items-start gap-3 p-3 rounded-md border border-gray-100/50 opacity-60 bg-gray-50/50 pointer-events-none">
               <LinkCard 
                 link={dummy} 
@@ -84,7 +78,6 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
           ))}
         </div>
       ) : (
-        // RENDER MODE RESMI (Reorder System Aktif)
         <Reorder.Group 
           axis="y" 
           values={links} 
@@ -108,33 +101,28 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
   );
 }
 
-// Sub-komponen pembungkus item agar Reorder.Item menjadi direct child Reorder.Group
+// Sub-komponen pembungkus item
 function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number, isAdmin: boolean }) {
   const [isDraggable, setIsDraggable] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // FIXED: Menggunakan dragControls kustom untuk instruksi drag manual seketika
   const dragControls = useDragControls();
 
   const handleStartHold = (event: React.PointerEvent) => {
     if (!isAdmin) return;
     setIsHolding(true);
     
-    // Amankan nativeEvent agar koordinat kursor/sentuhan tidak hilang di dalam antrean asinkronus setTimeout
     const savedEvent = event.nativeEvent || event;
 
     if (timerRef.current) clearTimeout(timerRef.current);
 
-    // Kunci timer selama 0.2 detik (Hold Timer)
     timerRef.current = setTimeout(() => {
       setIsDraggable(true);
       
-      // Kunci scroll body agar halaman HP tidak bergoyang sewaktu di-drag
+      // Kunci layar agar halaman web tidak ikut bergulir ke atas/bawah
       document.body.style.overflow = "hidden";
       
-      // FIXED: Tembakkan instruksi geser paksa seketika saat waktu tahan terpenuhi
-      // Tidak perlu lepas tekan lagi, langsung drag murni
+      // Tembakkan instruksi geser langsung saat detik ke-0.2 tanpa angkat jari
       dragControls.start(savedEvent);
     }, 200); 
   };
@@ -142,16 +130,11 @@ function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number
   const handleEndHold = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
     setIsHolding(false);
-    // Jika dilepas sebelum 200ms, batalkan mode drag kustom
-    if (!isDraggable) {
-      setIsDraggable(false);
-    }
   };
 
   const handleDragEndLocal = () => {
     setIsDraggable(false);
     setIsHolding(false);
-    // Kembalikan fungsionalitas scroll layar normal
     document.body.style.overflow = "";
   };
 
@@ -159,25 +142,23 @@ function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number
     <Reorder.Item 
       value={link}
       id={link._id.toString()}
-      // dragListener dimatikan agar tidak konflik, kita gunakan dragControls manual
       dragListener={false} 
       dragControls={dragControls}
       layout
       onDragEnd={handleDragEndLocal}
-      className={`relative flex items-start gap-3 p-3 rounded-md border select-none transition-all ${
+      // Menghilangkan scale membesar agar kartu tidak melompat (efek magnet hilang)
+      className={`relative flex items-start gap-3 p-3 rounded-md border select-none transition-shadow duration-150 ${
         isDraggable 
-          ? "bg-slate-100 border-blue-400 shadow-xl z-50 scale-[1.015]" 
+          ? "bg-slate-50 border-gray-300 shadow-md z-50 cursor-grabbing" 
           : "bg-white border-gray-100/70 shadow-sm"
       }`}
       style={{ 
         touchAction: "none", 
         userSelect: "none", 
-        WebkitUserSelect: "none",
-        cursor: isDraggable ? "grabbing" : "auto"
+        WebkitUserSelect: "none"
       }}
-      // FIXED: Konfigurasi transisi spring untuk efek SNAP/MAGNET yang tajam
-      // Stiffness tinggi = nempel cepat. Damping tinggi = tidak membal, langsung mengunci 'PLEK'.
-      transition={{ type: "spring", stiffness: 700, damping: 50 }}
+      // Menggunakan animasi transisi normal linier tanpa efek pegas bouncy berlebih
+      transition={{ type: "tween", duration: 0.18 }}
     >
       <LinkCard 
         link={link} 
