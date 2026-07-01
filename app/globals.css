@@ -94,3 +94,23 @@ body {
 .animate-simple-marquee {
   animation: marquee-simple-wkwk 8s ease-in-out infinite;
 }
+
+    @keyframes marqueeScroll {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-preview-marquee {
+          display: flex;
+          width: max-content;
+          animation: marqueeScroll 30s linear infinite;
+        }
+        .animate-preview-marquee:hover {
+          animation-play-state: paused;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
