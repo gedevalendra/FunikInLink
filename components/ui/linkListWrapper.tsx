@@ -102,6 +102,8 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
 }
 
 // Sub-komponen pembungkus item agar useDragControls terpanggil dengan benar di dalam Reorder.Group
+// Jalankan perbaikan pada fungsi ReorderItemWrapper di bagian bawah file LinkListWrapper.tsx
+
 function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number, isAdmin: boolean }) {
   const [isDraggable, setIsDraggable] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
@@ -115,13 +117,27 @@ function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number
 
     timerRef.current = setTimeout(() => {
       setIsDraggable(true);
+      
+      // FIXED: Matikan scroll layar HP saat item mulai digeser agar tidak bentrok
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+      
       dragControls.start(event);
-    }, 200); // 0.2 detik aktifkan drag
+    }, 200); // Tahan 0.2 detik
   };
 
   const handleEndHold = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
     setIsHolding(false);
+  };
+
+  const handleDragEndLocal = () => {
+    setIsDraggable(false);
+    setIsHolding(false);
+    
+    // FIXED: Kembalikan fungsi scroll layar HP seperti semula setelah jari dilepas
+    document.body.style.overflow = "";
+    document.body.style.touchAction = "";
   };
 
   return (
@@ -130,11 +146,9 @@ function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number
       id={link._id.toString()}
       dragListener={false}
       dragControls={dragControls}
-      onDragEnd={() => {
-        setIsDraggable(false);
-        setIsHolding(false);
-      }}
-      className={`relative flex items-start gap-3 p-3 rounded-md transition-colors border border-gray-100/50 select-none ${
+      onDragEnd={handleDragEndLocal}
+      // FIXED: touch-none ditambahkan agar browser HP tidak salah paham mengira ini perintah scroll halaman
+      className={`relative flex items-start gap-3 p-3 rounded-md transition-colors border border-gray-100/50 select-none touch-none ${
         isDraggable ? "bg-slate-50 border-dashed border-slate-300 shadow-lg scale-[1.02] z-50 cursor-grabbing" : "bg-white"
       }`}
     >
