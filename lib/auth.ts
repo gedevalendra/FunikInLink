@@ -20,7 +20,7 @@ export const authOptions: NextAuthOptions = {
         await connectDB();
         
         try {
-          // 1. Ambil atau Buat User di Database
+          // 1. Ambil atau Buat User Baru di Database jika Belum Terdaftar
           const existingUser = await User.findOne({ email: user.email });
           
           if (!existingUser) {
@@ -37,7 +37,7 @@ export const authOptions: NextAuthOptions = {
             });
           }
 
-          // 2. INTEGRASI EMAIL (Wajib ditunggu menggunakan await yang tepat)
+          // 2. INTEGRASI EMAIL: Menggunakan domain resmi funikin.it.com
           if (user.email) {
             try {
               const username = user.name || "Pengguna";
@@ -45,7 +45,8 @@ export const authOptions: NextAuthOptions = {
               console.log(`[Resend] Memulai pengiriman email ke: ${user.email}`);
               
               const emailResponse = await resend.emails.send({
-                from: "FunikIn <onboarding@resend.dev>", // Ganti jika sudah ada domain kustom
+                // SUDAH DIUBAH: Menggunakan domain kustom kamu agar tidak terdeteksi spoofing/spam oleh Gmail
+                from: "FunikIn <noreply@funikin.it.com>", 
                 to: user.email,
                 subject: "Selamat Datang Kembali di FunikIn!",
                 html: `
@@ -103,12 +104,12 @@ export const authOptions: NextAuthOptions = {
               console.log("[Resend] Respons API:", JSON.stringify(emailResponse));
               console.log(`[Resend] Email onboarding sukses terkirim ke ${user.email}`);
             } catch (emailError) {
-              // Jika kuota Resend habis, log akan terekam jelas di Vercel tanpa memblokir login
+              // Jika kuota Resend habis atau ada kendala network, log terekam dan user tidak terblokir loginnya
               console.error("[Resend] Gagal mengirim notifikasi email:", emailError);
             }
           }
 
-          // Return true dipindahkan ke posisi paling akhir setelah block try selesai memproses semuanya
+          // Return true ditaruh di sini agar Vercel menunggu seluruh proses di atas beres
           return true;
         } catch (error) {
           console.error("Error saat menyimpan profil user atau memproses login:", error);
