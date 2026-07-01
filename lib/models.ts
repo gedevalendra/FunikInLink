@@ -52,3 +52,29 @@ const AdminListSchema = new mongoose.Schema({
 });
 
 export const AdminList = mongoose.models.AdminList || mongoose.model("AdminList", AdminListSchema);
+
+
+// ========================================================
+// 🚀 MODEL BARU: Skema untuk Koleksi Produk (Koleksi: "Produk")
+// ========================================================
+const ProdukSchema = new mongoose.Schema({
+  // Relasi kepemilikan produk (bisa diisi username atau ID User pemiliknya)
+  username: { type: String, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  
+  // Informasi Utama Produk
+  name: { type: String, required: true },
+  slug: { type: String, required: true, unique: true }, // URL ramah SEO, contoh: "premium-notion-template"
+  description: { type: String, default: "" },
+  image: { type: String, required: true }, // Menyimpan URL string dari image hosting (Unsplash/Cloudinary)
+  
+  // Finansial & Statistik
+  price: { type: Number, required: true, default: 0 },
+  salesCount: { type: Number, default: 0 }, // Total pembelian produk
+}, { 
+  collection: "Produk", // Nama koleksi di database MongoDB kamu wajib sama
+  timestamps: true      // Otomatis membuat field createdAt dan updatedAt
+});
+
+// Daftarkan model "Produk" agar bisa dipanggil oleh server Next.js tanpa crash duplikasi
+export const Produk = mongoose.models.Produk || mongoose.model("Produk", ProdukSchema);
