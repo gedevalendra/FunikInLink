@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { deleteLink, updateLink } from "../../lib/actions";
-// Import motion dari framer-motion untuk mendaftarkan animasi layout bergeser
+// Import motion dari framer-motion
 import { motion } from "framer-motion";
 
 const BOXICONS = [
@@ -28,8 +28,9 @@ interface LinkCardProps {
   isAdmin: boolean;
   isDummy?: boolean;
   index: number;
-  onDragStart: (e: React.DragEvent, index: number) => void;
-  onDragOver: (e: React.DragEvent, index: number) => void;
+  // Menggunakan tipe data any pada spesifikasi event agar tidak bertabrakan dengan internal event handler milik Framer Motion
+  onDragStart: (e: any, index: number) => void;
+  onDragOver: (e: any, index: number) => void;
   onDragEnd: () => void;
 }
 
@@ -76,9 +77,6 @@ export default function LinkCard({
 
   return (
     <>
-      {/* MENGGUNAKAN <motion.div> + Properti layout & transition.
-        Ini yang membuat elemen-elemen lain bergerak meluncur mulus saat posisinya digeser.
-      */}
       <motion.div 
         layout
         transition={{
