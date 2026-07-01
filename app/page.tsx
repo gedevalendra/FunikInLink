@@ -113,10 +113,10 @@ export default async function LandingPage() {
           <div className="max-w-5xl mx-auto px-4">
             <div className="text-center max-w-xl mx-auto mb-10">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-slate-100 px-2.5 py-1 rounded-md">
-                Fitur Unggulan
+                Kenapa harus Funik<span className="text-yellow-500">In</span> ?
               </span>
               <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight mt-2.5">
-                Cara Kerja & Keunggulan Utama
+                Fitur Unggulan
               </h2>
             </div>
 
@@ -238,7 +238,7 @@ export default async function LandingPage() {
         {/* SECTION PREMIUM BANNER / CALL TO ACTION PROMO (Max Rounded: md) */}
         <section className="w-full py-16 bg-white">
           <div className="max-w-4xl mx-auto px-4">
-            <div className="bg-slate-50 border border-slate-200 rounded-md p-6 md:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-xs relative overflow-hidden">
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 md:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-xs relative overflow-hidden">
               
               <div className="space-y-3 max-w-xl text-center lg:text-left">
                 <div className="inline-flex items-center gap-1 bg-slate-900 text-white text-[9px] font-bold px-2 py-0.5 rounded-md tracking-wider uppercase mx-auto lg:mx-0">
@@ -253,10 +253,6 @@ export default async function LandingPage() {
                 
                 {/* Benefit List Checklist */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 text-slate-600 text-xs text-left">
-                  <div className="flex items-center gap-2">
-                    <i className="bx bx-check text-slate-900 font-bold text-xs bg-white border border-slate-200 rounded-md p-0.5 shrink-0"></i> 
-                    <span>Branding Domain Pribadi</span>
-                  </div>
                   <div className="flex items-center gap-2">
                     <i className="bx bx-check text-slate-900 font-bold text-xs bg-white border border-slate-200 rounded-md p-0.5 shrink-0"></i> 
                     <span>Integrasi Midtrans</span>
