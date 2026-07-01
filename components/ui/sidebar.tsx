@@ -12,8 +12,8 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { data: session } = useSession();
 
-  // Ambil data profile secara aman dan akurat dari session rill
-  const userName = session?.user?.name || "Pengguna";
+  // Ambil data profile secara aman dan akurat dari database session rill
+  const userName = (session?.user as any)?.name || session?.user?.name || "Pengguna";
   const userImage = session?.user?.image || "";
   
   // Ambil username asli jika ada di session, jika tidak ada, ekstrak dari email sebagai fallback aman
@@ -85,7 +85,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               onClick={onClose}
               className="p-1.5 flex cursor-pointer rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 active:scale-95 transition-all duration-150"
             >
-              <i className="bx bx-x text-xl sm:text-2xl"></i>
+              <i className="bx bx-x text-2xl"></i>
             </button>
           </div>
 
@@ -97,15 +97,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               }`}
             >
               {userImage ? (
-                <img src={userImage} alt={userName} className="w-9 h-9 sm:w-10 sm:h-10 rounded-md border border-slate-200 object-cover" />
+                <img src={userImage} alt={userName} className="w-10 h-10 rounded-md border border-slate-200 object-cover" />
               ) : (
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-slate-800 text-white font-medium flex items-center justify-center text-xs uppercase shrink-0">
+                <div className="w-10 h-10 rounded-md bg-slate-800 text-white font-medium flex items-center justify-center text-xs uppercase shrink-0">
                   {userName.substring(0, 2)}
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-xs sm:text-sm text-slate-800 truncate">{userName}</p>
-                <p className="text-[10px] sm:text-xs text-slate-400 font-mono truncate">@{userUsername}</p>
+                <p className="font-medium text-sm sm:text-base text-slate-800 truncate">{userName}</p>
+                <p className="text-xs text-slate-400 font-mono truncate">@{userUsername}</p>
               </div>
             </div>
           ) : (
@@ -114,27 +114,27 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 isOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"
               }`}
             >
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-yellow-500 text-white flex items-center justify-center text-sm sm:text-base shrink-0">
+              <div className="w-10 h-10 rounded-md bg-yellow-500 text-white flex items-center justify-center text-base shrink-0">
                 <i className="bx bx-user-circle"></i>
               </div>
               <div className="min-w-0">
-                <p className="font-medium text-xs sm:text-sm text-slate-800 truncate">Tamu FunikIn</p>
-                <p className="text-[10px] sm:text-[11px] text-yellow-600 font-medium truncate">Silahkan masuk ke akun anda</p>
+                <p className="font-medium text-sm sm:text-base text-slate-800 truncate">Tamu FunikIn</p>
+                <p className="text-xs text-yellow-600 font-medium truncate">Silahkan masuk ke akun anda</p>
               </div>
             </div>
           )}
 
           {/* Daftar Navigasi Utama Ber-HR */}
-          <nav className="flex flex-col text-xs sm:text-sm">
+          <nav className="flex flex-col text-sm sm:text-base">
             <div className="border-b border-slate-100">
               <Link
                 href="/"
                 onClick={onClose}
-                className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
+                className={`flex items-center gap-3 px-3 py-3.5 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
                   isOpen ? "translate-y-0 opacity-100 delay-[50ms]" : "-translate-y-4 opacity-0"
                 }`}
               >
-                <i className="bx bx-home-alt text-lg"></i>
+                <i className="bx bx-home-alt text-xl"></i>
                 Home
               </Link>
             </div>
@@ -143,11 +143,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <Link
                 href="/About"
                 onClick={onClose}
-                className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
+                className={`flex items-center gap-3 px-3 py-3.5 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
                   isOpen ? "translate-y-0 opacity-100 delay-[100ms]" : "-translate-y-4 opacity-0"
                 }`}
               >
-                <i className="bx bx-info-circle text-lg"></i>
+                <i className="bx bx-info-circle text-xl"></i>
                 About
               </Link>
             </div>
@@ -156,11 +156,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <Link
                 href="/Privacy"
                 onClick={onClose}
-                className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
+                className={`flex items-center gap-3 px-3 py-3.5 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
                   isOpen ? "translate-y-0 opacity-100 delay-[150ms]" : "-translate-y-4 opacity-0"
                 }`}
               >
-                <i className="bx bx-shield-alt-2 text-lg"></i>
+                <i className="bx bx-shield-alt-2 text-xl"></i>
                 Privacy
               </Link>
             </div>
@@ -172,40 +172,40 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   <Link
                     href={`/${userUsername}`}
                     onClick={onClose}
-                    className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
+                    className={`flex items-center gap-3 px-3 py-3.5 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
                       isOpen ? "translate-y-0 opacity-100 delay-[200ms]" : "-translate-y-4 opacity-0"
                     }`}
                   >
-                    <i className="bx bx-user text-lg"></i>
+                    <i className="bx bx-user text-xl"></i>
                     Profile Saya
                   </Link>
                 </div>
 
-                {/* 🚀 MENU BARU: KERANJANG */}
+                {/* MENU BARU: KERANJANG */}
                 <div className="border-b border-slate-100">
                   <Link
                     href={`/${userUsername}/chart`}
                     onClick={onClose}
-                    className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
+                    className={`flex items-center gap-3 px-3 py-3.5 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-yellow-600 transition-all transform duration-300 ${
                       isOpen ? "translate-y-0 opacity-100 delay-[220ms]" : "-translate-y-4 opacity-0"
                     }`}
                   >
-                    <i className="bx bx-cart text-lg"></i>
+                    <i className="bx bx-cart text-xl"></i>
                     Keranjang Belanja
                   </Link>
                 </div>
 
-                {/* 🚀 BERHASIL DIPERBAIKI: MENU ADMIN PANEL AKTIF */}
+                {/* MENU ADMIN PANEL AKTIF */}
                 {(session.user as any)?.role === "admin" && (
                   <div className="border-b border-slate-100">
                     <Link
                       href="/admin"
                       onClick={onClose}
-                      className={`flex items-center gap-3 px-3 py-3 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-red-600 transition-all transform duration-300 ${
+                      className={`flex items-center gap-3 px-3 py-3.5 rounded-md font-medium text-slate-600 hover:bg-slate-50 hover:text-red-600 transition-all transform duration-300 ${
                         isOpen ? "translate-y-0 opacity-100 delay-[240ms]" : "-translate-y-4 opacity-0"
                       }`}
                     >
-                      <i className="bx bx-grid-alt text-lg text-red-500"></i>
+                      <i className="bx bx-grid-alt text-xl text-red-500"></i>
                       Admin Panel
                     </Link>
                   </div>
@@ -232,11 +232,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   signOut({ callbackUrl: "/" });
                   onClose();
                 }}
-                className={`w-full flex items-center justify-center gap-2 font-normal bg-gradient-to-r from-red-600 via-rose-600 to-red-700 animate-gradient-shift text-white py-2.5 rounded-md text-xs sm:text-sm tracking-wide transition-all transform duration-300 ${
+                className={`w-full flex items-center justify-center gap-2 font-normal bg-gradient-to-r from-red-600 via-rose-600 to-red-700 animate-gradient-shift text-white py-3 rounded-md text-sm sm:text-base tracking-wide transition-all transform duration-300 ${
                   isOpen ? "translate-y-0 opacity-100 delay-[300ms]" : "-translate-y-4 opacity-0"
                 }`}
               >
-                <i className="bx bx-log-out text-sm animate-pulse"></i>
+                <i className="bx bx-log-out text-base animate-pulse"></i>
                 Keluar Akun
               </button>
             </div>
@@ -252,7 +252,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <Link
                 href="/registrasi"
                 onClick={onClose}
-                className={`w-full block text-center font-normal bg-transparent text-slate-900 border border-slate-900 py-2.5 rounded-md text-xs sm:text-sm tracking-wide transition-all transform duration-300 ${
+                className={`w-full block text-center font-normal bg-transparent text-slate-900 border border-slate-900 py-3 rounded-md text-sm sm:text-base tracking-wide transition-all transform duration-300 ${
                   isOpen ? "translate-y-0 opacity-100 delay-[200ms]" : "-translate-y-4 opacity-0"
                 }`}
               >
