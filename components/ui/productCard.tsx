@@ -20,6 +20,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, username }: ProductCardProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false); // State untuk mendeteksi error gambar
 
   const formatRupiah = (value: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -43,20 +44,27 @@ export default function ProductCard({ product, username }: ProductCardProps) {
 
   return (
     <div className="group relative flex flex-col bg-white border border-neutral-100 rounded-xl overflow-hidden transition-all duration-200 h-full hover:border-neutral-200">
-      {/* Gambar Produk */}
+      {/* Gambar Produk atau Tampilan Error Segitiga */}
       <a
         href={`/${username}/produk/${product.slug}`}
         className="relative block w-full aspect-[4/3] overflow-hidden bg-neutral-50 cursor-pointer"
       >
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-300"
-          onError={(e) => {
-            e.currentTarget.src =
-              "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600";
-          }}
-        />
+        {!hasError ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-300"
+            onError={() => setHasError(true)} // Jika error, switch ke tampilan error
+          />
+        ) : (
+          /* Tampilan Fallback Jika Gambar Gagal Dimuat */
+          <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-neutral-50 text-neutral-400 gap-1.5 select-none">
+            <i className="bx bx-error-circle text-2xl text-neutral-300"></i>
+            <span className="text-[10px] font-normal tracking-wide text-neutral-400 text-center px-2">
+              Gambar gagal dimuat
+            </span>
+          </div>
+        )}
       </a>
 
       {/* Info Produk */}

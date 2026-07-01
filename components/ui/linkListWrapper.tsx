@@ -10,9 +10,10 @@ interface LinkListWrapperProps {
   isAdmin: boolean;
   dummyLinks: any[];
   customVariant?: string;
+  username?: string; // Menambahkan username untuk informasi pesan
 }
 
-export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, customVariant }: LinkListWrapperProps) {
+export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, customVariant, username = "user" }: LinkListWrapperProps) {
   const sortedInitial = [...initialLinks].sort((a, b) => (a.order || 0) - (b.order || 0));
   const [links, setLinks] = useState(sortedInitial);
 
@@ -47,34 +48,51 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
 
   return (
     <div className="space-y-2 relative">
-
+      
+      {/* Tombol Tambah Tautan Baru di atas */}
       {isAdmin && <AddLinkModal />}
 
+      {/* KONDISI JIKA LINK KOSONG */}
       {links.length === 0 ? (
         <div className="flex flex-col gap-3 pt-2">
-          {isAdmin && (
-            <div className="p-3 bg-amber-50 border border-amber-100 rounded-md text-xs text-amber-700 leading-relaxed font-medium">
-              <i className="bx bx-info-circle mr-1 text-sm align-middle"></i>
-              Kamu belum menambahkan tautan apa pun.
+          {isAdmin ? (
+            /* Jika ADMIN: Tampilkan info box dan Konten Dummy */
+            <>
+              <div className="p-3.5 bg-neutral-50 border border-neutral-200 border-dashed rounded-xl text-xs text-neutral-500 leading-relaxed font-normal flex items-center gap-2 justify-center text-center">
+                <i className="bx bx-info-circle text-neutral-400 text-sm"></i>
+                <span>Kamu belum menambahkan tautan apa pun. Berikut adalah tampilan simulasi dummy:</span>
+              </div>
+
+              {dummyLinks.map((dummy, idx) => (
+                <div key={dummy._id} className="relative flex items-start gap-3 p-3 rounded-md border border-gray-100/50 opacity-50 bg-gray-50/50 pointer-events-none select-none">
+                  <LinkCard 
+                    link={dummy} 
+                    isAdmin={isAdmin} 
+                    isDummy={true} 
+                    index={idx} 
+                    isDraggable={false} 
+                    isHolding={false} 
+                    handleStartHold={() => {}} 
+                    handleEndHold={() => {}} 
+                  />
+                </div>
+              ))}
+            </>
+          ) : (
+            /* Jika PENGUNJUNG UMUM: Sembunyikan dummy, tampilkan box informasi bersih */
+            <div className="w-full flex flex-col items-center justify-center p-8 text-center min-h-[180px] bg-neutral-50/50 border border-dashed border-neutral-200 rounded-2xl max-w-md mx-auto">
+              <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-400 mb-3">
+                <i className="bx bx-link text-xl"></i>
+              </div>
+              <h4 className="text-xs sm:text-sm font-medium text-neutral-800 mb-1">Tautan Belum Tersedia</h4>
+              <p className="text-[11px] sm:text-xs text-neutral-400 leading-relaxed px-4">
+                @{username} belum mengunggah tautan sosial atau informasi apa pun saat ini.
+              </p>
             </div>
           )}
-
-          {dummyLinks.map((dummy, idx) => (
-            <div key={dummy._id} className="relative flex items-start gap-3 p-3 rounded-md border border-gray-100/50 opacity-60 bg-gray-50/50 pointer-events-none">
-              <LinkCard 
-                link={dummy} 
-                isAdmin={isAdmin} 
-                isDummy={true} 
-                index={idx} 
-                isDraggable={false} 
-                isHolding={false} 
-                handleStartHold={() => {}} 
-                handleEndHold={() => {}} 
-              />
-            </div>
-          ))}
         </div>
       ) : (
+        /* KONDISI JIKA LINK ADA */
         <Reorder.Group 
           axis="y" 
           values={links} 
@@ -98,7 +116,7 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
   );
 }
 
-// Sub-komponen pembungkus item
+// Sub-komponen pembungkus item (Tetap utuh seperti sebelumnya)
 function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number, isAdmin: boolean }) {
   const [isDraggable, setIsDraggable] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
@@ -115,11 +133,7 @@ function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number
 
     timerRef.current = setTimeout(() => {
       setIsDraggable(true);
-      
-      // Kunci layar agar halaman web tidak ikut bergulir ke atas/bawah
       document.body.style.overflow = "hidden";
-      
-      // Tembakkan instruksi geser langsung saat detik ke-0.2 tanpa angkat jari
       dragControls.start(savedEvent);
     }, 500); 
   };
@@ -143,7 +157,6 @@ function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number
       dragControls={dragControls}
       layout
       onDragEnd={handleDragEndLocal}
-      // Menghilangkan scale membesar agar kartu tidak melompat (efek magnet hilang)
       className={`relative flex items-start gap-3 p-3 rounded-md border select-none transition-shadow duration-150 ${
         isDraggable 
           ? "bg-slate-50 border-gray-300 shadow-md z-50 cursor-grabbing" 
@@ -154,7 +167,6 @@ function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number
         userSelect: "none", 
         WebkitUserSelect: "none"
       }}
-      // Menggunakan animasi transisi normal linier tanpa efek pegas bouncy berlebih
       transition={{ type: "tween", duration: 0.18 }}
     >
       <LinkCard 
