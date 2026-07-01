@@ -125,9 +125,6 @@ export default async function LandingPage() {
               
               {/* Poin 1 */}
               <div className="p-4 bg-slate-50/70 border border-slate-100 rounded-md hover:bg-white hover:shadow-md hover:border-slate-200 transition-all duration-200 group">
-                <div className="w-9 h-9 bg-slate-900 text-white flex items-center justify-center rounded-md mb-3 group-hover:scale-105 transition-transform">
-                  <i className="bx bx-slider-alt text-lg"></i>
-                </div>
                 <h3 className="font-bold text-sm text-slate-800 mb-1">1. Profile Instan</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   Ganti warna, foto, susun link sesukamu dan animasi keren.
@@ -136,9 +133,6 @@ export default async function LandingPage() {
 
               {/* Poin 2 */}
               <div className="p-4 bg-slate-50/70 border border-slate-100 rounded-md hover:bg-white hover:shadow-md hover:border-slate-200 transition-all duration-200 group">
-                <div className="w-9 h-9 bg-slate-900 text-white flex items-center justify-center rounded-md mb-3 group-hover:scale-105 transition-transform">
-                  <i className="bx bx-layout text-lg"></i>
-                </div>
                 <h3 className="font-bold text-sm text-slate-800 mb-1">2. Template atau Custom</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   Gunakan desain template instan atau buat kustomisasi penuh.
@@ -147,9 +141,6 @@ export default async function LandingPage() {
 
               {/* Poin 3 */}
               <div className="p-4 bg-slate-50/70 border border-slate-100 rounded-md hover:bg-white hover:shadow-md hover:border-slate-200 transition-all duration-200 group">
-                <div className="w-9 h-9 bg-slate-900 text-white flex items-center justify-center rounded-md mb-3 group-hover:scale-105 transition-transform">
-                  <i className="bx bx-shopping-bag text-lg"></i>
-                </div>
                 <h3 className="font-bold text-sm text-slate-800 mb-1">3. Jual atau beli produk</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   Jual produk digital atau terima donasi lewat QRIS & e-wallet.
@@ -158,9 +149,6 @@ export default async function LandingPage() {
 
               {/* Poin 4 */}
               <div className="p-4 bg-slate-50/70 border border-slate-100 rounded-md hover:bg-white hover:shadow-md hover:border-slate-200 transition-all duration-200 group">
-                <div className="w-9 h-9 bg-slate-900 text-white flex items-center justify-center rounded-md mb-3 group-hover:scale-105 transition-transform">
-                  <i className="bx bx-line-chart text-lg"></i>
-                </div>
                 <h3 className="font-bold text-sm text-slate-800 mb-1">4. Laporan analitik</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   Pantau pengunjung dan klik link, laporan sederhana & akurat.
