@@ -242,11 +242,11 @@ export default function InteractiveHero({ session, userUsername, Name }: HeroPro
                   {/* Bagian Foto & Username Header Dinamis */}
                   <div className="flex items-center gap-4 pt-2">
                     <div className="w-14 h-14 rounded-full bg-slate-900 text-white font-semibold flex items-center justify-center text-sm tracking-wide uppercase border border-slate-200 shadow-xs">
-                      {String(Name || userUsername || "F").substring(0, 2)}
+                      {String(Name || userUsername || "Y").substring(0, 2)}
                     </div>
                     <div className="space-y-0.5">
-                      <h3 className="text-base font-bold text-slate-900 flex items-center gap-1">
-                        {Name || userUsername || "User FunikIn"}
+                      <h3 className="text-base font-bold text-slate-900 flex items-center gap-1 line-clamp-1">
+                        {Name || userUsername || "Your Name"}
                         <i className="bx bxs-badge-check text-blue-500 text-base"></i>
                       </h3>
                       <p className="text-xs text-slate-400 font-mono">@{userUsername || "username"}</p>

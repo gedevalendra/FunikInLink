@@ -1,15 +1,27 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../lib/auth";
 import InteractiveHero from "../components/ui/interactiveHero";
-// Pastikan path import ini sesuai dengan lokasi file ParallaxWrapper yang kamu buat
 import ParallaxWrapper from "../components/ui/parallaxWrapper"; 
+import { connectDB } from "../lib/db"; // Import fungsi koneksi database
+import { User } from "../lib/models";   // Import model User dari database
 
 export default async function LandingPage() {
   const session = await getServerSession(authOptions);
   
-  // Ambil username dengan aman jika ada
-  const userUsername = (session?.user as any)?.username || "";
-  const Name = (session?.user as any)?.name || "";
+  // 1. Inisialisasi variabel string kosong untuk fallback awal
+  let userUsername = "";
+  let Name = "";
+
+  // 2. Jika ada session user yang login, ambil data real langsung dari database
+  if (session?.user?.email) {
+    await connectDB();
+    const dbUser = await User.findOne({ email: session.user.email }).lean();
+    
+    if (dbUser) {
+      userUsername = dbUser.username || "";
+      Name = dbUser.name || "";
+    }
+  }
 
   // Data Dummy untuk FAQ
   const faqData = [
@@ -33,13 +45,6 @@ export default async function LandingPage() {
 
   return (
     <div className="flex flex-col min-h-screen text-gray-900 font-sans pt-20 relative overflow-x-hidden">
-      
-      {/* ==========================================
-          HEADER (FIXED & Z-50)
-          Diberikan bg-white/90 (agak transparan dengan efek blur) 
-          agar terlihat estetik tapi tetap menutupi elemen di bawahnya
-          ========================================== */}
-  
       
       {/* ==========================================
           1. SECTION HERO ANIMASI (TRUE PARALLAX)
@@ -109,7 +114,7 @@ export default async function LandingPage() {
                 </div>
                 <h3 className="font-bold text-base text-slate-800 mb-2">3. Laporan Pengunjung</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Lihat dengan mudah berapa orang yang mengintip profilmu hari ini, link mana yang paling sering diklik, tanpa perlu pusing membaca grafik rumit.
+                  Look dengan mudah berapa orang yang mengintip profilmu hari ini, link mana yang paling sering diklik, tanpa perlu pusing membaca grafik rumit.
                 </p>
               </div>
             </div>
