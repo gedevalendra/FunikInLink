@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import LinkCard from "./linkCard";
 import AddLinkModal from "./addLinkModal";
 
@@ -8,12 +8,23 @@ interface LinkListWrapperProps {
   initialLinks: any[];
   isAdmin: boolean;
   dummyLinks: any[];
+  customVariant?: string;
 }
 
-export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks }: LinkListWrapperProps) {
+export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, customVariant }: LinkListWrapperProps) {
   // Urutkan data awal berdasarkan index order dari terkecil ke terbesar (0, 1, 2, ...)
   const sortedInitial = [...initialLinks].sort((a, b) => (a.order || 0) - (b.order || 0));
   const [links, setLinks] = useState(sortedInitial);
+
+  // Sinkronisasi state jika initialLinks dari Server Component berubah
+  useEffect(() => {
+    const updatedSorted = [...initialLinks].sort((a, b) => (a.order || 0) - (b.order || 0));
+    setLinks(updatedSorted);
+  }, [initialLinks]);
+
+  // Ref untuk melacak elemen yang sedang diseret dan elemen target di bawahnya
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
 
   // Fungsi untuk menyimpan urutan baru ke database via API internal
   const saveNewOrder = async (updatedLinks: any[]) => {
@@ -33,20 +44,38 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks }: L
     }
   };
 
-  const moveLink = (index: number, direction: "up" | "down") => {
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= links.length) return;
+  // Fungsi pemicu saat baris mulai diseret (Drag Start)
+  const handleDragStart = (e: React.DragEvent, position: number) => {
+    dragItem.current = position;
+  };
 
-    const newLinks = [...links];
-    // Tukar posisi elemen array
-    const temp = newLinks[index];
-    newLinks[index] = newLinks[targetIndex];
-    newLinks[targetIndex] = temp;
+  // Fungsi pemicu saat melewati baris lain (Drag Over)
+  const handleDragOver = (e: React.DragEvent, position: number) => {
+    e.preventDefault(); // Mengizinkan elemen ditaruh di sini
+    dragOverItem.current = position;
+  };
 
-    setLinks(newLinks);
-    if (isAdmin) {
-      saveNewOrder(newLinks);
+  // Fungsi saat seretan dilepas (Drag End) - Mengatur ulang posisi array dan simpan ke DB
+  const handleDragEnd = () => {
+    if (dragItem.current !== null && dragOverItem.current !== null) {
+      if (dragItem.current !== dragOverItem.current) {
+        const copyListItems = [...links];
+        const dragItemContent = copyListItems[dragItem.current];
+        
+        // Hapus elemen lama dan masukkan ke indeks posisi target yang baru
+        copyListItems.splice(dragItem.current, 1);
+        copyListItems.splice(dragOverItem.current, 0, dragItemContent);
+        
+        setLinks(copyListItems);
+
+        if (isAdmin) {
+          saveNewOrder(copyListItems);
+        }
+      }
     }
+    // Reset data tracking ref
+    dragItem.current = null;
+    dragOverItem.current = null;
   };
 
   return (
@@ -60,34 +89,40 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks }: L
       {links.length === 0 ? (
         <div className="flex flex-col gap-3 pt-2">
           {isAdmin && (
-            <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-700 leading-relaxed font-medium">
+            <div className="p-3 bg-amber-50 border border-amber-100 rounded-md text-xs text-amber-700 leading-relaxed font-medium">
               <i className="bx bx-info-circle mr-1 text-sm align-middle"></i>
               Kamu belum menambahkan tautan apa pun. Di bawah ini adalah pratinjau tampilan profilmu jika nanti sudah diisi:
             </div>
           )}
           
-          {dummyLinks.map((dummy) => (
+          {dummyLinks.map((dummy, idx) => (
             <LinkCard 
               key={dummy._id} 
               link={dummy} 
               isAdmin={isAdmin} 
-              isDummy={true} 
+              isDummy={true}
+              index={idx}
+              onDragStart={() => {}}
+              onDragOver={() => {}}
+              onDragEnd={() => {}}
             />
           ))}
         </div>
       ) : (
-        links.map((link, index) => (
-          <LinkCard 
-            key={link._id.toString()} 
-            link={link} 
-            isAdmin={isAdmin} 
-            isDummy={false}
-            isFirst={index === 0}
-            isLast={index === links.length - 1}
-            onMoveUp={() => moveLink(index, "up")}
-            onMoveDown={() => moveLink(index, "down")}
-          />
-        ))
+        <div className="flex flex-col gap-1">
+          {links.map((link, index) => (
+            <LinkCard 
+              key={link._id.toString()} 
+              link={link} 
+              isAdmin={isAdmin} 
+              isDummy={false}
+              index={index}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

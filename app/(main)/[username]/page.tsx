@@ -131,10 +131,10 @@ export default async function DynamicProfilePage({ params }: Props) {
       )}
 
       {/* KONTEN UTAMA:
-        - Lebar dinaikkan menjadi max-w-3xl agar optimal di laptop.
+        - Lebar dinaikkan menjadi max-w-4xl agar optimal di laptop.
         - Class 'border' dan 'border-gray-100' dihapus sesuai request.
       */}
-      <main className={`grow max-w-4xl w-full mx-auto px-6 py-12 mt-6 transition-all duration-300
+      <main className={`grow max-w-4xl w-full mx-auto px-6 pt-14 py-12 -mt-2 mb-12 transition-all duration-300
         ${custom.isBlur ? "bg-white/60 backdrop-blur-md shadow-xl" : "bg-white shadow-sm"}
         ${custom.rounded}
       `}>
