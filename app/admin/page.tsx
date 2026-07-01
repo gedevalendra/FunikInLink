@@ -239,7 +239,7 @@ export default async function admin() {
               <i className="bx bx-shield-quarter text-slate-600"></i> Admin Panel
             </h1>
             <p className="text-xs text-slate-400 mt-0.5">
-              Sesi aktif sebagai: <span className="text-slate-600 font-medium">{String(checkAdmin.nama)}</span>
+              Login sebagai: <span className="text-slate-600 font-medium">{String(checkAdmin.nama)}</span>
             </p>
           </div>
 

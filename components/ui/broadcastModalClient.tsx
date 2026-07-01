@@ -94,9 +94,9 @@ export default function BroadcastModalClient({ users }: { users: UserItem[] }) {
       {/* Tombol Pemicu Utama */}
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all shadow-sm"
+        className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-300 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all shadow-sm"
       >
-        <i className="bx bx-paper-plane text-sm"></i> Kirim Broadcast Email
+        Kirim Broadcast Email
       </button>
 
       {/* MODAL WINDOW */}
@@ -107,7 +107,7 @@ export default function BroadcastModalClient({ users }: { users: UserItem[] }) {
             {/* Header Modal */}
             <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
               <div className="flex items-center gap-2">
-                <i className="bx bx-envelope text-blue-600 text-lg"></i>
+                <i className="bx bx-envelope text-yellow-500 text-lg"></i>
                 <h3 className="font-bold text-slate-800 text-sm sm:text-base">Kirim Pesan Custom Ke Pengguna</h3>
               </div>
               <button 
@@ -158,18 +158,18 @@ export default function BroadcastModalClient({ users }: { users: UserItem[] }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="block font-medium text-slate-600">Subjek Email *</label>
-                  <input type="text" value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="Contoh: Info Pembaruan Sistem" className="w-full p-2 border rounded-md text-xs focus:outline-blue-500" required />
+                  <input type="text" value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="Contoh: Info Pembaruan Sistem" className="w-full p-2 border rounded-md text-xs focus:outline-yellow-400" required />
                 </div>
                 <div className="space-y-1">
                   <label className="block font-medium text-slate-600">Judul Utama Konten *</label>
-                  <input type="text" value={title} onChange={(e)=>setTitle(e.target.value)} placeholder="Contoh: Selamat Datang di Versi Baru" className="w-full p-2 border rounded-md text-xs focus:outline-blue-500" required />
+                  <input type="text" value={title} onChange={(e)=>setTitle(e.target.value)} placeholder="Contoh: Selamat Datang di Versi Baru" className="w-full p-2 border rounded-md text-xs focus:outline-yellow-400" required />
                 </div>
               </div>
 
               {/* Subjudul */}
               <div className="space-y-1">
                 <label className="block font-medium text-slate-600">Subjudul (Opsional)</label>
-                <input type="text" value={subtitle} onChange={(e)=>setSubtitle(e.target.value)} placeholder="Teks kecil di bawah judul utama" className="w-full p-2 border rounded-md text-xs focus:outline-blue-500" />
+                <input type="text" value={subtitle} onChange={(e)=>setSubtitle(e.target.value)} placeholder="Teks kecil di bawah judul utama" className="w-full p-2 border rounded-md text-xs focus:outline-yellow-400" />
               </div>
 
               {/* Isi Pesan Utama */}
@@ -180,7 +180,7 @@ export default function BroadcastModalClient({ users }: { users: UserItem[] }) {
                   value={messageText}
                   onChange={(e)=>setMessageText(e.target.value)}
                   placeholder="Ketik isi pesan kamu disini...&#10;Setiap kali menekan enter, teks otomatis dibungkus menjadi paragraf (<p>) baru yang rapi saat terkirim." 
-                  className="w-full p-2.5 border rounded-md text-xs focus:outline-blue-500 font-sans" 
+                  className="w-full p-2.5 border rounded-md text-xs focus:outline-yellow-400 font-sans" 
                   required
                 />
               </div>
@@ -193,14 +193,14 @@ export default function BroadcastModalClient({ users }: { users: UserItem[] }) {
                 </label>
 
                 {hasButton && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-blue-50/50 p-3 rounded-lg border border-blue-100 animate-fade-in">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-yellow-50/50 p-3 rounded-lg border border-yellow-100 animate-fade-in">
                     <div className="space-y-1">
                       <label className="block text-xs font-medium text-slate-600">Teks Dalam Tombol</label>
-                      <input type="text" value={buttonText} onChange={(e)=>setButtonText(e.target.value)} placeholder="Contoh: Klaim Fitur Premium" className="w-full p-2 bg-white border rounded-md text-xs focus:outline-blue-500" required={hasButton} />
+                      <input type="text" value={buttonText} onChange={(e)=>setButtonText(e.target.value)} placeholder="Contoh: Klaim Fitur Premium" className="w-full p-2 bg-white border rounded-md text-xs focus:outline-yellow-400" required={hasButton} />
                     </div>
                     <div className="space-y-1">
                       <label className="block text-xs font-medium text-slate-600">URL Tujuan Tautan</label>
-                      <input type="url" value={buttonUrl} onChange={(e)=>setButtonUrl(e.target.value)} placeholder="Contoh: https://aplikasikamu.com/fitur" className="w-full p-2 bg-white border rounded-md text-xs focus:outline-blue-500" required={hasButton} />
+                      <input type="url" value={buttonUrl} onChange={(e)=>setButtonUrl(e.target.value)} placeholder="Contoh: https://aplikasikamu.com/fitur" className="w-full p-2 bg-white border rounded-md text-xs focus:outline-yellow-400" required={hasButton} />
                     </div>
                   </div>
                 )}
@@ -218,7 +218,7 @@ export default function BroadcastModalClient({ users }: { users: UserItem[] }) {
                 <button 
                   type="submit" 
                   disabled={loading}
-                  className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-xs disabled:bg-gray-400"
+                  className="flex-1 py-2 bg-yellow-500 hover:bg-yellow-300 text-white font-medium rounded-lg text-xs disabled:bg-gray-400"
                 >
                   {loading ? "Sedang Memproses Kirim..." : "Broadcast Sekarang"}
                 </button>
