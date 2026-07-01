@@ -245,7 +245,7 @@ export default async function DynamicProfilePage({ params }: Props) {
           </div>
         </div>
 
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 space-y-3 mb-4">
           <p className="text-sm text-gray-600 leading-relaxed max-w-2xl">
             {user.bio || "Belum ada bio."}
           </p>
@@ -255,6 +255,8 @@ export default async function DynamicProfilePage({ params }: Props) {
             ))}
           </div>
         </div>
+
+        
 
         {/* 🚀 RENDER SISTEM TAB BARU (Tautan VS Produk Grid 2x4) */}
         <ProfileTabs 

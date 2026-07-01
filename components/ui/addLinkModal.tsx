@@ -66,7 +66,7 @@ export default function AddLinkModal() {
           setSelectedIcon("bx-link");
           setShowPicker(false);
         }}
-        className="w-full py-3 mb-6 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-yellow-400 hover:text-yellow-600 transition-all flex items-center justify-center gap-2"
+        className="w-full py-3 mb-6 border-1 border-dashed border-gray-200 rounded-lg text-sm font-medium text-gray-500 hover:border-yellow-400 hover:text-yellow-600 transition-all flex items-center justify-center gap-2"
       >
         <i className="bx bx-plus text-lg"></i> Tambah Tautan Baru
       </button>
