@@ -7,9 +7,10 @@ import { motion, AnimatePresence } from "framer-motion";
 interface HeroProps {
   session: any;
   userUsername: string;
+  Name: string;
 }
 
-export default function InteractiveHero({ session, userUsername }: HeroProps) {
+export default function InteractiveHero({ session, userUsername, Name }: HeroProps) {
   // 1. Daftar kata ganti yang diketik di dalam Mockup Safari iOS
   const iosKeywords = ["brand", "influencer", "youtuber", "streamer", "freelancer"];
   const [iosIndex, setIosIndex] = useState(0);
@@ -89,7 +90,7 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
   } as const;
 
   return (
-    <main className="relative pt-[10rem] md:pt-[10rem] flex-grow flex flex-col items-center justify-center text-center px-4 sm:px-6 w-full mx-auto overflow-hidden min-h-[95vh] z-0 bg-[#FAFAFA] pt-12 md:pt-16">
+    <main className="relative flex-grow flex flex-col items-center justify-center text-center px-4 sm:px-6 w-full mx-auto overflow-hidden min-h-[95vh] z-0 bg-[#FAFAFA] pt-24 md:pt-28">
       
       {/* Background Grid & Light Scanner Effect */}
       {isMounted && (
@@ -189,7 +190,7 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
               href={`/${userUsername}`}
               className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 sm:py-3.5 sm:px-8 rounded-xl transition-all shadow-md hover:shadow-lg inline-block active:scale-95 text-sm sm:text-base border border-yellow-600/20"
             >
-              Halo {userUsername}! Ke Profil Saya
+              Halo, {userUsername}! Ke Profil Saya
             </Link>
           ) : (
             <Link
@@ -201,7 +202,7 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
           )}
         </div>
 
-        {/* 4. PREMIUM IPHONE 14 PRO MAX MOCKUP (DENGAN REPLIKA UI RILL DASHBOARD MOBILE KAMU) */}
+        {/* 4. PREMIUM IPHONE 14 PRO MAX MOCKUP */}
         <div className="w-full pt-6 flex justify-center relative">
           
           {/* Efek Opacity Gradasi Masking Bawah ke Atas */}
@@ -238,17 +239,17 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
                 {/* Konten Scrollable Profile */}
                 <div className="flex-1 overflow-y-auto p-5 space-y-5">
                   
-                  {/* Bagian Foto & Username Header */}
+                  {/* Bagian Foto & Username Header Dinamis */}
                   <div className="flex items-center gap-4 pt-2">
                     <div className="w-14 h-14 rounded-full bg-slate-900 text-white font-semibold flex items-center justify-center text-sm tracking-wide uppercase border border-slate-200 shadow-xs">
-                      GV
+                      {String(Name || userUsername || "F").substring(0, 2)}
                     </div>
                     <div className="space-y-0.5">
                       <h3 className="text-base font-bold text-slate-900 flex items-center gap-1">
-                        Gede Valendra
+                        {Name || userUsername || "User FunikIn"}
                         <i className="bx bxs-badge-check text-blue-500 text-base"></i>
                       </h3>
-                      <p className="text-xs text-slate-400 font-mono">@{userUsername || "gedevalendra"}</p>
+                      <p className="text-xs text-slate-400 font-mono">@{userUsername || "username"}</p>
                     </div>
                   </div>
 
@@ -311,7 +312,6 @@ export default function InteractiveHero({ session, userUsername }: HeroProps) {
               </div>
             </motion.div>
           </div>
-
         </div>
 
       </div>

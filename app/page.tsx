@@ -9,6 +9,7 @@ export default async function LandingPage() {
   
   // Ambil username dengan aman jika ada
   const userUsername = (session?.user as any)?.username || "";
+  const Name = (session?.user as any)?.name || "";
 
   // Data Dummy untuk FAQ
   const faqData = [
@@ -45,7 +46,7 @@ export default async function LandingPage() {
           Dibungkus dengan ParallaxWrapper yang kita buat
           ========================================== */}
       <ParallaxWrapper>
-        <InteractiveHero session={session} userUsername={userUsername} />
+        <InteractiveHero session={session} userUsername={userUsername} Name={Name} />
       </ParallaxWrapper>
 
       {/* ==========================================
