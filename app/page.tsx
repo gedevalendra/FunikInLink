@@ -89,115 +89,127 @@ export default async function LandingPage() {
       </ParallaxWrapper>
 
       {/* ==========================================
-          2. WRAPPER KONTEN BAWAH (Modern & High Converting)
+          2. WRAPPER KONTEN BAWAH (Max Rounded: md)
           ========================================== */}
-      <div className="relative z-10 bg-white mt-[100vh] shadow-[0_-20px_50px_rgba(0,0,0,0.08)] rounded-t-[2.5rem]">
+      <div className="relative z-10 bg-white mt-[100vh] shadow-[0_-20px_50px_rgba(0,0,0,0.05)] rounded-t-md">
         
         {/* SECTION MEDIA PARTNER */}
-        <section className="w-full bg-slate-50/60 py-12 border-b border-slate-100 overflow-hidden flex flex-col items-center rounded-t-[2.5rem]">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-6 text-center">
+        <section className="w-full bg-slate-50/60 py-10 border-b border-slate-100 overflow-hidden flex flex-col items-center rounded-t-md">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-4 text-center">
             Our Main Partners
           </p>
           <div className="w-full max-w-[30rem] px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
             <div className="flex flex-row items-center justify-center gap-12 text-center">
-              <div className="flex items-center gap-2 font-bold text-base text-slate-600 whitespace-nowrap">
-                <i className="bx bx-globe text-2xl text-yellow-500"></i>
+              <div className="flex items-center gap-2 font-bold text-sm text-slate-600 whitespace-nowrap">
+                <i className="bx bx-globe text-xl text-yellow-500"></i>
                 FunikIn Edu
               </div>
             </div>
           </div>
         </section>
 
-        {/* SECTION STRUKTUR PROGRAM / FITUR UTAMA */}
-        <section className="w-full py-24 bg-white">
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="text-xs font-bold text-yellow-600 uppercase tracking-widest bg-yellow-50 px-3 py-1 rounded-full">Fitur Unggulan</span>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mt-3">
+        {/* SECTION CARA KERJA & KEUNGGULAN UTAMA (Minimalis, Padat, Mobile Grid Max 2) */}
+        <section className="w-full py-16 bg-white border-b border-slate-100">
+          <div className="max-w-5xl mx-auto px-4">
+            <div className="text-center max-w-xl mx-auto mb-10">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-slate-100 px-2.5 py-1 rounded-md">
+                Fitur Unggulan
+              </span>
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight mt-2.5">
                 Cara Kerja & Keunggulan Utama
               </h2>
-              <p className="text-sm md:text-base text-slate-500 mt-3 leading-relaxed">
-                Didesain super ringkas agar profil sosial mediamu menghasilkan lebih banyak klik, konversi, dan interaksi.
-              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="p-8 bg-slate-50/50 border border-slate-100 rounded-2xl hover:bg-white hover:shadow-xl hover:border-transparent transition-all duration-300 group">
-                <div className="w-12 h-12 bg-yellow-500 text-white flex items-center justify-center rounded-xl mb-6 shadow-md shadow-yellow-500/20 group-hover:scale-110 transition-transform">
-                  <i className="bx bx-slider-alt text-2xl"></i>
+            {/* Grid 2 Kolom di Mobile, 4 Kolom di Desktop - Desain Ultra Minimalis & Pendek */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              
+              {/* Poin 1 */}
+              <div className="p-4 bg-slate-50/70 border border-slate-100 rounded-md hover:bg-white hover:shadow-md hover:border-slate-200 transition-all duration-200 group">
+                <div className="w-9 h-9 bg-slate-900 text-white flex items-center justify-center rounded-md mb-3 group-hover:scale-105 transition-transform">
+                  <i className="bx bx-slider-alt text-lg"></i>
                 </div>
-                <h3 className="font-bold text-lg text-slate-800 mb-3">1. Hias Profil Instan</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">
-                  Kamu bisa ganti warna, pasang foto terbaik, susun link sesukamu, dan langsung pakai animasi tombol keren agar pengunjung betah berlama-lama.
+                <h3 className="font-bold text-sm text-slate-800 mb-1">1. Profile Instan</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Ganti warna, foto, susun link sesukamu dan animasi keren.
                 </p>
               </div>
 
-              <div className="p-8 bg-slate-50/50 border border-slate-100 rounded-2xl hover:bg-white hover:shadow-xl hover:border-transparent transition-all duration-300 group">
-                <div className="w-12 h-12 bg-red-500 text-white flex items-center justify-center rounded-xl mb-6 shadow-md shadow-red-500/20 group-hover:scale-110 transition-transform">
-                  <i className="bx bx-wallet text-2xl"></i>
+              {/* Poin 2 */}
+              <div className="p-4 bg-slate-50/70 border border-slate-100 rounded-md hover:bg-white hover:shadow-md hover:border-slate-200 transition-all duration-200 group">
+                <div className="w-9 h-9 bg-slate-900 text-white flex items-center justify-center rounded-md mb-3 group-hover:scale-105 transition-transform">
+                  <i className="bx bx-layout text-lg"></i>
                 </div>
-                <h3 className="font-bold text-lg text-slate-800 mb-3">2. Terima Uang & Donasi</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">
-                  Pengunjung bisa langsung bayar produk digitalmu atau kirim donasi dukungan lewat QRIS, transfer bank, dan e-wallet secara aman dari profilmu.
+                <h3 className="font-bold text-sm text-slate-800 mb-1">2. Template atau Custom</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Gunakan desain template instan atau buat kustomisasi penuh.
                 </p>
               </div>
 
-              <div className="p-8 bg-slate-50/50 border border-slate-100 rounded-2xl hover:bg-white hover:shadow-xl hover:border-transparent transition-all duration-300 group">
-                <div className="w-12 h-12 bg-slate-900 text-white flex items-center justify-center rounded-xl mb-6 shadow-md shadow-slate-900/20 group-hover:scale-110 transition-transform">
-                  <i className="bx bx-line-chart text-2xl"></i>
+              {/* Poin 3 */}
+              <div className="p-4 bg-slate-50/70 border border-slate-100 rounded-md hover:bg-white hover:shadow-md hover:border-slate-200 transition-all duration-200 group">
+                <div className="w-9 h-9 bg-slate-900 text-white flex items-center justify-center rounded-md mb-3 group-hover:scale-105 transition-transform">
+                  <i className="bx bx-shopping-bag text-lg"></i>
                 </div>
-                <h3 className="font-bold text-lg text-slate-800 mb-3">3. Laporan Analitik</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">
-                  Pantau dengan mudah berapa orang yang mengintip profilmu hari ini, link mana yang paling sering diklik, tanpa perlu pusing membaca grafik rumit.
+                <h3 className="font-bold text-sm text-slate-800 mb-1">3. Jual atau beli produk</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Jual produk digital atau terima donasi lewat QRIS & e-wallet.
                 </p>
               </div>
+
+              {/* Poin 4 */}
+              <div className="p-4 bg-slate-50/70 border border-slate-100 rounded-md hover:bg-white hover:shadow-md hover:border-slate-200 transition-all duration-200 group">
+                <div className="w-9 h-9 bg-slate-900 text-white flex items-center justify-center rounded-md mb-3 group-hover:scale-105 transition-transform">
+                  <i className="bx bx-line-chart text-lg"></i>
+                </div>
+                <h3 className="font-bold text-sm text-slate-800 mb-1">4. Laporan analitik</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Pantau pengunjung dan klik link, laporan sederhana & akurat.
+                </p>
+              </div>
+
             </div>
           </div>
         </section>
 
-        {/* SECTION LIVE PREVIEW: USER DATABASE (MELAYANG & BOXICONS BURST EFFECTS) */}
-        <section className="w-full py-20 bg-slate-50 border-y border-slate-100 overflow-hidden">
-          <div className="max-w-5xl mx-auto px-6 mb-14 text-center">
-            <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">Komunitas Kreator</span>
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mt-3">
-              Kreator yang Telah Bergabung Bersama Kami
+        {/* SECTION LIVE PREVIEW: USER DATABASE (Max Rounded: md) */}
+        <section className="w-full py-16 bg-slate-50 border-b border-slate-100 overflow-hidden">
+          <div className="max-w-5xl mx-auto px-4 mb-10 text-center">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-slate-200/60 px-2.5 py-1 rounded-md">
+              Komunitas Kreator
+            </span>
+            <h2 className="text-2xl font-bold text-slate-900 tracking-tight mt-2.5">
+              Kreator yang Telah Bergabung
             </h2>
-            <p className="text-sm text-slate-500 mt-2 max-w-xl mx-auto">
-              Daftar pengguna terdaftar yang aktif membangun personal branding mereka di ekosistem platform kami.
-            </p>
           </div>
 
           {/* Container Jalur Marquee Gulir Kiri-Kanan Otomatis */}
-          <div className="w-full flex overflow-hidden relative py-6 select-none">
-            <div className="animate-marquee-container gap-6 px-4">
+          <div className="w-full flex overflow-hidden relative py-2 select-none">
+            <div className="animate-marquee-container gap-4 px-4">
               {marqueeUsers.map((user, idx) => {
-                // Kalkulasi jeda waktu & posisi acak untuk animasi semburan ikon Boxicons
                 const iconDelay1 = `${(idx % 4) * 0.6}s`;
                 const iconDelay2 = `${((idx % 4) * 0.6) + 1.2}s`;
                 const leftPos1 = `${25 + (idx % 3) * 15}%`;
                 const leftPos2 = `${50 + (idx % 3) * 12}%`;
-
-                // Kalkulasi jeda animasi melayang agar gerakan kartu bervariasi alami
                 const floatDelay = `${(idx % 3) * -1.3}s`;
 
                 return (
                   <div 
                     key={idx} 
-                    className="floating-user-card w-[260px] bg-white rounded-2xl p-5 shadow-sm hover:shadow-xl border border-slate-100/80 flex items-center gap-3.5 shrink-0 text-left relative overflow-hidden transition-all duration-300"
+                    className="floating-user-card w-[240px] bg-white rounded-md p-4 shadow-xs hover:shadow-md border border-slate-200/60 flex items-center gap-3 shrink-0 text-left relative overflow-hidden transition-all duration-200"
                     style={{ animationDelay: floatDelay }}
                   >
                     {/* Elemen Semburan Boxicons Meluncur ke Atas */}
                     <i 
-                      className={`bx ${burstIcons[idx % burstIcons.length]} boxicon-burst text-sm`}
+                      className={`bx ${burstIcons[idx % burstIcons.length]} boxicon-burst text-xs`}
                       style={{ animationDelay: iconDelay1, left: leftPos1 }}
                     ></i>
                     <i 
-                      className={`bx ${burstIcons[(idx + 2) % burstIcons.length]} boxicon-burst text-xs`}
+                      className={`bx ${burstIcons[(idx + 2) % burstIcons.length]} boxicon-burst text-[10px]`}
                       style={{ animationDelay: iconDelay2, left: leftPos2 }}
                     ></i>
 
                     {/* Avatar Inisial User */}
-                    <div className="w-11 h-11 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs flex-shrink-0 uppercase tracking-wider">
+                    <div className="w-9 h-9 rounded-md bg-slate-900 text-white font-bold flex items-center justify-center text-xs flex-shrink-0 uppercase tracking-wider">
                       {user.initial}
                     </div>
 
@@ -206,15 +218,15 @@ export default async function LandingPage() {
                       <h3 className="text-xs font-bold tracking-tight text-slate-900 flex items-center gap-1">
                         <span className="truncate">{user.name}</span>
                         {user.isVerified && (
-                          <i className="bx bxs-badge-check text-blue-500 text-sm flex-shrink-0"></i>
+                          <i className="bx bxs-badge-check text-blue-500 text-xs flex-shrink-0"></i>
                         )}
                       </h3>
-                      <p className="text-[10px] text-slate-400 font-mono truncate mt-0.5">@{user.username}</p>
+                      <p className="text-[10px] text-slate-400 font-mono truncate">@{user.username}</p>
                     </div>
 
                     {/* Panah Indikator Aksi Tautan */}
-                    <div className="text-slate-300 group-hover:text-slate-500 transition-colors">
-                      <i className="bx bx-chevron-right text-lg"></i>
+                    <div className="text-slate-300">
+                      <i className="bx bx-chevron-right text-base"></i>
                     </div>
                   </div>
                 );
@@ -223,55 +235,51 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION PREMIUM BANNER / CALL TO ACTION PROMO 
-            Desain Baru: Terang, Latar Belakang Putih Minimalis, Elegan & Sangat User-Friendly */}
-        <section className="w-full py-24 bg-white">
-          <div className="max-w-4xl mx-auto px-6">
-            <div className="bg-gradient-to-tr from-slate-50 via-white to-indigo-50/30 rounded-[2.5rem] p-8 md:p-14 flex flex-col lg:flex-row items-center justify-between gap-10 border border-slate-200/60 shadow-md shadow-slate-100/50 relative overflow-hidden">
+        {/* SECTION PREMIUM BANNER / CALL TO ACTION PROMO (Max Rounded: md) */}
+        <section className="w-full py-16 bg-white">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="bg-slate-50 border border-slate-200 rounded-md p-6 md:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-xs relative overflow-hidden">
               
-              {/* Ornamen Akses Bantuan Halus */}
-              <div className="absolute top-0 right-0 w-48 h-48 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none"></div>
-              
-              <div className="space-y-4 max-w-xl text-center lg:text-left">
-                <div className="inline-flex items-center gap-1.5 bg-yellow-500/10 text-yellow-700 text-[10px] font-bold px-3 py-1 rounded-md tracking-wider uppercase border border-yellow-500/10 mx-auto lg:mx-0">
-                  <i className="bx bx-crown"></i> Funikin Premium Account
+              <div className="space-y-3 max-w-xl text-center lg:text-left">
+                <div className="inline-flex items-center gap-1 bg-slate-900 text-white text-[9px] font-bold px-2 py-0.5 rounded-md tracking-wider uppercase mx-auto lg:mx-0">
+                  <i className="bx bx-crown"></i> Funikin Premium
                 </div>
-                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                  Kembangkan Akses Kontrol Bisnis dan Personal Branding Anda
+                <h2 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight leading-tight">
+                  Tingkatkan Potensi Profilmu ke Paket Premium
                 </h2>
-                <p className="text-sm text-slate-500 leading-relaxed">
-                  Tingkatkan halaman profil Anda melewati batas tautan standar. Dapatkan ekosistem kustomisasi desain tingkat lanjut untuk menciptakan portofolio yang kredibel dan eksklusif.
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Dapatkan ekosistem kustomisasi desain tingkat lanjut untuk menciptakan portofolio yang kredibel, eksklusif, dan profesional.
                 </p>
                 
-                {/* Benefit List Checklist Terang */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-4 text-slate-600 text-xs text-left">
-                  <div className="flex items-center gap-2.5">
-                    <i className="bx bx-check text-emerald-600 font-bold text-xs bg-emerald-50 rounded-full p-1 shrink-0"></i> 
-                    <span>Custom Branding & Domain Pribadi</span>
+                {/* Benefit List Checklist */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 text-slate-600 text-xs text-left">
+                  <div className="flex items-center gap-2">
+                    <i className="bx bx-check text-slate-900 font-bold text-xs bg-white border border-slate-200 rounded-md p-0.5 shrink-0"></i> 
+                    <span>Branding Domain Pribadi</span>
                   </div>
-                  <div className="flex items-center gap-2.5">
-                    <i className="bx bx-check text-emerald-600 font-bold text-xs bg-emerald-50 rounded-full p-1 shrink-0"></i> 
-                    <span>Integrasi Gerbang Pembayaran Midtrans</span>
+                  <div className="flex items-center gap-2">
+                    <i className="bx bx-check text-slate-900 font-bold text-xs bg-white border border-slate-200 rounded-md p-0.5 shrink-0"></i> 
+                    <span>Integrasi Midtrans</span>
                   </div>
-                  <div className="flex items-center gap-2.5">
-                    <i className="bx bx-check text-emerald-600 font-bold text-xs bg-emerald-50 rounded-full p-1 shrink-0"></i> 
-                    <span>Lencana Verifikasi Akun Resmi (Blue Badge)</span>
+                  <div className="flex items-center gap-2">
+                    <i className="bx bx-check text-slate-900 font-bold text-xs bg-white border border-slate-200 rounded-md p-0.5 shrink-0"></i> 
+                    <span>Binc Badge Resmi</span>
                   </div>
-                  <div className="flex items-center gap-2.5">
-                    <i className="bx bx-check text-emerald-600 font-bold text-xs bg-emerald-50 rounded-full p-1 shrink-0"></i> 
-                    <span>Akses Data Analitik Pengunjung Realtime</span>
+                  <div className="flex items-center gap-2">
+                    <i className="bx bx-check text-slate-900 font-bold text-xs bg-white border border-slate-200 rounded-md p-0.5 shrink-0"></i> 
+                    <span>Analitik Pengunjung Realtime</span>
                   </div>
                 </div>
               </div>
 
-              {/* Tombol Menuju Halaman Pricing */}
-              <div className="shrink-0 w-full lg:w-auto pt-2 lg:pt-0">
+              {/* Tombol Akses */}
+              <div className="shrink-0 w-full lg:w-auto">
                 <Link 
                   href="/pricing"
-                  className="w-full lg:w-auto inline-flex items-center justify-center gap-2 bg-slate-950 text-white font-bold px-7 py-4 rounded-xl hover:bg-slate-800 active:scale-95 transition-all text-sm tracking-wide shadow-lg shadow-slate-900/10 text-center"
+                  className="w-full lg:w-auto inline-flex items-center justify-center gap-1.5 bg-slate-950 text-white font-bold px-5 py-3 rounded-md hover:bg-slate-800 active:scale-95 transition-all text-xs tracking-wide text-center"
                 >
-                  Pelajari Paket & Benefit
-                  <i className="bx bx-right-arrow-alt text-base"></i>
+                  Pelajari Paket
+                  <i className="bx bx-right-arrow-alt text-sm"></i>
                 </Link>
               </div>
 
@@ -279,32 +287,32 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION FAQ ACCORDION */}
-        <section className="w-full py-20 bg-slate-50/50 border-t border-slate-100">
-          <div className="max-w-4xl lg:max-w-[60%] mx-auto px-6 flex flex-col md:flex-row gap-10 md:gap-16">
+        {/* SECTION FAQ ACCORDION (Max Rounded: md) */}
+        <section className="w-full py-16 bg-slate-50/50 border-t border-slate-100">
+          <div className="max-w-4xl lg:max-w-[65%] mx-auto px-4 flex flex-col md:flex-row gap-8 md:gap-12">
             
             <div className="w-full md:w-1/3 flex flex-col justify-start">
-              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                Pertanyaan yang Sering Diajukan
+              <h2 className="text-xl font-bold text-slate-900 tracking-tight leading-tight">
+                FAQ Accordion
               </h2>
-              <p className="text-xs text-slate-400 mt-3 leading-relaxed">
-                Punya pertanyaan seputar layanan kami? Temukan jawaban instan di kolom bantuan sebelah kanan.
+              <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+                Punya pertanyaan seputar layanan kami? Temukan jawaban instan di kolom bantuan berikut.
               </p>
             </div>
 
-            <div className="w-full md:w-2/3 flex flex-col gap-3">
+            <div className="w-full md:w-2/3 flex flex-col gap-2.5">
               {faqData.map((item, index) => (
                 <details 
                   key={index} 
                   name="funikin-faq"
-                  className="group bg-white border border-slate-100 rounded-xl shadow-xs overflow-hidden transition-all duration-300 [&_summary::-webkit-details-marker]:hidden"
+                  className="group bg-white border border-slate-200 rounded-md shadow-2xs overflow-hidden transition-all duration-200 [&_summary::-webkit-details-marker]:hidden"
                 >
-                  <summary className="flex items-center justify-between p-4 cursor-pointer select-none font-semibold text-sm text-slate-800 hover:bg-slate-50/50 list-none transition-colors">
+                  <summary className="flex items-center justify-between p-3.5 cursor-pointer select-none font-semibold text-xs text-slate-800 hover:bg-slate-50/50 list-none transition-colors">
                     <span>{item.q}</span>
-                    <i className="bx bx-chevron-down text-xl text-slate-400 group-open:rotate-180 transition-transform duration-200"></i>
+                    <i className="bx bx-chevron-down text-base text-slate-400 group-open:rotate-180 transition-transform duration-200"></i>
                   </summary>
                   
-                  <div className="px-4 pb-4 pt-1 text-xs text-slate-500 leading-relaxed border-t border-slate-50 bg-slate-50/30">
+                  <div className="px-3.5 pb-3.5 pt-0.5 text-xs text-slate-500 leading-relaxed border-t border-slate-100 bg-slate-50/30">
                     {item.a}
                   </div>
                 </details>
