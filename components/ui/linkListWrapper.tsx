@@ -124,7 +124,7 @@ function ReorderItemWrapper({ link, index, isAdmin }: { link: any, index: number
       
       // Tembakkan instruksi geser langsung saat detik ke-0.2 tanpa angkat jari
       dragControls.start(savedEvent);
-    }, 200); 
+    }, 500); 
   };
 
   const handleEndHold = () => {
