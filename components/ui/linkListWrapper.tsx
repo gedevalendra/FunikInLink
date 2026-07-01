@@ -8,10 +8,9 @@ interface LinkListWrapperProps {
   initialLinks: any[];
   isAdmin: boolean;
   dummyLinks: any[];
-  customVariant?: string; // Menambahkan properti baru kustomisasi gaya
 }
 
-export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, customVariant = "solid" }: LinkListWrapperProps) {
+export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks }: LinkListWrapperProps) {
   // Urutkan data awal berdasarkan index order dari terkecil ke terbesar (0, 1, 2, ...)
   const sortedInitial = [...initialLinks].sort((a, b) => (a.order || 0) - (b.order || 0));
   const [links, setLinks] = useState(sortedInitial);
@@ -50,19 +49,6 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
     }
   };
 
-  // Helper fungsi untuk menentukan class CSS pembungkus variant tombol link jika diperlukan global
-  const getVariantStyles = () => {
-    switch (customVariant) {
-      case "outline":
-        return "[&_a]:border-2 [&_a]:border-slate-950 [&_a]:bg-transparent [&_a]:text-slate-950 [&_a]:shadow-none";
-      case "shadow":
-        return "[&_a]:bg-white [&_a]:border [&_a]:border-slate-100 [&_a]:shadow-md [&_a]:text-slate-950 hover:[&_a]:shadow-lg";
-      case "solid":
-      default:
-        return "[&_a]:bg-slate-950 [&_a]:text-white [&_a]:border-none";
-    }
-  };
-
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center mb-4">
@@ -72,7 +58,7 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
       {isAdmin && <AddLinkModal />}
       
       {links.length === 0 ? (
-        <div className={`flex flex-col gap-3 pt-2 ${getVariantStyles()}`}>
+        <div className="flex flex-col gap-3 pt-2">
           {isAdmin && (
             <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-700 leading-relaxed font-medium">
               <i className="bx bx-info-circle mr-1 text-sm align-middle"></i>
@@ -90,20 +76,18 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
           ))}
         </div>
       ) : (
-        <div className={`flex flex-col gap-2 ${getVariantStyles()}`}>
-          {links.map((link, index) => (
-            <LinkCard 
-              key={link._id.toString()} 
-              link={link} 
-              isAdmin={isAdmin} 
-              isDummy={false}
-              isFirst={index === 0}
-              isLast={index === links.length - 1}
-              onMoveUp={() => moveLink(index, "up")}
-              onMoveDown={() => moveLink(index, "down")}
-            />
-          ))}
-        </div>
+        links.map((link, index) => (
+          <LinkCard 
+            key={link._id.toString()} 
+            link={link} 
+            isAdmin={isAdmin} 
+            isDummy={false}
+            isFirst={index === 0}
+            isLast={index === links.length - 1}
+            onMoveUp={() => moveLink(index, "up")}
+            onMoveDown={() => moveLink(index, "down")}
+          />
+        ))
       )}
     </div>
   );

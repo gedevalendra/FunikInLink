@@ -4,9 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function CustomizeProfileModal({ user, onClose }: { user: any, onClose: () => void }) {
-  // State kustomisasi (Mengambil konfigurasi simpanan dari database)
+  // State kustomisasi (Mengambil konfigurasi simpanan dari database tanpa opsi background)
   const [config, setConfig] = useState({
-    background: user.customization?.background || "#f8fafc",
     isBlur: user.customization?.isBlur || false,
     rounded: user.customization?.rounded || "rounded-xl",
     profileBorder: user.customization?.profileBorder || "none",
@@ -31,7 +30,6 @@ export default function CustomizeProfileModal({ user, onClose }: { user: any, on
 
       if (response.ok) {
         router.refresh(); // Memicu Server Component untuk menarik data terbaru
-        alert("Kustomisasi berhasil diterapkan secara permanen!");
         onClose();
       } else {
         alert(result.error || "Gagal menyimpan perubahan");
@@ -45,8 +43,9 @@ export default function CustomizeProfileModal({ user, onClose }: { user: any, on
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-[100] flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-md rounded-md shadow-xl overflow-hidden flex flex-col max-h-[85vh] border border-slate-200/60">
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+      {/* Container Modal: Fullscreen di Mobile (slide up), Box Center di Desktop */}
+      <div className="bg-white w-full max-w-md rounded-t-2xl sm:rounded-xl shadow-2xl overflow-hidden flex flex-col h-[90vh] sm:h-auto max-h-[85vh] border border-slate-200/60 transition-all transform translate-y-0 sm:scale-100">
         
         {/* HEADER MODAL */}
         <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -55,51 +54,31 @@ export default function CustomizeProfileModal({ user, onClose }: { user: any, on
           </h2>
           <button 
             onClick={onClose} 
-            className="text-slate-400 hover:text-slate-600 transition-colors text-xl p-1 flex items-center justify-center"
+            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all text-xl p-1.5 flex items-center justify-center"
           >
             <i className="bx bx-x"></i>
           </button>
         </div>
 
         {/* KONTEN - SCROLLABLE */}
-        <div className="p-5 overflow-y-auto space-y-5 no-scrollbar">
+        <div className="p-5 overflow-y-auto space-y-6 no-scrollbar flex-grow">
           
-          {/* 1. Background Halaman */}
-          <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Background Halaman
-            </label>
-            <div className="flex gap-2 items-center">
-              <input 
-                type="color" 
-                value={config.background}
-                onChange={(e) => setConfig({...config, background: e.target.value})}
-                className="w-9 h-9 rounded-md cursor-pointer border border-slate-200 p-0 overflow-hidden shrink-0"
-              />
-              <input 
-                type="text"
-                value={config.background}
-                onChange={(e) => setConfig({...config, background: e.target.value})}
-                className="flex-1 border border-slate-200 rounded-md px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:border-slate-950 transition-colors"
-                placeholder="#hexcode"
-              />
-            </div>
-          </div>
-
-          {/* 2. Gaya Elemen (Blur & Rounded) */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* 1. Gaya Elemen (Blur & Rounded) */}
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 Efek Glassmorphism
               </label>
               <button 
+                type="button"
                 onClick={() => setConfig({...config, isBlur: !config.isBlur})}
-                className={`w-full py-2 px-3 rounded-md border text-xs font-semibold transition-all ${
+                className={`w-full py-2.5 px-3 rounded-lg border text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
                   config.isBlur 
-                    ? 'bg-slate-950 border-slate-950 text-white' 
+                    ? 'bg-slate-950 border-slate-950 text-white shadow-sm' 
                     : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
                 }`}
               >
+                <i className={`bx ${config.isBlur ? 'bx-check-circle' : 'bx-circle'} text-sm`}></i>
                 {config.isBlur ? 'Blur Aktif' : 'Tanpa Blur'}
               </button>
             </div>
@@ -108,25 +87,28 @@ export default function CustomizeProfileModal({ user, onClose }: { user: any, on
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 Lekukan Elemen
               </label>
-              <select 
-                value={config.rounded}
-                onChange={(e) => setConfig({...config, rounded: e.target.value})}
-                className="w-full border border-slate-200 rounded-md px-2 py-2 text-xs text-slate-700 bg-white focus:outline-none focus:border-slate-950 transition-colors"
-              >
-                <option value="rounded-none">Siku Tajam (None)</option>
-                <option value="rounded-md">Sedang (MD)</option>
-                <option value="rounded-xl">Membulat Premium (XL)</option>
-                <option value="rounded-3xl">Sangat Bulat (3XL)</option>
-              </select>
+              <div className="relative">
+                <select 
+                  value={config.rounded}
+                  onChange={(e) => setConfig({...config, rounded: e.target.value})}
+                  className="w-full border border-slate-200 rounded-lg pl-3 pr-8 py-2.5 text-xs text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-slate-950/10 focus:border-slate-950 transition-all appearance-none cursor-pointer"
+                >
+                  <option value="rounded-none">Siku Tajam (None)</option>
+                  <option value="rounded-md">Sedang (MD)</option>
+                  <option value="rounded-xl">Membulat Premium (XL)</option>
+                  <option value="rounded-3xl">Sangat Bulat (3XL)</option>
+                </select>
+                <i className="bx bx-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base"></i>
+              </div>
             </div>
           </div>
 
-          {/* 3. Dekorasi Foto Profil */}
-          <div className="space-y-1.5">
+          {/* 2. Dekorasi Foto Profil */}
+          <div className="space-y-2">
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Bingkai Foto Profil
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {[
                 { key: 'none', label: 'Polos' },
                 { key: 'ring-slate-950', label: 'Gelap' },
@@ -135,12 +117,13 @@ export default function CustomizeProfileModal({ user, onClose }: { user: any, on
                 { key: 'ring-offset-2', label: 'Jarak Spasi' }
               ].map((item) => (
                 <button
+                  type="button"
                   key={item.key}
                   onClick={() => setConfig({...config, profileBorder: item.key})}
-                  className={`py-2 px-1 text-[11px] font-medium border rounded-md transition-all truncate ${
+                  className={`py-2.5 px-2 text-[11px] font-medium border rounded-lg transition-all truncate ${
                     config.profileBorder === item.key 
-                      ? 'border-slate-950 bg-slate-50 text-slate-950 font-bold' 
-                      : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                      ? 'border-slate-950 bg-slate-950 text-white font-bold shadow-sm' 
+                      : 'border-slate-200 text-slate-600 bg-white hover:border-slate-300'
                   }`}
                 >
                   {item.label}
@@ -149,61 +132,82 @@ export default function CustomizeProfileModal({ user, onClose }: { user: any, on
             </div>
           </div>
 
-          {/* 4. Gaya Tautan (Link) */}
+          {/* 3. Gaya Tautan (Link) */}
           <div className="space-y-1.5">
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               Gaya Tombol Tautan
             </label>
-            <select 
-              value={config.linkStyle}
-              onChange={(e) => setConfig({...config, linkStyle: e.target.value})}
-              className="w-full border border-slate-200 rounded-md px-2 py-2 text-xs text-slate-700 bg-white focus:outline-none focus:border-slate-950 transition-colors"
-            >
-              <option value="solid">Minimalis Solid (Warna Penuh)</option>
-              <option value="outline">Clean Outline (Garis Tepi)</option>
-              <option value="shadow">Soft Shadow (Efek Bayangan)</option>
-            </select>
+            <div className="relative">
+              <select 
+                value={config.linkStyle}
+                onChange={(e) => setConfig({...config, linkStyle: e.target.value})}
+                className="w-full border border-slate-200 rounded-lg pl-3 pr-8 py-2.5 text-xs text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-slate-950/10 focus:border-slate-950 transition-all appearance-none cursor-pointer"
+              >
+                <option value="solid">Minimalis Solid (Warna Penuh)</option>
+                <option value="outline">Clean Outline (Garis Tepi)</option>
+                <option value="shadow">Soft Shadow (Efek Bayangan)</option>
+              </select>
+              <i className="bx bx-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base"></i>
+            </div>
           </div>
 
-          {/* 5. Pop Up Pesan */}
-          <div className="bg-slate-50 border border-slate-200/60 p-3.5 rounded-md space-y-3">
+          {/* 4. Pop Up Pesan */}
+          <div className="bg-slate-50 border border-slate-200/80 p-4 rounded-xl space-y-3">
             <div className="flex justify-between items-center">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                <i className="bx bx-message-detail text-sm"></i> Pop-up Sambutan
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 cursor-pointer select-none" htmlFor="popup-toggle">
+                <i className="bx bx-message-detail text-base text-slate-700"></i> Pop-up Sambutan
               </label>
-              <input 
-                type="checkbox" 
-                checked={config.showPopup}
-                onChange={(e) => setConfig({...config, showPopup: e.target.checked})}
-                className="w-3.5 h-3.5 accent-slate-950 cursor-pointer"
-              />
+              <div className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  id="popup-toggle"
+                  type="checkbox" 
+                  checked={config.showPopup}
+                  onChange={(e) => setConfig({...config, showPopup: e.target.checked})}
+                  className="sr-only peer"
+                />
+                <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-focus:ring-0 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-slate-950"></div>
+              </div>
             </div>
             {config.showPopup && (
               <textarea 
                 value={config.popupMessage}
                 onChange={(e) => setConfig({...config, popupMessage: e.target.value})}
-                className="w-full bg-white border border-slate-200 rounded-md p-2.5 text-xs text-slate-700 focus:outline-none focus:border-slate-950 transition-colors min-h-[70px] resize-none"
+                className="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-950/10 focus:border-slate-950 transition-all min-h-[80px] resize-none animate-fade-in"
                 placeholder="Tulis pesan salam pembuka..."
+                maxLength={150}
               />
             )}
           </div>
 
         </div>
 
-        {/* FOOTER MODAL */}
-        <div className="p-4 border-t border-slate-100 flex gap-2.5 bg-slate-50/30">
+        {/* FOOTER MODAL - FIXED BOTTOM */}
+        <div className="p-4 border-t border-slate-100 flex gap-3 bg-slate-50/50 pb-6 sm:pb-4">
           <button 
+            type="button"
             onClick={onClose}
-            className="flex-1 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 border border-slate-200 rounded-md transition-colors"
+            disabled={loading}
+            className="flex-1 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors disabled:opacity-50"
           >
             Batal
           </button>
           <button 
+            type="button"
             onClick={handleSave}
             disabled={loading}
-            className="flex-1 py-2 text-xs font-bold text-white bg-slate-950 hover:bg-slate-800 rounded-md transition-all shadow-xs disabled:opacity-50"
+            className="flex-1 py-2.5 text-xs font-bold text-white bg-slate-950 hover:bg-slate-800 rounded-lg transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-1.5"
           >
-            {loading ? 'Menyimpan...' : 'Terapkan'}
+            {loading ? (
+              <>
+                <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Menyimpan...
+              </>
+            ) : (
+              'Terapkan'
+            )}
           </button>
         </div>
 
