@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { addLink } from "../../lib/actions";
 
+// Daftar 100 Ikon Populer dari Boxicons
 const BOXICONS = [
   "bx-link", "bx-globe", "bxl-instagram", "bxl-tiktok", "bxl-youtube", "bxl-facebook", "bxl-twitter",
   "bxl-whatsapp", "bxl-telegram", "bxl-discord", "bxl-github", "bxl-linkedin", "bxl-spotify",
@@ -22,6 +23,7 @@ const BOXICONS = [
   "bx-cookie", "bx-game", "bx-ghost", "bx-bot", "bx-joystick", "bx-party"
 ];
 
+// Logika Deteksi Otomatis Ikon
 function getIconFromUrl(url: string) {
   const lowerUrl = url.toLowerCase();
   if (lowerUrl.includes('instagram.com')) return 'bxl-instagram';
@@ -49,8 +51,13 @@ export default function AddLinkModal() {
   const [showPicker, setShowPicker] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  // Mencegah hidrasi error pada Next.js Server-Side Rendering (SSR)
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Mengunci scroll layar belakang (Scroll Lock) saat modal terbuka
+  useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -61,6 +68,7 @@ export default function AddLinkModal() {
     };
   }, [isOpen]);
 
+  // Otomatis ubah ikon saat user mengetik URL (jika user belum memilih ikon manual)
   useEffect(() => {
     if (!showPicker) {
       setSelectedIcon(getIconFromUrl(url));
@@ -71,6 +79,7 @@ export default function AddLinkModal() {
 
   return (
     <>
+      {/* Tombol Pemicu Modal */}
       <button 
         onClick={() => {
           setIsOpen(true);
@@ -83,21 +92,23 @@ export default function AddLinkModal() {
         <i className="bx bx-plus text-lg"></i> Tambah Tautan Baru
       </button>
 
+      {/* Backdrop & Dialog Modal menggunakan React Portal */}
       {isOpen && createPortal(
         <div 
-          className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/50 backdrop-blur-md"
+          className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/50 backdrop-blur-xs animate-fadeIn"
           onClick={() => setIsOpen(false)}
         >
           <div 
-            className="bg-white rounded-t-3xl p-6 w-full max-w-md shadow-2xl max-h-[85vh] overflow-y-auto text-slate-800"
+            className="bg-white rounded-t-3xl p-6 w-full max-w-md shadow-2xl max-h-[85vh] overflow-y-auto text-slate-800 animate-slideUp"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Handle Bar (Gaya Bottom Sheet iOS) */}
+            {/* Handle Bar dekorasi indikator bottom sheet (iOS style) */}
             <div className="w-12 h-1 bg-neutral-200 rounded-full mx-auto mb-5"></div>
 
             <h3 className="font-bold text-lg mb-4 text-gray-800">Tambah Tautan</h3>
             
             <form action={(formData) => { addLink(formData); setIsOpen(false); }} className="space-y-4">
+              {/* Input Tersembunyi untuk Icon yang dipilih */}
               <input type="hidden" name="icon" value={selectedIcon} />
 
               <input 
@@ -120,6 +131,7 @@ export default function AddLinkModal() {
                 className="w-full p-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-yellow-500" 
               />
               
+              {/* UI Pemilihan Ikon */}
               <div className="pt-2">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Pilih Ikon</p>
@@ -139,6 +151,7 @@ export default function AddLinkModal() {
                   </div>
                 </div>
 
+                {/* Grid Pilihan Ikon */}
                 {showPicker && (
                   <div className="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto p-2 border border-gray-200 rounded-xl mt-3 bg-gray-50">
                     {BOXICONS.map(icon => (

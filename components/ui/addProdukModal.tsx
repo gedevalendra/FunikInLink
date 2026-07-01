@@ -10,8 +10,13 @@ export default function AddProdukModal() {
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  // Mencegah hidrasi error pada Next.js Server-Side Rendering (SSR)
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Mengunci scroll layar belakang (Scroll Lock) saat modal terbuka
+  useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -43,6 +48,7 @@ export default function AddProdukModal() {
 
   return (
     <>
+      {/* Tombol Pemicu Modal */}
       <button
         onClick={() => setIsOpen(true)}
         className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded-lg text-xs sm:text-sm font-medium shadow-xs transition-all duration-200 active:scale-95"
@@ -50,19 +56,20 @@ export default function AddProdukModal() {
         <i className="bx bx-plus text-lg"></i> Tambah Produk Baru
       </button>
 
+      {/* Backdrop & Dialog Modal menggunakan React Portal */}
       {isOpen && createPortal(
         <div 
-          className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/50 backdrop-blur-md"
+          className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/50 backdrop-blur-xs animate-fadeIn"
           onClick={() => setIsOpen(false)}
         >
           <div 
-            className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl p-6 text-slate-800 border-t border-neutral-100 max-h-[85vh] overflow-y-auto"
+            className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl p-6 text-slate-800 border-t border-neutral-100 max-h-[85vh] overflow-y-auto animate-slideUp"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Handle Bar (Gaya Bottom Sheet iOS) */}
+            {/* Handle Bar dekorasi indikator bottom sheet (iOS style) */}
             <div className="w-12 h-1 bg-neutral-200 rounded-full mx-auto mb-5"></div>
 
-            {/* Header */}
+            {/* Header Modal */}
             <div className="flex items-center justify-between border-b border-neutral-100 pb-3 mb-4">
               <h3 className="text-base font-semibold text-neutral-900 flex items-center gap-2">
                 <i className="bx bx-store text-yellow-500 text-xl"></i>
@@ -77,7 +84,7 @@ export default function AddProdukModal() {
               </button>
             </div>
 
-            {/* Form */}
+            {/* Form Pengisian Data */}
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600 font-normal">
@@ -128,7 +135,7 @@ export default function AddProdukModal() {
                 />
               </div>
 
-              {/* Action Buttons */}
+              {/* Tombol Aksi */}
               <div className="flex gap-3 mt-6 pt-2">
                 <button
                   type="button"
