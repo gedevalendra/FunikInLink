@@ -6,23 +6,37 @@ import { signIn } from "next-auth/react";
 import ReCAPTCHA from "react-google-recaptcha";
 
 export default function RegistrasiPage() {
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fungsi untuk menangani perubahan status CAPTCHA
-  const handleCaptchaChange = (token: string | null) => {
-    setCaptchaToken(token);
-  };
-
+  // Fungsi utama saat tombol Google diklik
   const handleGoogleSignIn = async () => {
-    // Validasi: Jika CAPTCHA belum dicentang, jangan izinkan login
-    if (!captchaToken) {
-      alert("Silakan centang CAPTCHA terlebih dahulu!");
-      return;
-    }
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
-    // Jika sudah dicentang, jalankan proses sign-in
-    await signIn("google", { callbackUrl: "/" });
+    try {
+      // 1. Pemicu reCAPTCHA Invisible untuk bekerja di latar belakang
+      const token = await recaptchaRef.current?.executeAsync();
+
+      if (!token) {
+        alert("Gagal memverifikasi CAPTCHA. Silakan coba lagi.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // (Opsional) Jika kamu mau verifikasi token di backend kamu dulu, lakukan di sini.
+      // console.log("Token CAPTCHA Berhasil Didapat:", token);
+
+      // 2. Jika lolos verifikasi latar belakang, jalankan sign-in Google
+      await signIn("google", { callbackUrl: "/" });
+    } catch (error) {
+      console.error("Error captcha:", error);
+      alert("Terjadi kesalahan sistem.");
+    } finally {
+      // Reset reCAPTCHA agar bisa digunakan kembali jika klik selanjutnya gagal
+      recaptchaRef.current?.reset();
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -46,24 +60,23 @@ export default function RegistrasiPage() {
         {/* Tombol Login Google */}
         <button 
           onClick={handleGoogleSignIn}
-          className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 font-medium py-3 px-4 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all active:scale-[0.98]"
+          disabled={isSubmitting}
+          className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 font-medium py-3 px-4 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all active:scale-[0.98] disabled:opacity-50"
         >
           <img 
             src="https://www.svgrepo.com/show/475656/google-color.svg" 
             alt="Google Logo" 
             className="w-5 h-5"
           />
-          Lanjutkan dengan Google
+          {isSubmitting ? "Memverifikasi..." : "Lanjutkan dengan Google"}
         </button>
 
-        {/* Komponen CAPTCHA */}
-        <div className="flex justify-center pt-2">
-          <ReCAPTCHA
-            ref={recaptchaRef}
-            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""} 
-            onChange={handleCaptchaChange}
-          />
-        </div>
+        {/* Komponen CAPTCHA (Sekarang Invisible & Tersembunyi) */}
+        <ReCAPTCHA
+          ref={recaptchaRef}
+          size="invisible" // <-- WAJIB diganti ke invisible
+          sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""} 
+        />
 
         {/* Tombol Kembali */}
         <div className="pt-4">
