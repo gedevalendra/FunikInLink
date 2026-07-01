@@ -59,9 +59,7 @@ export default function LinkCard({
 
     timerRef.current = setTimeout(() => {
       setIsDraggable(true);
-      // Teruskan pemicu event awal ke arsitektur list induk kustom jika dibutuhkan
-      onDragStart(e, index);
-    }, 500); // FIXED: Diubah menjadi 0.5 detik
+    }, 500); // Tahan 0.5 detik
   };
 
   const handleEndHold = () => {
@@ -82,20 +80,21 @@ export default function LinkCard({
     <>
       <motion.div 
         layout
+        // Menggunakan sistem drag murni Framer Motion vertikal (Sumbu Y)
+        drag={isAdmin && !isDummy && isDraggable ? "y" : false}
+        dragConstraints={{ top: 0, bottom: 0 }} // Membantu merestart posisi balik setelah dilepas
+        dragElastic={1}
+        onDragStart={(e) => onDragStart(e, index)}
+        onDrag={(e) => onDragOver(e, index)}
+        onDragEnd={handleDragEndLocal}
         transition={{
           type: "spring",
           stiffness: 300,
           damping: 30
         }}
-        // Gunakan native drag over handler hanya untuk kalkulasi pertukaran posisi
-        onDragOver={(e) => {
-          if (isDraggable) {
-            onDragOver(e, index);
-          }
-        }}
         className={`relative flex items-start gap-3 p-3 rounded-md transition-colors border border-gray-100/50 select-none ${
           isDummy ? "opacity-60 bg-gray-50/50 pointer-events-none" : ""
-        } ${isDraggable ? "bg-slate-50 border-dashed border-slate-300 shadow-lg scale-[1.01] z-50 cursor-grabbing" : "bg-white"}`}
+        } ${isDraggable ? "bg-slate-50 border-dashed border-slate-300 shadow-lg scale-[1.02] z-50 cursor-grabbing" : "bg-white"}`}
       >
         {/* INDICATOR HANDLE DRAG */}
         {isAdmin && !isDummy && (
@@ -105,9 +104,6 @@ export default function LinkCard({
             onMouseLeave={handleEndHold}
             onTouchStart={handleStartHold}
             onTouchEnd={handleEndHold}
-            // Kaitkan event drag end html native agar sinkronisasi state mati merata
-            draggable={isDraggable}
-            onDragEnd={handleDragEndLocal}
             className={`flex items-center justify-center self-center p-1 rounded text-gray-400 cursor-grab hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0 ${
               isDraggable ? "text-blue-600 bg-blue-50 cursor-grabbing animate-pulse" : ""
             }`}
