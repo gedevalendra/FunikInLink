@@ -5,9 +5,10 @@ import { User, SharedLink, AdminList } from "../../lib/models";
 import { revalidatePath } from "next/cache";
 import DeleteUserButton from "../../components/ui/DeleteUserButton"; 
 import BroadcastModalClient from "../../components/ui/broadcastModalClient"; // Kita panggil client component pembungkus modal disini
+import { sendAdminActionEmail } from "../../lib/emailNotification"; // 🚀 1. IMPORT HELPER EMAIL KAMU DI SINI
 
 // =========================================================================
-// SERVER ACTIONS
+// SERVER ACTIONS (SUDAH INTEGRASI KIRIM EMAIL RESEND)
 // =========================================================================
 
 // 1. Server Action untuk menghapus pengguna beserta tautannya & AdminList (jika dia admin)
@@ -25,11 +26,21 @@ async function deleteUserAction(formData: FormData) {
   
   const userDoc = await User.findById(userId);
   if (userDoc) {
+    const targetEmail = userDoc.email;
+    const targetName = userDoc.name || "User";
+
     // Jika user yang dihapus merupakan admin, hapus juga dari koleksi AdminList
     await AdminList.deleteOne({ email: userDoc.email });
     // Hapus tautan dan data user
     await SharedLink.deleteMany({ username: userDoc.username });
     await User.findByIdAndDelete(userId);
+
+    // 🚀 2. KIRIM EMAIL NOTIFIKASI: Akun Dihapus
+    await sendAdminActionEmail({
+      toEmail: targetEmail,
+      userName: targetName,
+      actionType: "delete"
+    });
   }
 
   revalidatePath("/admin");
@@ -49,7 +60,17 @@ async function toggleVerifyUserAction(formData: FormData) {
   const userId = formData.get("userId") as string;
   const currentStatus = formData.get("currentStatus") === "true";
 
-  await User.findByIdAndUpdate(userId, { isNewUser: !currentStatus });
+  // Tangkap data user menggunakan findByIdAndUpdate dengan opsi { new: true } agar mendapat data terupdate
+  const userDoc = await User.findByIdAndUpdate(userId, { isNewUser: !currentStatus }, { new: true });
+
+  if (userDoc) {
+    // 🚀 3. KIRIM EMAIL NOTIFIKASI: Reset Status / Aktifkan Kembali
+    await sendAdminActionEmail({
+      toEmail: userDoc.email,
+      userName: userDoc.name || "User",
+      actionType: !currentStatus ? "reset_setup" : "reset_active"
+    });
+  }
 
   revalidatePath("/admin");
 }
@@ -68,7 +89,17 @@ async function toggleBadgeVerificationAction(formData: FormData) {
   const userId = formData.get("userId") as string;
   const currentVerifiedStatus = formData.get("currentVerifiedStatus") === "true";
 
-  await User.findByIdAndUpdate(userId, { isVerified: !currentVerifiedStatus });
+  // Gunakan { new: true } agar data kembalian userDoc membawa status verifikasi terbaru
+  const userDoc = await User.findByIdAndUpdate(userId, { isVerified: !currentVerifiedStatus }, { new: true });
+
+  if (userDoc) {
+    // 🚀 4. KIRIM EMAIL NOTIFIKASI: Beri Centang / Hapus Centang Biru
+    await sendAdminActionEmail({
+      toEmail: userDoc.email,
+      userName: userDoc.name || "User",
+      actionType: !currentVerifiedStatus ? "verify" : "unverify"
+    });
+  }
 
   revalidatePath("/admin");
 }
@@ -96,10 +127,24 @@ async function toggleAdminRoleAction(formData: FormData) {
       }
     }
     await AdminList.deleteOne({ email: userEmail });
+
+    // 🚀 5. KIRIM EMAIL NOTIFIKASI: Akses Admin Dicabut
+    await sendAdminActionEmail({
+      toEmail: userEmail,
+      userName: userName,
+      actionType: "admin_revoke"
+    });
   } else {
     await AdminList.create({
       nama: userName,
       email: userEmail
+    });
+
+    // 🚀 6. KIRIM EMAIL NOTIFIKASI: Diangkat Jadi Admin
+    await sendAdminActionEmail({
+      toEmail: userEmail,
+      userName: userName,
+      actionType: "admin_grant"
     });
   }
 
