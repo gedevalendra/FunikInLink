@@ -10,9 +10,19 @@ interface HeroProps {
   Name: string;
 }
 
-export default function InteractiveHero({ session, userUsername, Name }: HeroProps) {
+export default function InteractiveHero({
+  session,
+  userUsername,
+  Name,
+}: HeroProps) {
   // 1. Daftar kata ganti yang diketik di dalam Mockup Safari iOS
-  const iosKeywords = ["brand", "influencer", "youtuber", "streamer", "freelancer"];
+  const iosKeywords = [
+    "brand",
+    "influencer",
+    "youtuber",
+    "streamer",
+    "freelancer",
+  ];
   const [iosIndex, setIosIndex] = useState(0);
   const [iosTyped, setIosTyped] = useState("");
   const [iosDeleting, setIosDeleting] = useState(false);
@@ -72,7 +82,7 @@ export default function InteractiveHero({ session, userUsername, Name }: HeroPro
   const containerVariants = {
     initial: {},
     animate: { transition: { staggerChildren: 0.03 } },
-    exit: { transition: { staggerChildren: 0.02, staggerDirection: -1 } }
+    exit: { transition: { staggerChildren: 0.02, staggerDirection: -1 } },
   } as const;
 
   const letterVariants = {
@@ -80,18 +90,17 @@ export default function InteractiveHero({ session, userUsername, Name }: HeroPro
     animate: {
       opacity: 1,
       y: 0,
-      transition: { type: "spring" as const, damping: 12, stiffness: 200 }
+      transition: { type: "spring" as const, damping: 12, stiffness: 200 },
     },
     exit: {
       opacity: 0,
       y: -15,
-      transition: { ease: "easeIn" as const, duration: 0.15 }
-    }
+      transition: { ease: "easeIn" as const, duration: 0.15 },
+    },
   } as const;
 
   return (
     <main className="relative flex-grow flex flex-col items-center justify-center text-center px-4 sm:px-6 w-full mx-auto overflow-hidden min-h-[95vh] z-0 bg-[#FAFAFA] pt-24 md:pt-28">
-      
       {/* Background Grid & Light Scanner Effect */}
       {isMounted && (
         <>
@@ -107,7 +116,6 @@ export default function InteractiveHero({ session, userUsername, Name }: HeroPro
       )}
 
       <div className="relative z-10 w-full max-w-4xl space-y-6 sm:space-y-8 flex flex-col items-center">
-        
         {/* 1. ANIMASI FLIP 3D BOX ICON */}
         <motion.div
           animate={{ rotateY: [0, 180, 180, 360, 360], y: [0, -6, 0, -6, 0] }}
@@ -135,14 +143,37 @@ export default function InteractiveHero({ session, userUsername, Name }: HeroPro
                   <>
                     {/* Render Manual untuk Funik(Hitam) In(Kuning) Link(Hitam) */}
                     {"Funik".split("").map((char, i) => (
-                      <motion.span key={`f-${i}`} variants={letterVariants} className="text-black inline-block">{char}</motion.span>
+                      <motion.span
+                        key={`f-${i}`}
+                        variants={letterVariants}
+                        className="text-black inline-block"
+                      >
+                        {char}
+                      </motion.span>
                     ))}
                     {"In".split("").map((char, i) => (
-                      <motion.span key={`i-${i}`} variants={letterVariants} className="text-yellow-500 inline-block">{char}</motion.span>
+                      <motion.span
+                        key={`i-${i}`}
+                        variants={letterVariants}
+                        className="text-yellow-500 inline-block"
+                      >
+                        {char}
+                      </motion.span>
                     ))}
-                    <motion.span variants={letterVariants} className="text-black inline-block">&nbsp;</motion.span>
+                    <motion.span
+                      variants={letterVariants}
+                      className="text-black inline-block"
+                    >
+                      &nbsp;
+                    </motion.span>
                     {"Link".split("").map((char, i) => (
-                      <motion.span key={`l-${i}`} variants={letterVariants} className="text-black inline-block">{char}</motion.span>
+                      <motion.span
+                        key={`l-${i}`}
+                        variants={letterVariants}
+                        className="text-black inline-block"
+                      >
+                        {char}
+                      </motion.span>
                     ))}
                   </>
                 ) : (
@@ -180,7 +211,8 @@ export default function InteractiveHero({ session, userUsername, Name }: HeroPro
 
         {/* DESKRIPSI */}
         <p className="text-sm sm:text-base md:text-lg text-slate-500 max-w-md md:max-w-xl mx-auto leading-relaxed px-4">
-          Kelola portofolio, media sosial, dan tautan pentingmu dalam satu halaman profil kustom yang indah, cepat, dan responsif.
+          Kelola portofolio, media sosial, dan tautan pentingmu dalam satu
+          halaman profil kustom yang indah, cepat, dan responsif.
         </p>
 
         {/* TOMBOL AKSI */}
@@ -204,17 +236,18 @@ export default function InteractiveHero({ session, userUsername, Name }: HeroPro
 
         {/* 4. PREMIUM IPHONE 14 PRO MAX MOCKUP */}
         <div className="w-full pt-6 flex justify-center relative">
-          
           {/* Efek Opacity Gradasi Masking Bawah ke Atas */}
-          <div 
+          <div
             className="w-[360px] h-[400px] relative overflow-hidden flex justify-center z-10"
             style={{
-              maskImage: "linear-gradient(to top, transparent 0%, rgba(0,0,0,0.4) 20%, black 55%)",
-              WebkitMaskImage: "linear-gradient(to top, transparent 0%, rgba(0,0,0,0.4) 20%, black 55%)"
+              maskImage:
+                "linear-gradient(to top, transparent 0%, rgba(0,0,0,0.4) 20%, black 55%)",
+              WebkitMaskImage:
+                "linear-gradient(to top, transparent 0%, rgba(0,0,0,0.4) 20%, black 55%)",
             }}
           >
             {/* Rangka iPhone 14 Pro Max Dinamis */}
-            <motion.div 
+            <motion.div
               initial={{ y: 60, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
@@ -227,36 +260,45 @@ export default function InteractiveHero({ session, userUsername, Name }: HeroPro
 
               {/* Aplikasi Web Funikin di dalam iOS */}
               <div className="w-full h-full bg-[#f8fafc] rounded-[38px] overflow-hidden flex flex-col relative text-left select-none font-sans">
-                
                 {/* Navbar Mini Atas Match UI Gambar Kamu */}
                 <div className="w-full bg-white border-b border-slate-100 px-6 pt-7 pb-3 flex items-center justify-between shrink-0">
                   <span className="text-sm font-bold text-black font-sans">
-                    Funik<span className="text-yellow-500">In</span> <span className="bg-yellow-500 text-white text-[10px] px-1.5 py-0.5 rounded-md ml-0.5 font-medium">Link</span>
+                    Funik<span className="text-yellow-500">In</span>{" "}
+                    <span className="bg-yellow-500 text-white text-[10px] px-1.5 py-0.5 rounded-md ml-0.5 font-medium">
+                      Link
+                    </span>
                   </span>
                   <i className="bx bx-menu text-xl text-slate-800"></i>
                 </div>
 
                 {/* Konten Scrollable Profile */}
                 <div className="flex-1 overflow-y-auto p-5 space-y-5">
-                  
                   {/* Bagian Foto & Username Header Dinamis */}
                   <div className="flex items-center gap-4 pt-2">
-                    <div className="w-14 h-14 rounded-full bg-slate-900 text-white font-semibold flex items-center justify-center text-sm tracking-wide uppercase border border-slate-200 shadow-xs">
+                    <div className="w-14 h-14 rounded-full bg-slate-900 text-white font-semibold flex items-center justify-center text-sm tracking-wide uppercase border border-slate-200 shadow-xs shrink-0">
                       {String(Name || userUsername || "Y").substring(0, 2)}
                     </div>
-                    <div className="space-y-0.5">
-                      <h3 className="text-base font-bold text-slate-900 flex items-center gap-1 line-clamp-1">
-                        {Name || userUsername || "Your Name"}
-                        <i className="bx bxs-badge-check text-blue-500 text-base"></i>
+                    {/* min-w-0 ditambahkan agar flexbox anak di dalamnya bisa melakukan truncate dengan benar */}
+                    <div className="space-y-0.5 min-w-0 flex-1">
+                      <h3 className="text-base font-bold text-slate-900 flex items-center gap-1 w-full">
+                        {/* Bungkus teks nama di sini agar efek titik-titik tidak merusak ikon centang */}
+                        <span className="truncate">
+                          {Name || userUsername || "Your Name"}
+                        </span>
+                        <i className="bx bxs-badge-check text-blue-500 text-base shrink-0"></i>
                       </h3>
-                      <p className="text-xs text-slate-400 font-mono">@{userUsername || "username"}</p>
+                      <p className="text-xs text-slate-400 font-mono truncate">
+                        @{userUsername || "username"}
+                      </p>
                     </div>
                   </div>
 
                   {/* Deskripsi Bio & Hashtags */}
                   <div className="space-y-2">
                     <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                      Halo, selamat datang di tautan resmi saya! Mari berkolaborasi, dan saling berbagi ilmu mengenai dunia tech!
+                      Halo, selamat datang di tautan resmi saya! Mari
+                      berkolaborasi, dan saling berbagi ilmu mengenai dunia
+                      tech!
                     </p>
                     <div className="flex gap-1.5 text-[11px] font-medium text-blue-600">
                       <span>#Developer</span>
@@ -266,8 +308,10 @@ export default function InteractiveHero({ session, userUsername, Name }: HeroPro
 
                   {/* Title Section */}
                   <div className="pt-2">
-                    <p className="text-[10px] font-bold tracking-wider uppercase text-slate-400 mb-2.5">Tautan Resmi</p>
-                    
+                    <p className="text-[10px] font-bold tracking-wider uppercase text-slate-400 mb-2.5">
+                      Tautan Resmi
+                    </p>
+
                     {/* Tombol Tambah Tautan */}
                     <div className="w-full py-2.5 border border-dashed border-slate-300 rounded-xl text-center text-xs font-medium text-slate-500 bg-white/50 mb-3 flex items-center justify-center gap-1.5">
                       <i className="bx bx-plus text-sm"></i> Tambah Tautan Baru
@@ -281,12 +325,20 @@ export default function InteractiveHero({ session, userUsername, Name }: HeroPro
                           <i className="bx bx-globe"></i>
                         </div>
                         <div className="min-w-0 flex-1 pr-6">
-                          <h4 className="text-xs font-bold text-slate-800">FunikIn—Edu</h4>
-                          <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Bergabung, belajar, bermain, semua dalam satu platform—FunikIn</p>
-                          <p className="text-[10px] text-blue-500 font-mono mt-1 font-medium">www.funikin.com ↗</p>
+                          <h4 className="text-xs font-bold text-slate-800">
+                            FunikIn—Edu
+                          </h4>
+                          <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">
+                            Bergabung, belajar, bermain, semua dalam satu
+                            platform—FunikIn
+                          </p>
+                          <p className="text-[10px] text-blue-500 font-mono mt-1 font-medium">
+                            www.funikin.com ↗
+                          </p>
                         </div>
                         <div className="absolute right-3.5 top-3.5 flex gap-1.5 text-slate-300 text-xs">
-                          <i className="bx bx-edit-alt"></i> <i className="bx bx-trash"></i>
+                          <i className="bx bx-edit-alt"></i>{" "}
+                          <i className="bx bx-trash"></i>
                         </div>
                       </div>
 
@@ -296,24 +348,28 @@ export default function InteractiveHero({ session, userUsername, Name }: HeroPro
                           <i className="bx bxl-linkedin"></i>
                         </div>
                         <div className="min-w-0 flex-1 pr-6">
-                          <h4 className="text-xs font-bold text-slate-800">LinkedIn</h4>
-                          <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Ayo buat koneksi bersama!</p>
-                          <p className="text-[10px] text-blue-500 font-mono mt-1 font-medium">www.linkedin.com/in/... ↗</p>
+                          <h4 className="text-xs font-bold text-slate-800">
+                            LinkedIn
+                          </h4>
+                          <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">
+                            Ayo buat koneksi bersama!
+                          </p>
+                          <p className="text-[10px] text-blue-500 font-mono mt-1 font-medium">
+                            www.linkedin.com/in/... ↗
+                          </p>
                         </div>
                         <div className="absolute right-3.5 top-3.5 flex gap-1.5 text-slate-300 text-xs">
-                          <i className="bx bx-edit-alt"></i> <i className="bx bx-trash"></i>
+                          <i className="bx bx-edit-alt"></i>{" "}
+                          <i className="bx bx-trash"></i>
                         </div>
                       </div>
                     </div>
-
                   </div>
                 </div>
-
               </div>
             </motion.div>
           </div>
         </div>
-
       </div>
     </main>
   );
