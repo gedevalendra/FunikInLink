@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import LinkCard from "./linkCard";
 import AddLinkModal from "./addLinkModal";
-// Import AnimatePresence untuk mendeteksi siklus hidup animasi jika ada item yang bergeser
 import { AnimatePresence } from "framer-motion";
 
 interface LinkListWrapperProps {
@@ -42,6 +41,7 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
     }
   };
 
+  // Type diturunkan menjadi React.DragEvent agar cocok dengan interaksi di wrapper
   const handleDragStart = (e: React.DragEvent, position: number) => {
     dragItem.current = position;
   };
@@ -52,15 +52,12 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
     
     dragOverItem.current = position;
     
-    // LIVE ANIMATION SWAP: Tukar posisi array langsung di sini saat hover
-    // Ini yang memicu elemen-elemen lain otomatis bergerak minggir/kegeser lewat Framer Motion
     const copyListItems = [...links];
     const dragItemContent = copyListItems[dragItem.current];
     
     copyListItems.splice(dragItem.current, 1);
     copyListItems.splice(dragOverItem.current, 0, dragItemContent);
     
-    // Perbarui referensi index posisi yang baru diseret agar tetap sinkron
     dragItem.current = position; 
     setLinks(copyListItems);
   };
@@ -106,7 +103,6 @@ export default function LinkListWrapper({ initialLinks, isAdmin, dummyLinks, cus
           ))}
         </div>
       ) : (
-        // Menggunakan flex-col dengan tumpukan elemen motion
         <div className="flex flex-col gap-1.5 overflow-hidden p-1">
           <AnimatePresence initial={false}>
             {links.map((link, index) => (
