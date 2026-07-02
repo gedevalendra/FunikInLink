@@ -24,9 +24,9 @@ export default function ProductCard({ product, username, isAdmin }: ProductCardP
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
 
-  // 2. JIKA PRODUK INI ADALAH DUMMY DAN YANG MELIHAT BUKAN ADMIN -> SEMBUNYIKAN (RETURN NULL)
-  // Kamu bisa sesuaikan kondisi di bawah (misal: product.price === 0 atau product.isDummy)
-  if (product.isDummy && !isAdmin) {
+  // 2. PERBAIKAN: Hanya user yang punya akun (pemilik/Admin) yang bisa melihat produk ini.
+  // Jika pengunjung bukan pemilik akun (!isAdmin), kartu produk tidak akan di-render (return null)
+  if (!isAdmin) {
     return null;
   }
 
