@@ -11,22 +11,23 @@ interface Product {
   image: string;
   price: number;
   salesCount: number;
-  isDummy?: boolean; // Tambahkan properti opsional jika ada penanda dummy
+  isDummy?: boolean; // Penanda apakah produk ini dummy atau asli
 }
 
 interface ProductCardProps {
   product: Product;
   username: string;
-  isAdmin: boolean; // 1. Tambahkan prop isAdmin disini
+  isAdmin: boolean; // Menandakan apakah yang sedang melihat adalah pemilik akun (Admin)
 }
 
 export default function ProductCard({ product, username, isAdmin }: ProductCardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
 
-  // 2. PERBAIKAN: Hanya user yang punya akun (pemilik/Admin) yang bisa melihat produk ini.
-  // Jika pengunjung bukan pemilik akun (!isAdmin), kartu produk tidak akan di-render (return null)
-  if (!isAdmin) {
+  // 🔥 PERBAIKAN LOGIKA AKSES:
+  // Jika produk ini adalah dummy DAN yang melihat BUKAN pemilik akun (!isAdmin), sembunyikan produk (return null)
+  // Jika produk asli (product.isDummy bernilai false/undefined), maka lolos dan bisa dilihat semua orang.
+  if (product.isDummy && !isAdmin) {
     return null;
   }
 
